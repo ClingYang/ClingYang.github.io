@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="HAL_PWM配置占空比频率">
+<title>HAL_PWM配置占空比频率</title>
+
+<link rel='canonical' href='https://clingyang.github.io/p/hal_pwm%E9%85%8D%E7%BD%AE%E5%8D%A0%E7%A9%BA%E6%AF%94%E9%A2%91%E7%8E%87/'>
+
+<link rel="stylesheet" href="/scss/style.min.e14f3ba93baae65b2aef2339f32b6f25d7a0184785ebf4f6bd7d3376ae5dc2d4.css"><meta property='og:title' content="HAL_PWM配置占空比频率">
+<meta property='og:description' content="HAL_PWM配置占空比频率">
+<meta property='og:url' content='https://clingyang.github.io/p/hal_pwm%E9%85%8D%E7%BD%AE%E5%8D%A0%E7%A9%BA%E6%AF%94%E9%A2%91%E7%8E%87/'>
+<meta property='og:site_name' content='CLing'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='STM32' /><meta property='article:tag' content='HAL' /><meta property='article:published_time' content='2024-11-21T14:25:54&#43;08:00'/><meta property='article:modified_time' content='2025-03-21T15:42:17&#43;08:00'/><meta property='og:image' content='https://cdn.jsdelivr.net/gh/ClingYang/img1@latest/20250321150515154.png' />
+<meta name="twitter:title" content="HAL_PWM配置占空比频率">
+<meta name="twitter:description" content="HAL_PWM配置占空比频率"><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='https://cdn.jsdelivr.net/gh/ClingYang/img1@latest/20250321150515154.png' />
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_78d0838d474f354e.png" width="300"
+                            height="290" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🏀</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">CLing</a></h1>
+            <h2 class="site-description">你好 欢迎来到我的博客</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>档案</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E6%8A%80%E6%9C%AF%E9%93%BE%E6%8E%A5/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>技术链接</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#看你cubemx-里面的配置时钟频率是多少">看你cubemx 里面的配置时钟频率是多少</a></li>
+    <li><a href="#参照第二篇文章描述修改-下面俩个参数就行">参照第二篇文章描述修改 下面俩个参数就行</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/p/hal_pwm%E9%85%8D%E7%BD%AE%E5%8D%A0%E7%A9%BA%E6%AF%94%E9%A2%91%E7%8E%87/">
+                
+                    <img src="https://cdn.jsdelivr.net/gh/ClingYang/img1@latest/20250321150515154.png" loading="lazy" alt="Featured image of post HAL_PWM配置占空比频率" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/stm32/" >
+                STM32
+            </a>
+        
+            <a href="/categories/hal/" >
+                HAL
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/hal_pwm%E9%85%8D%E7%BD%AE%E5%8D%A0%E7%A9%BA%E6%AF%94%E9%A2%91%E7%8E%87/">HAL_PWM配置占空比频率</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            HAL_PWM配置占空比频率
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2024-11-21</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 1 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="引言">引言
+</h1><p>HAL_PWM配置占空比频率 讲解占空比频率 配置占空比频率 定时器 之间的关系以及参数配置</p>
+<h1 id="参考连接">参考连接
+</h1><p><a class="link" href="https://leung-manwah.blog.csdn.net/article/details/113599959"  target="_blank" rel="noopener"
+    >1.STM32CubeMX学习笔记（13）——PWM输出(呼吸灯)使用</a>
+<br/>
+<a class="link" href="https://blog.csdn.net/weixin_49337111/article/details/135671353"  target="_blank" rel="noopener"
+    >2.STM32标准库+HAL库 | 高精度动态调节PWM输出频率+占空比</a></p>
+<!-- ![41690c209abb74b830586107a34589d9](https://i-blog.csdnimg.cn/blog_migrate/58e59cd6074154a3ddcc2c9b42999bb6.png) -->
+<p><img src="https://cdn.jsdelivr.net/gh/ClingYang/img1@latest/58e59cd6074154a3ddcc2c9b42999bb6.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<!-- ![5deea5ca89951eb3f7a346bb02f18061](https://i-blog.csdnimg.cn/blog_migrate/5cefb6dfc6adab06957dce778e962dae.png) -->
+<p><img src="https://cdn.jsdelivr.net/gh/ClingYang/img1@latest/5cefb6dfc6adab06957dce778e962dae.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<!-- ![0c929cbae85d4ee5526606dffe4831fa](https://i-blog.csdnimg.cn/blog_migrate/c3f63e976ca01f13559e36ba36e5879a.png) -->
+<p><img src="https://cdn.jsdelivr.net/gh/ClingYang/img1@latest/c3f63e976ca01f13559e36ba36e5879a.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<h2 id="看你cubemx-里面的配置时钟频率是多少">看你cubemx 里面的配置时钟频率是多少
+</h2><h2 id="参照第二篇文章描述修改-下面俩个参数就行">参照第二篇文章描述修改 下面俩个参数就行
+</h2><p><code>    uint16_t prescaler</code><br />
+<code>   uint64_t tim_clk_freq</code></p>
+<!-- ![20240506162512](https://i-blog.csdnimg.cn/blog_migrate/08668970a02abeee6994c89f89769543.png) -->
+<p><img src="https://cdn.jsdelivr.net/gh/ClingYang/img1@latest/08668970a02abeee6994c89f89769543.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<h1 id="实战操作">实战操作
+</h1><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-C" data-lang="C"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">set_pwm_param</span><span class="p">(</span><span class="n">TIM_HandleTypeDef</span> <span class="n">htim</span><span class="p">,</span> <span class="kt">uint32_t</span> <span class="n">Channel</span><span class="p">,</span> <span class="kt">uint32_t</span> <span class="n">freq</span><span class="p">,</span> <span class="kt">uint16_t</span> <span class="n">duty</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint16_t</span> <span class="n">prescaler</span> <span class="o">=</span> <span class="mi">72</span><span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint64_t</span> <span class="n">tim_clk_freq</span> <span class="o">=</span> <span class="mi">72000000</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//计算PWM频率，所对应的自动重装载   ---&gt; ARR = 主频 / (预分�?+1) / 预期PWM频率(Hz) - 1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">float</span> <span class="n">pwm_freq_arr</span>  <span class="o">=</span> <span class="p">(</span><span class="n">tim_clk_freq</span> <span class="o">*</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">prescaler</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">freq</span> <span class="o">*</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//计算PWM占空比，对应比较寄存器的 ---&gt; CCR = 预期占空�? * (自动重装载�??+1)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">//占空比则由捕/比较寄存器（TIMx_CRx）寄存器决定。占空比:duty = Pluse / (ARR+1)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kt">float</span> <span class="n">pwm_duty_pulse</span> <span class="o">=</span> <span class="n">duty</span> <span class="o">*</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mi">100</span> <span class="o">*</span> <span class="p">(</span><span class="n">pwm_freq_arr</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">//配置PSC预分频
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">__HAL_TIM_SET_PRESCALER</span><span class="p">(</span><span class="o">&amp;</span><span class="n">htim</span><span class="p">,</span> <span class="n">prescaler</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//配置PWM频率 ARR
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">__HAL_TIM_SetAutoreload</span><span class="p">(</span><span class="o">&amp;</span><span class="n">htim</span><span class="p">,</span> <span class="p">(</span><span class="kt">uint16_t</span><span class="p">)</span><span class="n">pwm_freq_arr</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//配置PWM占空比
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">__HAL_TIM_SetCompare</span><span class="p">(</span><span class="o">&amp;</span><span class="n">htim</span><span class="p">,</span> <span class="n">Channel</span><span class="p">,</span> <span class="p">(</span><span class="kt">uint16_t</span><span class="p">)</span><span class="n">pwm_duty_pulse</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="c1">//    printf(&#34;pwm_freq_arr:%.2f\r\n&#34;, pwm_freq_arr);
+</span></span></span><span class="line"><span class="cl"><span class="c1">//    printf(&#34;pwm_duty_pulse:%.2f\r\n&#34;, pwm_duty_pulse);
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/stm32/">STM32</a>
+        
+            <a href="/tags/hal/">HAL</a>
+        
+    </section>
+
+
+    <section class="article-lastmod">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <span>
+            最后更新于 Mar 21, 2025 15:42 &#43;0800
+        </span>
+    </section></footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/p/hal_freertos%E7%9A%84%E4%BD%BF%E7%94%A8%E8%AE%B0%E5%BD%952/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="https://cdn.jsdelivr.net/gh/ClingYang/img1@latest/20250320144944405.png" loading="lazy" data-key="" data-hash="https://cdn.jsdelivr.net/gh/ClingYang/img1@latest/20250320144944405.png"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HAL_Freertos的使用记录2</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hal_flash-%E6%95%B0%E6%8D%AE%E5%A4%87%E4%BB%BD%E4%B8%8E%E8%AF%BB%E5%8F%96/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="https://cdn.jsdelivr.net/gh/ClingYang/img1@latest/20250320145049973.png" loading="lazy" data-key="" data-hash="https://cdn.jsdelivr.net/gh/ClingYang/img1@latest/20250320145049973.png"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HAL_flash 数据备份与读取</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hal_cubemx%E5%AE%9A%E6%97%B6%E5%99%A8%E4%BD%BF%E7%94%A8%E8%AE%B0%E5%BD%95/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="https://cdn.jsdelivr.net/gh/ClingYang/img1@latest/20250321152335834.png" loading="lazy" data-key="" data-hash="https://cdn.jsdelivr.net/gh/ClingYang/img1@latest/20250321152335834.png"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HAL_Cubemx定时器使用记录</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hal_dma%E4%B8%AD%E6%96%AD%E7%A9%BA%E9%97%B2%E6%8E%A5%E5%8F%97%E4%B8%8D%E5%AE%9A%E9%95%BF%E6%95%B0%E6%8D%AE1/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="https://cdn.jsdelivr.net/gh/ClingYang/img1@latest/20250321093939084.png" loading="lazy" data-key="" data-hash="https://cdn.jsdelivr.net/gh/ClingYang/img1@latest/20250321093939084.png"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HAL_DMA中断空闲接受不定长数据1</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hal_dma%E4%B8%AD%E6%96%AD%E7%A9%BA%E9%97%B2%E6%8E%A5%E5%8F%97%E4%B8%8D%E5%AE%9A%E9%95%BF%E6%95%B0%E6%8D%AE2/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="https://cdn.jsdelivr.net/gh/ClingYang/img1@latest/20250321093939084.png" loading="lazy" data-key="" data-hash="https://cdn.jsdelivr.net/gh/ClingYang/img1@latest/20250321093939084.png"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HAL_DMA中断空闲接受不定长数据2</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="ClingYang/ClingYang.github.io"
+        issue-term="pathname"
+        
+        label="💬comment"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2025 CLing
+    </section>
+    
+    <section class="powerby">
+        
+            世界是你们 <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<style>
+    #TableOfContents > ul, ol {
+        ul, ol {
+            display: none;
+        }
+        .open {
+            display: block;
+        }
+    }
+</style>
+
+<script>
+    function initTocHide() {
+        
+        let toc = document.querySelector(".widget--toc");
+        if (!toc) {
+            return;
+        }
+        
+        window.addEventListener('scroll', function() {
+            
+            let currentLi = document.querySelector(".active-class");
+            if (!currentLi) {
+                return
+            }
+            
+            let elementsByClassName = document.querySelectorAll(".open");
+            if (elementsByClassName.length > 0) {
+                elementsByClassName.forEach((ul) => {
+                    ul.classList.remove("open")
+                })
+            }
+            
+            if (currentLi.children.length > 1) {
+                currentLi.children[1].classList.add("open")
+            }
+            
+            let ul = currentLi.parentElement;
+            do {
+                ul.classList.add("open");
+                ul = ul.parentElement.parentElement
+            } while (ul !== undefined && (ul.localName === 'ul' || ul.localName === 'ol'))
+        });
+    }
+    initTocHide()
+</script>
+
+    </body>
+</html>
