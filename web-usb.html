@@ -3,13 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Serial Oscilloscope JSON - JSON串口示波器</title>
+    <title>Web Serial JSON Oscilloscope - 串口示波器</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
             background: #0a0a0f;
@@ -46,9 +42,7 @@
             letter-spacing: 1px;
         }
         
-        .panel-title:first-child {
-            margin-top: 0;
-        }
+        .panel-title:first-child { margin-top: 0; }
         
         .control-group {
             margin-bottom: 15px;
@@ -90,33 +84,15 @@
             box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
         }
         
-        .btn:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
-        
-        .btn.active {
-            background: #00ff88;
-            color: #000;
-        }
-        
-        .btn.small {
-            padding: 5px;
-            font-size: 10px;
-            width: auto;
-            display: inline-block;
-            margin-right: 5px;
-        }
+        .btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .btn.active { background: #00ff88; color: #000; }
         
         .btn.danger {
             border-color: #ff4444;
             color: #ff4444;
         }
         
-        .btn.danger:hover {
-            background: #ff4444;
-            color: #fff;
-        }
+        .btn.danger:hover { background: #ff4444; color: #fff; }
         
         select, input[type="number"], input[type="range"], input[type="color"] {
             width: 100%;
@@ -130,11 +106,7 @@
             font-size: 11px;
         }
         
-        input[type="color"] {
-            height: 30px;
-            cursor: pointer;
-            padding: 2px;
-        }
+        input[type="color"] { height: 30px; cursor: pointer; padding: 2px; }
         
         input[type="range"] {
             cursor: pointer;
@@ -178,16 +150,8 @@
             margin-bottom: 8px;
         }
         
-        .channel-name {
-            font-weight: bold;
-            font-size: 12px;
-            text-transform: uppercase;
-        }
-        
-        .channel-toggle {
-            width: auto;
-            margin: 0;
-        }
+        .channel-name { font-weight: bold; font-size: 12px; text-transform: uppercase; }
+        .channel-toggle { width: auto; margin: 0; }
         
         .display-area {
             position: relative;
@@ -207,11 +171,7 @@
             font-size: 11px;
         }
         
-        .status-indicator {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+        .status-indicator { display: flex; align-items: center; gap: 8px; }
         
         .status-dot {
             width: 6px;
@@ -226,21 +186,9 @@
             animation: pulse 2s infinite;
         }
         
-        .status-dot.error {
-            background: #ff4444;
-            box-shadow: 0 0 8px #ff4444;
-        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
         
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
-        }
-        
-        #canvas {
-            flex: 1;
-            width: 100%;
-            cursor: crosshair;
-        }
+        #canvas { flex: 1; width: 100%; cursor: crosshair; }
         
         .measure-panel {
             background: #111116;
@@ -258,10 +206,7 @@
             border-left: 3px solid #00ff88;
         }
         
-        .stat-box.inactive {
-            opacity: 0.3;
-            border-left-color: #666;
-        }
+        .stat-box.inactive { opacity: 0.3; border-left-color: #666; }
         
         .stat-label {
             font-size: 9px;
@@ -279,11 +224,7 @@
             font-family: 'Courier New', monospace;
         }
         
-        .stat-unit {
-            font-size: 10px;
-            color: #666;
-            margin-left: 3px;
-        }
+        .stat-unit { font-size: 10px; color: #666; margin-left: 3px; }
         
         .debug-info {
             position: absolute;
@@ -312,27 +253,14 @@
         }
         
         @media (max-width: 1200px) {
-            .container {
-                grid-template-columns: 260px 1fr;
-            }
-            .measure-panel {
-                display: none;
-            }
+            .container { grid-template-columns: 260px 1fr; }
+            .measure-panel { display: none; }
         }
         
         .scanlines {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(
-                to bottom,
-                rgba(255,255,255,0),
-                rgba(255,255,255,0) 50%,
-                rgba(0,0,0,0.1) 50%,
-                rgba(0,0,0,0.1)
-            );
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1));
             background-size: 100% 4px;
             pointer-events: none;
             z-index: 1000;
@@ -360,13 +288,14 @@
                     <option value="57600">57600</option>
                     <option value="115200" selected>115200</option>
                     <option value="230400">230400</option>
-                    <option value="460800">460800</option>
-                    <option value="921600">921600</option>
                 </select>
                 
-                <div class="json-preview" id="lastJson">
-                    Waiting for data...
+                <label class="control-label">Buffer Format</label>
+                <div style="font-size:10px; color:#666; margin-bottom:5px;">
+                    Auto-detect: 支持无换行连续JSON
                 </div>
+                
+                <div class="json-preview" id="lastJson">Waiting for data...</div>
             </div>
             
             <div class="panel-title">Time Base</div>
@@ -388,13 +317,7 @@
             </div>
             
             <div class="panel-title">Channels</div>
-            <div id="channelsContainer">
-                <!-- 动态生成通道配置 -->
-            </div>
-            
-            <button id="addChannelBtn" class="btn small" style="margin-top:10px; display:none">
-                + Add Virtual
-            </button>
+            <div id="channelsContainer"></div>
         </div>
         
         <!-- 主显示区 -->
@@ -406,28 +329,22 @@
                     <span style="color:#333;margin:0 5px">|</span>
                     <span id="rxRate" style="color:#666">0 B/s</span>
                 </div>
-                <div style="color:#666; font-size:10px; letter-spacing:1px">
-                    JSON OSCILLOSCOPE
-                </div>
+                <div style="color:#666; font-size:10px; letter-spacing:1px">JSON OSCILLOSCOPE</div>
                 <div class="status-indicator">
                     <span id="fpsCounter" style="color:#666">60 FPS</span>
                 </div>
             </div>
             <canvas id="canvas"></canvas>
-            <div class="debug-info" id="debugInfo">No data</div>
+            <div class="debug-info" id="debugInfo">Buffer: 0 | Ch: 0</div>
         </div>
         
-        <!-- 右侧面板 - 测量 -->
+        <!-- 右侧面板 -->
         <div class="measure-panel">
             <div class="panel-title">Measurements</div>
-            <div id="statsContainer">
-                <!-- 动态生成统计 -->
-            </div>
+            <div id="statsContainer"></div>
             
             <div class="panel-title" style="margin-top:20px">Legend</div>
-            <div id="legendContainer">
-                <!-- 动态生成图例 -->
-            </div>
+            <div id="legendContainer"></div>
         </div>
     </div>
 
@@ -439,19 +356,18 @@
                 this.port = null;
                 this.reader = null;
                 this.isConnected = false;
-                this.textBuffer = '';  // 用于处理分包
+                this.textBuffer = '';  // 关键：累积缓冲区
                 
-                // 通道配置
-                this.channels = {};  // { name: { data: [], color, scale, offset, visible, unit } }
+                this.channels = {};
                 this.channelColors = ['#00ff88', '#ff6b6b', '#4dabf7', '#ffd43b', '#da77f2', '#ffa94d'];
                 this.colorIndex = 0;
                 
-                // 全局设置
-                this.timePerDiv = 100;  // ms
+                this.timePerDiv = 100;
                 this.maxPoints = 500;
-                this.startTime = Date.now();
                 this.rxBytes = 0;
                 this.lastRxTime = Date.now();
+                this.lastFrameTime = Date.now();
+                this.frameCount = 0;
                 
                 this.resize();
                 window.addEventListener('resize', () => this.resize());
@@ -475,11 +391,8 @@
                 document.getElementById('bufferSize').addEventListener('input', (e) => {
                     this.maxPoints = parseInt(e.target.value);
                     document.getElementById('bufferDisplay').textContent = this.maxPoints + ' pts';
-                    // 调整已有数据
                     Object.values(this.channels).forEach(ch => {
-                        if (ch.data.length > this.maxPoints) {
-                            ch.data = ch.data.slice(-this.maxPoints);
-                        }
+                        if (ch.data.length > this.maxPoints) ch.data = ch.data.slice(-this.maxPoints);
                     });
                 });
             }
@@ -496,6 +409,7 @@
                     await this.port.open({ baudRate });
                     
                     this.isConnected = true;
+                    this.textBuffer = ''; // 清空旧缓冲区
                     this.updateUI();
                     this.readLoop();
                 } catch (err) {
@@ -506,12 +420,8 @@
             
             async disconnect() {
                 this.isConnected = false;
-                if (this.reader) {
-                    await this.reader.cancel();
-                }
-                if (this.port) {
-                    await this.port.close();
-                }
+                if (this.reader) await this.reader.cancel();
+                if (this.port) await this.port.close();
                 this.port = null;
                 this.reader = null;
                 this.updateUI();
@@ -531,60 +441,108 @@
                         console.error('读取错误:', err);
                         break;
                     } finally {
-                        if (this.reader) {
-                            this.reader.releaseLock();
-                        }
+                        if (this.reader) this.reader.releaseLock();
                     }
                 }
             }
             
+            // ==========================================
+            // 核心修复：处理无换行符的连续 JSON
+            // ==========================================
             processData(uint8Array) {
-                // 累积到文本缓冲区处理分包问题
                 const text = new TextDecoder().decode(uint8Array);
                 this.textBuffer += text;
                 
-                // 按行分割，保留最后一个不完整的行
-                let lines = this.textBuffer.split('\n');
-                this.textBuffer = lines.pop() || '';  // 保留不完整行
-                
-                lines.forEach(line => {
-                    line = line.trim();
-                    if (!line) return;
+                // 方法1：尝试按换行分割（兼容旧格式）
+                if (this.textBuffer.includes('\n')) {
+                    let lines = this.textBuffer.split('\n');
+                    this.textBuffer = lines.pop() || ''; // 保留不完整行
                     
-                    try {
-                        const json = JSON.parse(line);
-                        this.processJson(json);
-                        
-                        // 显示最后收到的JSON
-                        document.getElementById('lastJson').textContent = line.substring(0, 100);
-                    } catch (e) {
-                        // JSON解析失败，可能是数据损坏
-                        console.warn('JSON parse error:', line);
+                    lines.forEach(line => {
+                        line = line.trim();
+                        if (line) this.tryParseJson(line);
+                    });
+                }
+                
+                // 方法2：处理无换行符的连续 JSON（花括号深度计数）
+                // 当缓冲区积累大量数据且无换行符时触发
+                if (this.textBuffer.length > 20 && 
+                    (!this.textBuffer.includes('\n') || this.textBuffer.indexOf('\n') > 200)) {
+                    
+                    const { objects, remaining } = this.extractJsonObjects(this.textBuffer);
+                    
+                    objects.forEach(obj => this.tryParseJson(obj));
+                    this.textBuffer = remaining;
+                }
+                
+                // 安全阀：防止缓冲区无限增长
+                if (this.textBuffer.length > 8192) {
+                    console.warn('Buffer overflow, clearing');
+                    this.textBuffer = '';
+                }
+                
+                // 更新调试信息
+                document.getElementById('debugInfo').textContent = 
+                    `Buffer: ${this.textBuffer.length} | Ch: ${Object.keys(this.channels).length}`;
+            }
+            
+            // 花括号深度计数法提取 JSON
+            extractJsonObjects(text) {
+                const objects = [];
+                let depth = 0;
+                let start = -1;
+                
+                for (let i = 0; i < text.length; i++) {
+                    const char = text[i];
+                    
+                    if (char === '{') {
+                        if (depth === 0) start = i;
+                        depth++;
+                    } else if (char === '}') {
+                        depth--;
+                        if (depth === 0 && start !== -1) {
+                            objects.push(text.substring(start, i + 1));
+                            start = -1;
+                        }
                     }
-                });
+                }
+                
+                // 保留未闭合的部分（如下次数据会补全）
+                const remaining = (depth > 0 && start !== -1) ? text.substring(start) : '';
+                return { objects, remaining };
+            }
+            
+            tryParseJson(str) {
+                try {
+                    str = str.trim();
+                    // 清理可能的逗号前缀（某些格式是},{）
+                    if (str.startsWith(',')) str = str.substring(1);
+                    if (!str.startsWith('{')) return;
+                    
+                    const json = JSON.parse(str);
+                    this.processJson(json);
+                    
+                    const preview = str.length > 80 ? str.substring(0, 80) + '...' : str;
+                    document.getElementById('lastJson').textContent = preview;
+                } catch (e) {
+                    // 解析失败，静默丢弃（可能是损坏的数据帧）
+                }
             }
             
             processJson(json) {
                 const timestamp = Date.now();
                 
-                // 遍历JSON所有字段，提取数字类型
                 Object.keys(json).forEach(key => {
                     const value = json[key];
                     
-                    // 只处理数字
                     if (typeof value === 'number') {
-                        // 如果通道不存在，自动创建
-                        if (!this.channels[key]) {
-                            this.addChannel(key);
-                        }
+                        if (!this.channels[key]) this.addChannel(key);
                         
-                        // 添加数据点
                         this.channels[key].data.push({
                             value: value,
                             time: timestamp
                         });
                         
-                        // 限制缓冲区
                         if (this.channels[key].data.length > this.maxPoints) {
                             this.channels[key].data.shift();
                         }
@@ -602,8 +560,8 @@
                     name: name,
                     data: [],
                     color: color,
-                    scale: 1.0,      // 每格数值
-                    offset: 0,       // 垂直偏移
+                    scale: 1.0,
+                    offset: 0,
                     visible: true,
                     autoScale: true,
                     unit: this.inferUnit(name)
@@ -616,11 +574,12 @@
             
             inferUnit(name) {
                 const lower = name.toLowerCase();
-                if (lower.includes('voltage') || lower.includes('volt') || lower === 'v') return 'V';
-                if (lower.includes('current') || lower === 'i' || lower.includes('curr')) return 'A';
+                if (lower.includes('current') || lower === 'i') return 'A';
+                if (lower.includes('volt') || lower === 'v') return 'V';
                 if (lower.includes('temp')) return '°C';
                 if (lower.includes('press')) return 'Pa';
                 if (lower.includes('freq')) return 'Hz';
+                if (lower.includes('pow') || lower.includes('watt')) return 'W';
                 return '';
             }
             
@@ -640,12 +599,12 @@
                                onchange="scope.toggleChannel('${name}')">
                     </div>
                     
-                    <label class="control-label">Scale</label>
-                    <input type="range" min="0.001" max="100" step="0.001" value="1" 
+                    <label class="control-label">Scale (${ch.unit}/div)</label>
+                    <input type="range" min="0.001" max="1000" step="0.001" value="1" 
                            oninput="scope.setChannelScale('${name}', this.value)">
                     <div class="value-display" id="scale-${name}">Auto</div>
                     
-                    <label class="control-label">Offset</label>
+                    <label class="control-label">Offset (%)</label>
                     <input type="range" min="-100" max="100" value="0" 
                            oninput="scope.setChannelOffset('${name}', this.value)">
                     
@@ -684,7 +643,6 @@
                 const ch = this.channels[name];
                 
                 const div = document.createElement('div');
-                div.className = 'legend-item';
                 div.id = `legend-${name}`;
                 div.innerHTML = `
                     <div style="display:flex; align-items:center; gap:8px; margin:5px 0; font-size:11px;">
@@ -693,7 +651,6 @@
                         <span style="color:#666; font-size:9px;">[${ch.unit}]</span>
                     </div>
                 `;
-                
                 container.appendChild(div);
             }
             
@@ -709,14 +666,12 @@
                     const scale = parseFloat(value);
                     this.channels[name].scale = scale;
                     this.channels[name].autoScale = false;
-                    document.getElementById(`scale-${name}`).textContent = scale.toFixed(3) + ' /div';
+                    document.getElementById(`scale-${name}`).textContent = scale.toFixed(3);
                 }
             }
             
             setChannelOffset(name, value) {
-                if (this.channels[name]) {
-                    this.channels[name].offset = parseInt(value);
-                }
+                if (this.channels[name]) this.channels[name].offset = parseInt(value);
             }
             
             setChannelColor(name, value) {
@@ -724,7 +679,10 @@
                     this.channels[name].color = value;
                     document.getElementById(`ch-config-${name}`).style.borderLeftColor = value;
                     document.getElementById(`stat-${name}`).style.borderLeftColor = value;
-                    this.createLegendUI(name); // 刷新图例
+                    const legend = document.getElementById(`legend-${name}`);
+                    if (legend) {
+                        legend.querySelector('div div').style.background = value;
+                    }
                 }
             }
             
@@ -737,9 +695,7 @@
                     const vals = ch.data.map(d => d.value);
                     const min = Math.min(...vals);
                     const max = Math.max(...vals);
-                    const avg = vals.reduce((a,b) => a+b, 0) / vals.length;
                     
-                    // 更新显示
                     const el = document.getElementById(`val-${name}`);
                     if (el) {
                         let display = last;
@@ -751,13 +707,10 @@
                         el.innerHTML = `${display}<span class="stat-unit">${ch.unit}</span>`;
                     }
                     
-                    // 自动缩放逻辑
+                    // 自动缩放
                     if (ch.autoScale && ch.data.length > 10) {
                         const range = max - min;
-                        if (range > 0) {
-                            // 设置scale使得波形占据屏幕的合理比例
-                            ch.scale = range / 5; // 5格显示全部范围
-                        }
+                        if (range > 0) ch.scale = range / 5;
                     }
                 });
             }
@@ -782,76 +735,55 @@
             }
             
             drawGrid() {
-                const w = this.canvas.width;
-                const h = this.canvas.height;
+                const w = this.canvas.width, h = this.canvas.height;
                 const ctx = this.ctx;
                 
                 ctx.strokeStyle = '#1a1a24';
                 ctx.lineWidth = 1;
                 
-                // 垂直线 (10 divs)
                 for (let i = 0; i <= 10; i++) {
                     const x = (w / 10) * i;
-                    ctx.beginPath();
-                    ctx.moveTo(x, 0);
-                    ctx.lineTo(x, h);
-                    ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
                 }
                 
-                // 水平线 (8 divs)
                 for (let i = 0; i <= 8; i++) {
                     const y = (h / 8) * i;
-                    ctx.beginPath();
-                    ctx.moveTo(0, y);
-                    ctx.lineTo(w, y);
-                    ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
                 }
                 
-                // 中心十字
                 ctx.strokeStyle = '#2a2a35';
                 ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(w/2, 0);
-                ctx.lineTo(w/2, h);
-                ctx.moveTo(0, h/2);
-                ctx.lineTo(w, h/2);
-                ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(w/2, 0); ctx.lineTo(w/2, h); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(0, h/2); ctx.lineTo(w, h/2); ctx.stroke();
             }
             
             drawTraces() {
-                const w = this.canvas.width;
-                const h = this.canvas.height;
+                const w = this.canvas.width, h = this.canvas.height;
                 const ctx = this.ctx;
                 
                 Object.keys(this.channels).forEach(name => {
                     const ch = this.channels[name];
                     if (!ch.visible || ch.data.length < 2) return;
                     
-                    const data = ch.data;
-                    const scaleY = (h * 0.8) / (ch.scale * 8); // 8格高度
+                    const scaleY = (h * 0.8) / (ch.scale * 8);
                     const offsetY = h/2 + (ch.offset / 100 * h);
                     
                     ctx.strokeStyle = ch.color;
                     ctx.lineWidth = 2;
                     ctx.shadowBlur = 6;
                     ctx.shadowColor = ch.color;
-                    ctx.setLineDash([]);
                     
                     ctx.beginPath();
-                    
-                    // 时间映射
                     const now = Date.now();
-                    const timeSpan = this.timePerDiv * 10; // 10格
+                    const timeSpan = this.timePerDiv * 10;
                     
-                    for (let i = 0; i < data.length; i++) {
-                        const point = data[i];
+                    for (let i = 0; i < ch.data.length; i++) {
+                        const point = ch.data[i];
                         const age = now - point.time;
                         const x = w - (age / timeSpan) * w;
-                        
-                        if (x < 0) continue; // 超出左边界
+                        if (x < 0) continue;
                         
                         const y = offsetY - (point.value * scaleY);
-                        
                         if (i === 0 || x > w) ctx.moveTo(x, y);
                         else ctx.lineTo(x, y);
                     }
@@ -864,45 +796,47 @@
             updateRxRate() {
                 const now = Date.now();
                 if (now - this.lastRxTime >= 1000) {
-                    const rate = this.rxBytes;
-                    document.getElementById('rxRate').textContent = `${rate} B/s`;
+                    document.getElementById('rxRate').textContent = `${this.rxBytes} B/s`;
                     this.rxBytes = 0;
                     this.lastRxTime = now;
                 }
             }
             
+            updateFPS() {
+                this.frameCount++;
+                const now = Date.now();
+                if (now - this.lastFrameTime >= 1000) {
+                    document.getElementById('fpsCounter').textContent = `${this.frameCount} FPS`;
+                    this.frameCount = 0;
+                    this.lastFrameTime = now;
+                }
+            }
+            
             animate() {
-                // 半透明清除实现拖尾效果
                 this.ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
                 this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
                 
                 this.drawGrid();
                 this.drawTraces();
                 this.updateRxRate();
-                
-                // 显示调试信息
-                const chNames = Object.keys(this.channels).filter(k => this.channels[k].visible).join(', ');
-                document.getElementById('debugInfo').textContent = 
-                    `Channels: ${chNames || 'None'} | Points: ${this.maxPoints}`;
+                this.updateFPS();
                 
                 requestAnimationFrame(() => this.animate());
             }
         }
         
-        // 全局实例供HTML调用
         let scope;
         window.addEventListener('DOMContentLoaded', () => {
             scope = new JsonOscilloscope();
             
-            // 生成演示数据（未连接时）
+            // Demo mode when disconnected
             setInterval(() => {
                 if (!scope.isConnected && Object.keys(scope.channels).length === 0) {
-                    // 创建演示通道
-                    const demoData = {
-                        current: Math.sin(Date.now()/500) * 0.5 + 0.5 + (Math.random()-0.5)*0.1,
-                        voltage: 12 + Math.sin(Date.now()/1000) * 2 + (Math.random()-0.5)*0.5
-                    };
-                    scope.processJson(demoData);
+                    const t = Date.now() / 1000;
+                    scope.processJson({
+                        current: Math.sin(t) * 0.5 + 0.5 + Math.random()*0.1,
+                        voltage: 12 + Math.sin(t*0.5) * 2
+                    });
                 }
             }, 50);
         });
