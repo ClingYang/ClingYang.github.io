@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Serial Oscilloscope JSON - JSON串口示波器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #0a0a0f;
+            color: #00ff88;
+            font-family: 'Segoe UI', 'Courier New', monospace;
+            overflow: hidden;
+            height: 100vh;
+        }
+        
+        .container {
+            display: grid;
+            grid-template-columns: 280px 1fr 260px;
+            height: 100vh;
+            gap: 1px;
+            background: #000;
+        }
+        
+        .control-panel {
+            background: #111116;
+            padding: 15px;
+            border-right: 1px solid #333;
+            overflow-y: auto;
+            font-size: 12px;
+        }
+        
+        .panel-title {
+            font-size: 13px;
+            font-weight: bold;
+            margin: 20px 0 10px 0;
+            color: #00ff88;
+            border-bottom: 2px solid #00ff88;
+            padding-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .panel-title:first-child {
+            margin-top: 0;
+        }
+        
+        .control-group {
+            margin-bottom: 15px;
+            background: rgba(0, 255, 136, 0.03);
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #222;
+        }
+        
+        .control-label {
+            display: block;
+            font-size: 10px;
+            margin-bottom: 6px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 10px;
+            margin: 4px 0;
+            background: #1a1a20;
+            border: 1px solid #00ff88;
+            color: #00ff88;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            border-radius: 4px;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn:hover {
+            background: #00ff88;
+            color: #000;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+        }
+        
+        .btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        
+        .btn.active {
+            background: #00ff88;
+            color: #000;
+        }
+        
+        .btn.small {
+            padding: 5px;
+            font-size: 10px;
+            width: auto;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        
+        .btn.danger {
+            border-color: #ff4444;
+            color: #ff4444;
+        }
+        
+        .btn.danger:hover {
+            background: #ff4444;
+            color: #fff;
+        }
+        
+        select, input[type="number"], input[type="range"], input[type="color"] {
+            width: 100%;
+            padding: 6px;
+            background: #000;
+            border: 1px solid #333;
+            color: #fff;
+            font-family: inherit;
+            margin-bottom: 8px;
+            border-radius: 3px;
+            font-size: 11px;
+        }
+        
+        input[type="color"] {
+            height: 30px;
+            cursor: pointer;
+            padding: 2px;
+        }
+        
+        input[type="range"] {
+            cursor: pointer;
+            height: 4px;
+            -webkit-appearance: none;
+            background: #333;
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            background: #00ff88;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        
+        .value-display {
+            text-align: right;
+            font-size: 11px;
+            color: #00ff88;
+            margin-top: -6px;
+            margin-bottom: 8px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .channel-config {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-left: 3px solid;
+        }
+        
+        .channel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .channel-name {
+            font-weight: bold;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        
+        .channel-toggle {
+            width: auto;
+            margin: 0;
+        }
+        
+        .display-area {
+            position: relative;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .scope-header {
+            height: 35px;
+            background: #111;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 15px;
+            border-bottom: 1px solid #333;
+            font-size: 11px;
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #333;
+        }
+        
+        .status-dot.connected {
+            background: #00ff88;
+            box-shadow: 0 0 8px #00ff88;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-dot.error {
+            background: #ff4444;
+            box-shadow: 0 0 8px #ff4444;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        
+        #canvas {
+            flex: 1;
+            width: 100%;
+            cursor: crosshair;
+        }
+        
+        .measure-panel {
+            background: #111116;
+            padding: 15px;
+            border-left: 1px solid #333;
+            overflow-y: auto;
+        }
+        
+        .stat-box {
+            background: #000;
+            border: 1px solid #333;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            border-left: 3px solid #00ff88;
+        }
+        
+        .stat-box.inactive {
+            opacity: 0.3;
+            border-left-color: #666;
+        }
+        
+        .stat-label {
+            font-size: 9px;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 3px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .stat-unit {
+            font-size: 10px;
+            color: #666;
+            margin-left: 3px;
+        }
+        
+        .debug-info {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            color: #666;
+            font-size: 10px;
+            padding: 5px;
+            border-radius: 3px;
+            pointer-events: none;
+            font-family: monospace;
+        }
+        
+        .json-preview {
+            background: #000;
+            border: 1px solid #333;
+            padding: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            color: #666;
+            max-height: 60px;
+            overflow-y: auto;
+            word-break: break-all;
+            margin-top: 10px;
+        }
+        
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 260px 1fr;
+            }
+            .measure-panel {
+                display: none;
+            }
+        }
+        
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0,0,0,0.1) 50%,
+                rgba(0,0,0,0.1)
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0.2;
+        }
+    </style>
+</head>
+<body>
+    <div class="scanlines"></div>
+    
+    <div class="container">
+        <!-- 左侧控制面板 -->
+        <div class="control-panel">
+            <div class="panel-title">Connection</div>
+            <div class="control-group">
+                <label class="control-label">Serial Port</label>
+                <button id="connectBtn" class="btn">Connect Port</button>
+                <button id="disconnectBtn" class="btn danger" disabled>Disconnect</button>
+                
+                <label class="control-label" style="margin-top:10px">Baud Rate</label>
+                <select id="baudRate">
+                    <option value="9600">9600</option>
+                    <option value="19200">19200</option>
+                    <option value="38400">38400</option>
+                    <option value="57600">57600</option>
+                    <option value="115200" selected>115200</option>
+                    <option value="230400">230400</option>
+                    <option value="460800">460800</option>
+                    <option value="921600">921600</option>
+                </select>
+                
+                <div class="json-preview" id="lastJson">
+                    Waiting for data...
+                </div>
+            </div>
+            
+            <div class="panel-title">Time Base</div>
+            <div class="control-group">
+                <label class="control-label">Time/Div</label>
+                <select id="timePerDiv">
+                    <option value="10">10 ms/div</option>
+                    <option value="20">20 ms/div</option>
+                    <option value="50">50 ms/div</option>
+                    <option value="100" selected>100 ms/div</option>
+                    <option value="200">200 ms/div</option>
+                    <option value="500">500 ms/div</option>
+                    <option value="1000">1 s/div</option>
+                </select>
+                
+                <label class="control-label">Buffer Size</label>
+                <input type="range" id="bufferSize" min="100" max="2000" value="500" step="100">
+                <div class="value-display" id="bufferDisplay">500 pts</div>
+            </div>
+            
+            <div class="panel-title">Channels</div>
+            <div id="channelsContainer">
+                <!-- 动态生成通道配置 -->
+            </div>
+            
+            <button id="addChannelBtn" class="btn small" style="margin-top:10px; display:none">
+                + Add Virtual
+            </button>
+        </div>
+        
+        <!-- 主显示区 -->
+        <div class="display-area">
+            <div class="scope-header">
+                <div class="status-indicator">
+                    <div class="status-dot" id="statusDot"></div>
+                    <span id="statusText">DISCONNECTED</span>
+                    <span style="color:#333;margin:0 5px">|</span>
+                    <span id="rxRate" style="color:#666">0 B/s</span>
+                </div>
+                <div style="color:#666; font-size:10px; letter-spacing:1px">
+                    JSON OSCILLOSCOPE
+                </div>
+                <div class="status-indicator">
+                    <span id="fpsCounter" style="color:#666">60 FPS</span>
+                </div>
+            </div>
+            <canvas id="canvas"></canvas>
+            <div class="debug-info" id="debugInfo">No data</div>
+        </div>
+        
+        <!-- 右侧面板 - 测量 -->
+        <div class="measure-panel">
+            <div class="panel-title">Measurements</div>
+            <div id="statsContainer">
+                <!-- 动态生成统计 -->
+            </div>
+            
+            <div class="panel-title" style="margin-top:20px">Legend</div>
+            <div id="legendContainer">
+                <!-- 动态生成图例 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class JsonOscilloscope {
+            constructor() {
+                this.canvas = document.getElementById('canvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.port = null;
+                this.reader = null;
+                this.isConnected = false;
+                this.textBuffer = '';  // 用于处理分包
+                
+                // 通道配置
+                this.channels = {};  // { name: { data: [], color, scale, offset, visible, unit } }
+                this.channelColors = ['#00ff88', '#ff6b6b', '#4dabf7', '#ffd43b', '#da77f2', '#ffa94d'];
+                this.colorIndex = 0;
+                
+                // 全局设置
+                this.timePerDiv = 100;  // ms
+                this.maxPoints = 500;
+                this.startTime = Date.now();
+                this.rxBytes = 0;
+                this.lastRxTime = Date.now();
+                
+                this.resize();
+                window.addEventListener('resize', () => this.resize());
+                this.setupEventListeners();
+                this.animate();
+            }
+            
+            resize() {
+                this.canvas.width = this.canvas.offsetWidth;
+                this.canvas.height = this.canvas.offsetHeight;
+            }
+            
+            setupEventListeners() {
+                document.getElementById('connectBtn').addEventListener('click', () => this.connect());
+                document.getElementById('disconnectBtn').addEventListener('click', () => this.disconnect());
+                
+                document.getElementById('timePerDiv').addEventListener('change', (e) => {
+                    this.timePerDiv = parseInt(e.target.value);
+                });
+                
+                document.getElementById('bufferSize').addEventListener('input', (e) => {
+                    this.maxPoints = parseInt(e.target.value);
+                    document.getElementById('bufferDisplay').textContent = this.maxPoints + ' pts';
+                    // 调整已有数据
+                    Object.values(this.channels).forEach(ch => {
+                        if (ch.data.length > this.maxPoints) {
+                            ch.data = ch.data.slice(-this.maxPoints);
+                        }
+                    });
+                });
+            }
+            
+            async connect() {
+                try {
+                    if (!('serial' in navigator)) {
+                        alert('浏览器不支持 Web Serial API，请使用 Chrome/Edge 89+');
+                        return;
+                    }
+                    
+                    const baudRate = parseInt(document.getElementById('baudRate').value);
+                    this.port = await navigator.serial.requestPort();
+                    await this.port.open({ baudRate });
+                    
+                    this.isConnected = true;
+                    this.updateUI();
+                    this.readLoop();
+                } catch (err) {
+                    console.error('连接失败:', err);
+                    alert('连接失败: ' + err.message);
+                }
+            }
+            
+            async disconnect() {
+                this.isConnected = false;
+                if (this.reader) {
+                    await this.reader.cancel();
+                }
+                if (this.port) {
+                    await this.port.close();
+                }
+                this.port = null;
+                this.reader = null;
+                this.updateUI();
+            }
+            
+            async readLoop() {
+                while (this.port?.readable && this.isConnected) {
+                    try {
+                        this.reader = this.port.readable.getReader();
+                        while (true) {
+                            const { value, done } = await this.reader.read();
+                            if (done) break;
+                            this.rxBytes += value.length;
+                            this.processData(value);
+                        }
+                    } catch (err) {
+                        console.error('读取错误:', err);
+                        break;
+                    } finally {
+                        if (this.reader) {
+                            this.reader.releaseLock();
+                        }
+                    }
+                }
+            }
+            
+            processData(uint8Array) {
+                // 累积到文本缓冲区处理分包问题
+                const text = new TextDecoder().decode(uint8Array);
+                this.textBuffer += text;
+                
+                // 按行分割，保留最后一个不完整的行
+                let lines = this.textBuffer.split('\n');
+                this.textBuffer = lines.pop() || '';  // 保留不完整行
+                
+                lines.forEach(line => {
+                    line = line.trim();
+                    if (!line) return;
+                    
+                    try {
+                        const json = JSON.parse(line);
+                        this.processJson(json);
+                        
+                        // 显示最后收到的JSON
+                        document.getElementById('lastJson').textContent = line.substring(0, 100);
+                    } catch (e) {
+                        // JSON解析失败，可能是数据损坏
+                        console.warn('JSON parse error:', line);
+                    }
+                });
+            }
+            
+            processJson(json) {
+                const timestamp = Date.now();
+                
+                // 遍历JSON所有字段，提取数字类型
+                Object.keys(json).forEach(key => {
+                    const value = json[key];
+                    
+                    // 只处理数字
+                    if (typeof value === 'number') {
+                        // 如果通道不存在，自动创建
+                        if (!this.channels[key]) {
+                            this.addChannel(key);
+                        }
+                        
+                        // 添加数据点
+                        this.channels[key].data.push({
+                            value: value,
+                            time: timestamp
+                        });
+                        
+                        // 限制缓冲区
+                        if (this.channels[key].data.length > this.maxPoints) {
+                            this.channels[key].data.shift();
+                        }
+                    }
+                });
+                
+                this.updateStats();
+            }
+            
+            addChannel(name) {
+                const color = this.channelColors[this.colorIndex % this.channelColors.length];
+                this.colorIndex++;
+                
+                this.channels[name] = {
+                    name: name,
+                    data: [],
+                    color: color,
+                    scale: 1.0,      // 每格数值
+                    offset: 0,       // 垂直偏移
+                    visible: true,
+                    autoScale: true,
+                    unit: this.inferUnit(name)
+                };
+                
+                this.createChannelUI(name);
+                this.createStatsUI(name);
+                this.createLegendUI(name);
+            }
+            
+            inferUnit(name) {
+                const lower = name.toLowerCase();
+                if (lower.includes('voltage') || lower.includes('volt') || lower === 'v') return 'V';
+                if (lower.includes('current') || lower === 'i' || lower.includes('curr')) return 'A';
+                if (lower.includes('temp')) return '°C';
+                if (lower.includes('press')) return 'Pa';
+                if (lower.includes('freq')) return 'Hz';
+                return '';
+            }
+            
+            createChannelUI(name) {
+                const container = document.getElementById('channelsContainer');
+                const ch = this.channels[name];
+                
+                const div = document.createElement('div');
+                div.className = 'channel-config';
+                div.style.borderLeftColor = ch.color;
+                div.id = `ch-config-${name}`;
+                
+                div.innerHTML = `
+                    <div class="channel-header">
+                        <span class="channel-name" style="color:${ch.color}">${name}</span>
+                        <input type="checkbox" class="channel-toggle" checked 
+                               onchange="scope.toggleChannel('${name}')">
+                    </div>
+                    
+                    <label class="control-label">Scale</label>
+                    <input type="range" min="0.001" max="100" step="0.001" value="1" 
+                           oninput="scope.setChannelScale('${name}', this.value)">
+                    <div class="value-display" id="scale-${name}">Auto</div>
+                    
+                    <label class="control-label">Offset</label>
+                    <input type="range" min="-100" max="100" value="0" 
+                           oninput="scope.setChannelOffset('${name}', this.value)">
+                    
+                    <label class="control-label">Color</label>
+                    <input type="color" value="${ch.color}" 
+                           onchange="scope.setChannelColor('${name}', this.value)">
+                `;
+                
+                container.appendChild(div);
+            }
+            
+            createStatsUI(name) {
+                const container = document.getElementById('statsContainer');
+                const ch = this.channels[name];
+                
+                const div = document.createElement('div');
+                div.className = 'stat-box';
+                div.id = `stat-${name}`;
+                div.style.borderLeftColor = ch.color;
+                
+                div.innerHTML = `
+                    <div class="stat-label">
+                        <span>${name.toUpperCase()}</span>
+                        <span style="color:${ch.color}">●</span>
+                    </div>
+                    <div class="stat-value" id="val-${name}">
+                        0.000<span class="stat-unit">${ch.unit}</span>
+                    </div>
+                `;
+                
+                container.appendChild(div);
+            }
+            
+            createLegendUI(name) {
+                const container = document.getElementById('legendContainer');
+                const ch = this.channels[name];
+                
+                const div = document.createElement('div');
+                div.className = 'legend-item';
+                div.id = `legend-${name}`;
+                div.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:8px; margin:5px 0; font-size:11px;">
+                        <div style="width:20px; height:3px; background:${ch.color};"></div>
+                        <span>${name}</span>
+                        <span style="color:#666; font-size:9px;">[${ch.unit}]</span>
+                    </div>
+                `;
+                
+                container.appendChild(div);
+            }
+            
+            toggleChannel(name) {
+                if (this.channels[name]) {
+                    this.channels[name].visible = !this.channels[name].visible;
+                    document.getElementById(`stat-${name}`).classList.toggle('inactive', !this.channels[name].visible);
+                }
+            }
+            
+            setChannelScale(name, value) {
+                if (this.channels[name]) {
+                    const scale = parseFloat(value);
+                    this.channels[name].scale = scale;
+                    this.channels[name].autoScale = false;
+                    document.getElementById(`scale-${name}`).textContent = scale.toFixed(3) + ' /div';
+                }
+            }
+            
+            setChannelOffset(name, value) {
+                if (this.channels[name]) {
+                    this.channels[name].offset = parseInt(value);
+                }
+            }
+            
+            setChannelColor(name, value) {
+                if (this.channels[name]) {
+                    this.channels[name].color = value;
+                    document.getElementById(`ch-config-${name}`).style.borderLeftColor = value;
+                    document.getElementById(`stat-${name}`).style.borderLeftColor = value;
+                    this.createLegendUI(name); // 刷新图例
+                }
+            }
+            
+            updateStats() {
+                Object.keys(this.channels).forEach(name => {
+                    const ch = this.channels[name];
+                    if (ch.data.length === 0) return;
+                    
+                    const last = ch.data[ch.data.length - 1].value;
+                    const vals = ch.data.map(d => d.value);
+                    const min = Math.min(...vals);
+                    const max = Math.max(...vals);
+                    const avg = vals.reduce((a,b) => a+b, 0) / vals.length;
+                    
+                    // 更新显示
+                    const el = document.getElementById(`val-${name}`);
+                    if (el) {
+                        let display = last;
+                        if (Math.abs(last) < 0.001) display = last.toExponential(3);
+                        else if (Math.abs(last) < 1) display = last.toFixed(4);
+                        else if (Math.abs(last) < 100) display = last.toFixed(2);
+                        else display = last.toFixed(1);
+                        
+                        el.innerHTML = `${display}<span class="stat-unit">${ch.unit}</span>`;
+                    }
+                    
+                    // 自动缩放逻辑
+                    if (ch.autoScale && ch.data.length > 10) {
+                        const range = max - min;
+                        if (range > 0) {
+                            // 设置scale使得波形占据屏幕的合理比例
+                            ch.scale = range / 5; // 5格显示全部范围
+                        }
+                    }
+                });
+            }
+            
+            updateUI() {
+                const dot = document.getElementById('statusDot');
+                const text = document.getElementById('statusText');
+                const connectBtn = document.getElementById('connectBtn');
+                const disconnectBtn = document.getElementById('disconnectBtn');
+                
+                if (this.isConnected) {
+                    dot.classList.add('connected');
+                    text.textContent = 'CONNECTED';
+                    connectBtn.disabled = true;
+                    disconnectBtn.disabled = false;
+                } else {
+                    dot.classList.remove('connected');
+                    text.textContent = 'DISCONNECTED';
+                    connectBtn.disabled = false;
+                    disconnectBtn.disabled = true;
+                }
+            }
+            
+            drawGrid() {
+                const w = this.canvas.width;
+                const h = this.canvas.height;
+                const ctx = this.ctx;
+                
+                ctx.strokeStyle = '#1a1a24';
+                ctx.lineWidth = 1;
+                
+                // 垂直线 (10 divs)
+                for (let i = 0; i <= 10; i++) {
+                    const x = (w / 10) * i;
+                    ctx.beginPath();
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, h);
+                    ctx.stroke();
+                }
+                
+                // 水平线 (8 divs)
+                for (let i = 0; i <= 8; i++) {
+                    const y = (h / 8) * i;
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(w, y);
+                    ctx.stroke();
+                }
+                
+                // 中心十字
+                ctx.strokeStyle = '#2a2a35';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(w/2, 0);
+                ctx.lineTo(w/2, h);
+                ctx.moveTo(0, h/2);
+                ctx.lineTo(w, h/2);
+                ctx.stroke();
+            }
+            
+            drawTraces() {
+                const w = this.canvas.width;
+                const h = this.canvas.height;
+                const ctx = this.ctx;
+                
+                Object.keys(this.channels).forEach(name => {
+                    const ch = this.channels[name];
+                    if (!ch.visible || ch.data.length < 2) return;
+                    
+                    const data = ch.data;
+                    const scaleY = (h * 0.8) / (ch.scale * 8); // 8格高度
+                    const offsetY = h/2 + (ch.offset / 100 * h);
+                    
+                    ctx.strokeStyle = ch.color;
+                    ctx.lineWidth = 2;
+                    ctx.shadowBlur = 6;
+                    ctx.shadowColor = ch.color;
+                    ctx.setLineDash([]);
+                    
+                    ctx.beginPath();
+                    
+                    // 时间映射
+                    const now = Date.now();
+                    const timeSpan = this.timePerDiv * 10; // 10格
+                    
+                    for (let i = 0; i < data.length; i++) {
+                        const point = data[i];
+                        const age = now - point.time;
+                        const x = w - (age / timeSpan) * w;
+                        
+                        if (x < 0) continue; // 超出左边界
+                        
+                        const y = offsetY - (point.value * scaleY);
+                        
+                        if (i === 0 || x > w) ctx.moveTo(x, y);
+                        else ctx.lineTo(x, y);
+                    }
+                    
+                    ctx.stroke();
+                    ctx.shadowBlur = 0;
+                });
+            }
+            
+            updateRxRate() {
+                const now = Date.now();
+                if (now - this.lastRxTime >= 1000) {
+                    const rate = this.rxBytes;
+                    document.getElementById('rxRate').textContent = `${rate} B/s`;
+                    this.rxBytes = 0;
+                    this.lastRxTime = now;
+                }
+            }
+            
+            animate() {
+                // 半透明清除实现拖尾效果
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                this.drawGrid();
+                this.drawTraces();
+                this.updateRxRate();
+                
+                // 显示调试信息
+                const chNames = Object.keys(this.channels).filter(k => this.channels[k].visible).join(', ');
+                document.getElementById('debugInfo').textContent = 
+                    `Channels: ${chNames || 'None'} | Points: ${this.maxPoints}`;
+                
+                requestAnimationFrame(() => this.animate());
+            }
+        }
+        
+        // 全局实例供HTML调用
+        let scope;
+        window.addEventListener('DOMContentLoaded', () => {
+            scope = new JsonOscilloscope();
+            
+            // 生成演示数据（未连接时）
+            setInterval(() => {
+                if (!scope.isConnected && Object.keys(scope.channels).length === 0) {
+                    // 创建演示通道
+                    const demoData = {
+                        current: Math.sin(Date.now()/500) * 0.5 + 0.5 + (Math.random()-0.5)*0.1,
+                        voltage: 12 + Math.sin(Date.now()/1000) * 2 + (Math.random()-0.5)*0.5
+                    };
+                    scope.processJson(demoData);
+                }
+            }, 50);
+        });
+    </script>
+</body>
+</html>
