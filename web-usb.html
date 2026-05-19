@@ -3,252 +3,313 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic JSON Oscilloscope</title>
+    <title>JSON Oscilloscope</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
+
+        :root {
+            --bg: #020204;
+            --bg-panel: #0a0a0e;
+            --bg-hover: #111118;
+            --neon: #39ff14;
+            --neon-dim: rgba(57, 255, 20, 0.15);
+            --neon-border: rgba(57, 255, 20, 0.3);
+            --cyan: #00d4aa;
+            --magenta: #ff3366;
+            --grid: rgba(57, 255, 20, 0.05);
+            --text: #a0a0a0;
+            --text-dim: #555;
+        }
+
         body {
-            background: #0a0a0f;
-            color: #00ff88;
-            font-family: 'Segoe UI', monospace;
+            background: var(--bg);
+            color: var(--neon);
+            font-family: 'JetBrains Mono', 'Consolas', 'Courier New', monospace;
             overflow: hidden;
             height: 100vh;
             user-select: none;
         }
-        
+
+        /* Scanline overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9999;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.12) 2px,
+                rgba(0, 0, 0, 0.12) 4px
+            );
+        }
+
         .container {
             display: grid;
-            grid-template-columns: 300px 1fr 260px;
+            grid-template-columns: 220px 1fr 260px;
+            grid-template-rows: 1fr 420px;
             height: 100vh;
             gap: 1px;
             background: #000;
         }
-        
+
+        /* ── Control Panel ── */
         .control-panel {
-            background: #111118;
-            padding: 15px;
-            border-right: 1px solid #222;
+            grid-column: 1;
+            grid-row: 1 / 3;
+            background: var(--bg-panel);
+            padding: 12px;
+            border-right: 1px solid var(--neon-border);
             overflow-y: auto;
             font-size: 11px;
-            max-height: 100vh;
-        }
-        
-        .measure-panel {
-            background: #111118;
-            padding: 15px;
-            border-left: 1px solid #222;
-            overflow-y: auto;
-            font-size: 11px;
-            max-height: 100vh;
-        }
-        
-        .panel-title {
-            font-size: 11px;
-            font-weight: bold;
-            margin: 20px 0 10px 0;
-            color: #00ff88;
-            border-bottom: 1px solid #333;
-            padding-bottom: 5px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        .btn {
-            width: 100%;
-            padding: 10px;
-            margin: 5px 0;
-            background: #16161d;
-            border: 1px solid #00ff88;
-            color: #00ff88;
-            cursor: pointer;
-            font-family: inherit;
-            font-weight: bold;
-            border-radius: 4px;
-            transition: all 0.2s;
-            font-size: 11px;
-        }
-        
-        .btn:hover { background: #00ff88; color: #000; }
-        .btn:disabled { opacity: 0.3; cursor: not-allowed; }
-        .btn.danger { border-color: #ff4444; color: #ff4444; }
-        .btn.danger:hover { background: #ff4444; color: #fff; }
-        .btn.active { background: #ffaa44; border-color: #ffaa44; color: #000; }
-        
-        select, input[type="range"], input[type="number"] {
-            width: 100%;
-            padding: 6px;
-            background: #0a0a0f;
-            border: 1px solid #333;
-            color: #fff;
-            font-family: inherit;
-            margin-bottom: 8px;
-            border-radius: 3px;
-            font-size: 11px;
-        }
-        
-        input[type="number"] { 
-            width: 55px; 
-            text-align: right; 
-            display: inline-block;
-            margin-left: 5px;
-            padding: 4px;
-        }
-        
-        input[type="range"] {
-            -webkit-appearance: none;
-            height: 3px;
-            background: #2a2a30;
-            flex: 1;
             min-width: 0;
         }
-        
+
+        .panel-title {
+            font-size: 10px;
+            font-weight: 700;
+            margin: 14px 0 6px 0;
+            color: var(--neon);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            padding-left: 10px;
+        }
+
+        .panel-title::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 2px;
+            bottom: 2px;
+            width: 3px;
+            background: var(--neon);
+            box-shadow: 0 0 6px var(--neon);
+        }
+
+        .panel-title:first-child { margin-top: 0; }
+
+        .btn {
+            width: 100%;
+            padding: 8px;
+            margin: 4px 0;
+            background: linear-gradient(180deg, #141418 0%, #0c0c10 100%);
+            border: 1px solid var(--neon-border);
+            color: var(--neon);
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 11px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            position: relative;
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.05),
+                0 0 8px rgba(57, 255, 20, 0.1);
+            transition: all 0.15s;
+        }
+
+        .btn:hover {
+            border-color: var(--neon);
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.08),
+                0 0 12px rgba(57, 255, 20, 0.25);
+            text-shadow: 0 0 8px var(--neon);
+        }
+
+        .btn:active {
+            background: linear-gradient(180deg, #0c0c10 0%, #141418 100%);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+            transform: translateY(1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.25;
+            cursor: not-allowed;
+            border-color: #333;
+            color: #555;
+            box-shadow: none;
+            text-shadow: none;
+        }
+
+        .btn.danger {
+            border-color: rgba(255, 51, 102, 0.4);
+            color: var(--magenta);
+            box-shadow: 0 0 8px rgba(255, 51, 102, 0.1);
+        }
+
+        .btn.danger:hover {
+            border-color: var(--magenta);
+            box-shadow: 0 0 12px rgba(255, 51, 102, 0.3);
+            text-shadow: 0 0 8px var(--magenta);
+        }
+
+        .btn.active {
+            background: linear-gradient(180deg, #3a3010 0%, #2a2008 100%);
+            border-color: #ffaa44;
+            color: #ffaa44;
+            box-shadow: 0 0 12px rgba(255, 170, 68, 0.2);
+        }
+
+        select, input[type="range"], input[type="number"] {
+            width: 100%;
+            padding: 5px 8px;
+            background: #0a0a0f;
+            border: 1px solid #2a2a30;
+            color: #ccc;
+            font-family: inherit;
+            margin-bottom: 6px;
+            font-size: 11px;
+            outline: none;
+        }
+
+        select:focus, input[type="number"]:focus {
+            border-color: var(--neon-border);
+            box-shadow: 0 0 6px rgba(57, 255, 20, 0.15);
+        }
+
+        input[type="number"] {
+            width: 50px;
+            text-align: right;
+            display: inline-block;
+            margin-left: 4px;
+            padding: 4px;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            height: 4px;
+            background: #1a1a20;
+            border: none;
+            flex: 1;
+            min-width: 0;
+            margin-bottom: 0;
+        }
+
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 12px;
-            height: 12px;
-            background: #00ff88;
+            width: 14px;
+            height: 14px;
+            background: var(--neon);
             border-radius: 50%;
             cursor: pointer;
+            box-shadow: 0 0 8px var(--neon);
         }
-        
+
         input[type="checkbox"] {
-            accent-color: #00ff88;
+            accent-color: var(--neon);
             cursor: pointer;
             width: 14px;
             height: 14px;
             flex-shrink: 0;
         }
-        
+
+        /* ── Channel Items ── */
         .channel-item {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid #2a2a30;
-            border-radius: 6px;
-            padding: 12px;
-            margin-bottom: 10px;
-            border-left: 3px solid;
+            background: rgba(57, 255, 20, 0.03);
+            border: 1px solid #1f1f25;
+            border-radius: 4px;
+            padding: 8px;
+            margin-bottom: 6px;
+            border-left: 2px solid;
             width: 100%;
+            min-width: 0;
         }
-        
+
         .channel-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
-            gap: 10px;
+            margin-bottom: 6px;
+            gap: 8px;
         }
-        
-        .channel-name { 
-            font-weight: bold; 
-            font-size: 13px; 
+
+        .channel-name {
+            font-weight: 700;
+            font-size: 12px;
             letter-spacing: 0.5px;
-            word-break: break-all;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
             flex: 1;
             min-width: 0;
         }
-        
+
         .channel-row {
             display: flex;
             align-items: center;
-            margin-top: 8px;
-            gap: 8px;
+            margin-top: 5px;
+            gap: 6px;
             width: 100%;
         }
-        
-        .channel-label { 
-            font-size: 10px; 
-            color: #666; 
-            width: 45px;
+
+        .channel-label {
+            font-size: 10px;
+            color: var(--text-dim);
+            width: 36px;
             flex-shrink: 0;
         }
-        
+
         .auto-scale-row {
             display: flex;
             align-items: center;
-            gap: 8px;
-            margin: 8px 0;
+            gap: 6px;
+            margin: 5px 0;
             font-size: 10px;
-            color: #888;
+            color: #666;
         }
-        
+
         .scale-display {
             text-align: right;
             font-size: 9px;
-            color: #666;
-            margin-top: -5px;
-            margin-bottom: 8px;
+            color: #444;
+            margin-top: -3px;
+            margin-bottom: 4px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        
+
         .empty-state {
-            color: #555;
+            color: #444;
             text-align: center;
-            padding: 40px 20px;
+            padding: 24px 12px;
             font-style: italic;
-            font-size: 12px;
-            border: 1px dashed #333;
-            border-radius: 6px;
-            margin: 20px 0;
-            background: rgba(0,0,0,0.2);
-        }
-        
-        .stat-box {
-            background: #0a0a0f;
-            border: 1px solid #1f1f25;
-            padding: 12px;
-            margin-bottom: 8px;
+            font-size: 11px;
+            border: 1px dashed #222;
             border-radius: 4px;
-            border-left: 3px solid;
-            width: 100%;
+            margin: 12px 0;
         }
-        
-        .stat-box:hover { background: #151518; }
-        .stat-box.inactive { opacity: 0.3; }
-        .stat-box.highlight { 
-            background: rgba(255,255,255,0.08);
-            border-color: #fff;
-        }
-        
-        .stat-label {
-            font-size: 10px;
-            color: #555;
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 4px;
-            gap: 5px;
-        }
-        
-        .stat-value {
-            font-size: 20px;
-            font-weight: bold;
-            color: #fff;
-            font-family: monospace;
-            word-break: break-all;
-        }
-        
+
+        /* ── Oscilloscope Display ── */
         .display-area {
+            grid-column: 2;
+            grid-row: 1;
             position: relative;
-            background: #000;
+            background: var(--bg);
             display: flex;
             flex-direction: column;
+            min-height: 0;
+            overflow: hidden;
         }
-        
+
         .scope-header {
-            height: 36px;
-            background: #0f0f12;
+            height: 32px;
+            background: var(--bg-panel);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 20px;
-            border-bottom: 1px solid #1a1a20;
+            padding: 0 16px;
+            border-bottom: 1px solid var(--neon-border);
             font-size: 11px;
-            z-index: 10;
+            flex-shrink: 0;
+            letter-spacing: 1px;
         }
-        
+
         .status-dot {
             width: 8px;
             height: 8px;
@@ -256,122 +317,341 @@
             background: #333;
             display: inline-block;
             margin-right: 8px;
+            position: relative;
         }
-        
+
         .status-dot.connected {
-            background: #00ff88;
-            box-shadow: 0 0 10px #00ff88;
-            animation: pulse 2s infinite;
+            background: var(--neon);
+            box-shadow: 0 0 10px var(--neon), 0 0 20px rgba(57, 255, 20, 0.4);
+            animation: pulse 1.5s ease-in-out infinite;
         }
-        
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-        
-        #canvas { 
-            flex: 1; 
-            width: 100%; 
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 10px var(--neon), 0 0 20px rgba(57, 255, 20, 0.4); }
+            50% { opacity: 0.5; box-shadow: 0 0 4px var(--neon), 0 0 8px rgba(57, 255, 20, 0.2); }
+        }
+
+        #canvas {
+            flex: 1;
+            width: 100%;
             cursor: crosshair;
             display: block;
+            min-height: 0;
         }
-        
+
         .controls-overlay {
             position: absolute;
-            bottom: 20px;
-            right: 20px;
+            bottom: 16px;
+            right: 16px;
             display: flex;
-            gap: 10px;
+            gap: 8px;
             z-index: 50;
         }
-        
+
         .control-btn {
-            background: rgba(20,20,25,0.95);
-            border: 1px solid #555;
-            color: #aaa;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
+            background: rgba(10, 10, 14, 0.9);
+            border: 1px solid #444;
+            color: #888;
+            padding: 8px 18px;
             font-family: inherit;
-            font-size: 12px;
-            font-weight: bold;
-            transition: all 0.2s;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
             backdrop-filter: blur(4px);
+            transition: all 0.15s;
         }
-        
+
         .control-btn:hover {
-            border-color: #00ff88;
-            color: #00ff88;
+            border-color: var(--neon);
+            color: var(--neon);
+            box-shadow: 0 0 10px rgba(57, 255, 20, 0.2);
+            text-shadow: 0 0 6px var(--neon);
         }
-        
+
         .control-btn.active {
-            background: #ffaa44;
+            background: rgba(255, 170, 68, 0.1);
             border-color: #ffaa44;
-            color: #000;
+            color: #ffaa44;
+            box-shadow: 0 0 10px rgba(255, 170, 68, 0.15);
         }
-        
+
         .pause-indicator {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(255,170,68,0.15);
-            border: 2px solid #ffaa44;
+            background: rgba(255, 170, 68, 0.08);
+            border: 1px solid #ffaa44;
             color: #ffaa44;
-            padding: 15px 30px;
-            border-radius: 8px;
+            padding: 12px 28px;
             font-size: 14px;
-            font-weight: bold;
+            font-weight: 700;
+            letter-spacing: 4px;
             display: none;
             pointer-events: none;
             z-index: 20;
-            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(255, 170, 68, 0.5);
         }
-        
+
         .hover-tooltip {
             position: absolute;
-            background: rgba(0,0,0,0.95);
-            border: 1px solid #666;
+            background: rgba(2, 2, 4, 0.95);
+            border: 1px solid #444;
             border-left: 3px solid;
-            border-radius: 6px;
-            padding: 10px 15px;
+            border-radius: 4px;
+            padding: 10px 14px;
             pointer-events: none;
             font-size: 12px;
             color: #fff;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.8);
             z-index: 100;
             display: none;
-            min-width: 150px;
+            min-width: 160px;
+            font-family: inherit;
         }
-        
-        .hover-ch-name { font-weight: bold; margin-bottom: 5px; font-size: 14px; }
-        .hover-value { font-family: monospace; font-size: 18px; margin: 5px 0; }
-        .hover-time { color: #777; font-size: 10px; border-top: 1px solid #444; margin-top: 8px; padding-top: 5px; }
-        
-        @media (max-width: 1100px) {
-            .container { grid-template-columns: 280px 1fr; }
+
+        .hover-ch-name { font-weight: 700; margin-bottom: 4px; font-size: 13px; letter-spacing: 1px; }
+        .hover-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 20px;
+            margin: 6px 0;
+            text-shadow: 0 0 8px currentColor;
+        }
+        .hover-time { color: #666; font-size: 10px; border-top: 1px solid #333; margin-top: 6px; padding-top: 4px; }
+
+        /* ── Statistics Panel ── */
+        .measure-panel {
+            grid-column: 3;
+            grid-row: 1;
+            background: var(--bg-panel);
+            padding: 14px;
+            border-left: 1px solid var(--neon-border);
+            overflow-y: auto;
+            font-size: 11px;
+            min-width: 0;
+        }
+
+        .stat-box {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid #1a1a20;
+            padding: 14px 10px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            border-left: 3px solid;
+            width: 100%;
+            min-width: 0;
+            transition: background 0.2s;
+        }
+
+        .stat-box:hover { background: rgba(57, 255, 20, 0.04); }
+        .stat-box.inactive { opacity: 0.25; }
+        .stat-box.highlight {
+            background: rgba(57, 255, 20, 0.06);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: #555;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+            gap: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+            text-shadow: 0 0 12px currentColor;
+            word-break: break-all;
+            line-height: 1.1;
+        }
+
+        .stat-sub {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 4px;
+            margin-top: 8px;
+            font-size: 9px;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-sub-item {
+            text-align: center;
+            background: rgba(0,0,0,0.3);
+            padding: 4px 2px;
+            border-radius: 2px;
+        }
+
+        .stat-sub-val {
+            color: #999;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            text-shadow: 0 0 4px rgba(255,255,255,0.1);
+        }
+
+        /* ── Meter Area (bottom, spans cols 2-3) ── */
+        .meter-area {
+            grid-column: 2 / 4;
+            grid-row: 2;
+            display: flex;
+            gap: 2px;
+            background: #000;
+            min-height: 0;
+            overflow: hidden;
+            border-top: 1px solid var(--neon-border);
+            padding: 4px 6px 0;
+        }
+
+        .meter-box {
+            background: var(--bg-panel);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            min-height: 0;
+            flex: 1;
+            border-radius: 4px;
+            border: 1px solid rgba(57, 255, 20, 0.08);
+        }
+
+        .meter-box::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 12px;
+            right: 12px;
+            height: 1px;
+            background: linear-gradient(90deg, var(--neon-border), transparent 60%);
+        }
+
+        .meter-title {
+            position: absolute;
+            top: 14px;
+            left: 16px;
+            font-size: 11px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 700;
+            z-index: 2;
+        }
+
+        .meter-value {
+            position: absolute;
+            bottom: 16px;
+            font-size: 28px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            color: #fff;
+            z-index: 2;
+            text-shadow: 0 0 12px currentColor;
+            letter-spacing: 2px;
+        }
+
+        .meter-unit {
+            font-size: 14px;
+            color: #666;
+            margin-left: 4px;
+            text-shadow: none;
+        }
+
+        .meter-range {
+            position: absolute;
+            top: 14px;
+            right: 16px;
+            font-size: 10px;
+            color: #444;
+            letter-spacing: 1px;
+            z-index: 2;
+        }
+
+        .meter-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .meter-placeholder {
+            color: #333;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+
+        /* ── Log Panel (inside control panel) ── */
+        .log-section {
+            margin-top: 12px;
+            border-top: 1px solid #1a1a20;
+            padding-top: 10px;
+        }
+
+        .log-title {
+            font-size: 10px;
+            color: #444;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+
+        .log-content {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            color: #555;
+            line-height: 1.7;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            border-bottom: 1px solid #111;
+            padding: 2px 0;
+            word-break: break-all;
+        }
+
+        .log-entry .log-time { color: #333; margin-right: 6px; }
+        .log-entry .log-data { color: #777; }
+
+        /* ── Responsive ── */
+        @media (max-width: 960px) {
+            .container { grid-template-columns: 200px 1fr; }
             .measure-panel { display: none; }
+            .meter-area { grid-column: 2; }
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Left: Control Panel -->
         <div class="control-panel" id="controlPanel">
             <div class="panel-title">Connection</div>
             <button id="connectBtn" class="btn">Connect Port</button>
             <button id="disconnectBtn" class="btn danger" disabled>Disconnect</button>
-            
-            <select id="baudRate" style="margin-top:10px">
+
+            <select id="baudRate" style="margin-top:8px">
                 <option value="9600">9600</option>
                 <option value="115200" selected>115200</option>
                 <option value="921600">921600</option>
             </select>
-            
+
             <div class="panel-title">Time Base</div>
             <select id="timePerDiv">
-                <option value="10">10 μs/div</option>
-                <option value="20">20 μs/div</option>
-                <option value="50">50 μs/div</option>
-                <option value="100">100 μs/div</option>
-                <option value="200">200 μs/div</option>
-                <option value="500">500 μs/div</option>
+                <option value="10">10 us/div</option>
+                <option value="20">20 us/div</option>
+                <option value="50">50 us/div</option>
+                <option value="100">100 us/div</option>
+                <option value="200">200 us/div</option>
+                <option value="500">500 us/div</option>
                 <option value="1000">1 ms/div</option>
                 <option value="2000">2 ms/div</option>
                 <option value="5000">5 ms/div</option>
@@ -385,50 +665,88 @@
                 <option value="2000000">2 s/div</option>
                 <option value="5000000">5 s/div</option>
             </select>
-            
+
             <div class="panel-title">Buffer</div>
             <input type="range" id="bufferSize" min="100" max="2000" value="500" style="width:100%">
-            <div style="text-align:right;color:#666;font-size:11px;margin-top:-5px;margin-bottom:10px">
-                <span id="bufferDisplay">500</span> points
+            <div style="text-align:right;color:#444;font-size:10px;margin-top:-4px;margin-bottom:6px">
+                <span id="bufferDisplay">500</span> pts
             </div>
-            
-            <div class="panel-title">Channels <span id="chCount" style="float:right;color:#666">0</span></div>
+
+            <div class="panel-title">Stats Window</div>
+            <select id="statsWindow">
+                <option value="10000">10 s</option>
+                <option value="30000">30 s</option>
+                <option value="60000" selected>60 s</option>
+                <option value="120000">120 s</option>
+                <option value="300000">5 min</option>
+            </select>
+
+            <div class="panel-title">Channels <span id="chCount" style="float:right;color:#444">0</span></div>
             <div id="channelsContainer">
                 <div class="empty-state">Waiting for JSON data...</div>
             </div>
+
+            <div class="log-section">
+                <div class="log-title">Raw Data Log</div>
+                <div class="log-content" id="logContent">
+                    <div class="log-entry"><span class="log-time">--:--:--</span>Waiting for data...</div>
+                </div>
+            </div>
         </div>
-        
+
+        <!-- Center: Oscilloscope -->
         <div class="display-area">
             <div class="scope-header">
                 <div style="display:flex;align-items:center">
                     <span class="status-dot" id="statusDot"></span>
-                    <span id="statusText" style="color:#555">DISCONNECTED</span>
+                    <span id="statusText" style="color:#444">DISCONNECTED</span>
                 </div>
-                <div style="color:#333; font-size:11px; letter-spacing:2px;font-weight:bold">JSON OSCILLOSCOPE</div>
-                <div style="color:#555;font-size:11px">
+                <div style="color:#333; font-size:10px; letter-spacing:3px;font-weight:700">JSON OSCILLOSCOPE</div>
+                <div style="color:#444;font-size:10px;letter-spacing:1px">
                     <span id="rxRate">0</span> B/s
                 </div>
             </div>
-            
+
             <canvas id="canvas"></canvas>
-            
+
             <div class="pause-indicator" id="pauseIndicator">PAUSED</div>
-            
+
             <div class="controls-overlay">
                 <button id="pauseBtn" class="control-btn">PAUSE</button>
+                <button id="clearBtn" class="control-btn">CLEAR</button>
             </div>
-            
+
             <div class="hover-tooltip" id="hoverTooltip">
                 <div class="hover-ch-name" id="hoverName">Channel</div>
                 <div class="hover-value" id="hoverValue">0.000</div>
                 <div class="hover-time" id="hoverTime">T: 0.00ms</div>
             </div>
         </div>
-        
+
+        <!-- Right: Statistics -->
         <div class="measure-panel" id="measurePanel">
-            <div class="panel-title">Live Values</div>
+            <div class="panel-title">Live Stats</div>
             <div id="statsContainer">
                 <div class="empty-state">No data</div>
+            </div>
+        </div>
+
+        <!-- Bottom: Meters (spans cols 2-3) -->
+        <div class="meter-area">
+            <div class="meter-box" id="voltageMeterBox" style="display:none">
+                <span class="meter-title">Voltage</span>
+                <span class="meter-range" id="voltageRange">0-5V</span>
+                <canvas class="meter-canvas" id="voltageMeter"></canvas>
+                <span class="meter-value" id="voltageMeterValue">0.000<span class="meter-unit">V</span></span>
+            </div>
+            <div class="meter-box" id="currentMeterBox" style="display:none">
+                <span class="meter-title">Current</span>
+                <span class="meter-range" id="currentRange">0-5A</span>
+                <canvas class="meter-canvas" id="currentMeter"></canvas>
+                <span class="meter-value" id="currentMeterValue">0.000<span class="meter-unit">A</span></span>
+            </div>
+            <div class="meter-box" id="meterPlaceholder" style="display:flex">
+                <span class="meter-placeholder">Analog meters appear when voltage/current detected</span>
             </div>
         </div>
     </div>
@@ -442,72 +760,135 @@
                 this.reader = null;
                 this.isConnected = false;
                 this.textBuffer = '';
-                
+
                 this.channels = {};
                 this.colors = [
-                    '#00ff88', '#ff4477', '#4488ff', '#ffaa44', 
-                    '#aa44ff', '#44ffff', '#ff44ff', '#ffff44',
-                    '#ff6644', '#44ff66', '#6644ff', '#ffffff',
+                    '#39ff14', '#ff3366', '#00d4ff', '#ffaa00',
+                    '#aa44ff', '#00f0ff', '#ff44ff', '#ffff00',
+                    '#ff6633', '#44ff66', '#6666ff', '#ffffff',
                     '#00ffff', '#ff00ff', '#88ff00', '#ff8800'
                 ];
                 this.colorIdx = 0;
-                
+
                 this.timePerDiv = 10000;
                 this.maxPoints = 500;
                 this.rxBytes = 0;
                 this.lastRxTime = Date.now();
-                
+
                 this.isPaused = false;
                 this.pauseTime = null;
-                
+
                 this.mouseX = -1;
                 this.mouseY = -1;
                 this.hoveredChannel = null;
-                this.hasClearedEmptyState = false; // 标志：是否已经清空了初始状态
-                
+                this.hasClearedEmptyState = false;
+
+                this.statsWindowMs = 60000;
+                this.logEntries = [];
+                this.maxLogEntries = 30;
+
+                this.meterCanvas = {
+                    voltage: document.getElementById('voltageMeter'),
+                    current: document.getElementById('currentMeter')
+                };
+                this.meterCtx = {
+                    voltage: this.meterCanvas.voltage?.getContext('2d'),
+                    current: this.meterCanvas.current?.getContext('2d')
+                };
+
                 this.resize();
                 window.addEventListener('resize', () => this.resize());
                 this.setupEvents();
                 this.animate();
+
+                this.setupMeterObservers();
+                setInterval(() => this.cleanupOldData(), 1000);
             }
-            
+
             resize() {
-                this.canvas.width = this.canvas.offsetWidth;
-                this.canvas.height = this.canvas.offsetHeight;
+                const dpr = window.devicePixelRatio || 1;
+                this.canvas.width = this.canvas.offsetWidth * dpr;
+                this.canvas.height = this.canvas.offsetHeight * dpr;
+                this.ctx.scale(dpr, dpr);
+                this.canvas._dpr = dpr;
+
+                ['voltage', 'current'].forEach(type => {
+                    const c = this.meterCanvas[type];
+                    if (c) {
+                        const mdpr = window.devicePixelRatio || 1;
+                        c.width = c.offsetWidth * mdpr;
+                        c.height = c.offsetHeight * mdpr;
+                        const mctx = c.getContext('2d');
+                        mctx.scale(mdpr, mdpr);
+                        c._dpr = mdpr;
+                    }
+                });
             }
-            
+
+            setupMeterObservers() {
+                if (typeof ResizeObserver !== 'undefined') {
+                    ['voltage', 'current'].forEach(type => {
+                        const canvas = this.meterCanvas[type];
+                        if (!canvas) return;
+                        const observer = new ResizeObserver(() => {
+                            const dpr = window.devicePixelRatio || 1;
+                            canvas.width = canvas.offsetWidth * dpr;
+                            canvas.height = canvas.offsetHeight * dpr;
+                            const ctx = canvas.getContext('2d');
+                            ctx.scale(dpr, dpr);
+                            canvas._dpr = dpr;
+                            this.updateMeterDisplay();
+                        });
+                        observer.observe(canvas);
+                    });
+                }
+            }
+
             setupEvents() {
                 document.getElementById('connectBtn').addEventListener('click', () => this.connect());
                 document.getElementById('disconnectBtn').addEventListener('click', () => this.disconnect());
-                
+
                 document.getElementById('timePerDiv').addEventListener('change', e => {
                     this.timePerDiv = parseInt(e.target.value);
                 });
-                
+
                 document.getElementById('bufferSize').addEventListener('input', e => {
                     this.maxPoints = parseInt(e.target.value);
                     document.getElementById('bufferDisplay').textContent = this.maxPoints;
                 });
-                
+
+                document.getElementById('statsWindow').addEventListener('change', e => {
+                    this.statsWindowMs = parseInt(e.target.value);
+                });
+
                 document.getElementById('pauseBtn').addEventListener('click', (e) => {
                     this.isPaused = !this.isPaused;
                     e.target.textContent = this.isPaused ? 'RESUME' : 'PAUSE';
                     e.target.classList.toggle('active', this.isPaused);
                     document.getElementById('pauseIndicator').style.display = this.isPaused ? 'block' : 'none';
-                    
-                    if (this.isPaused) {
-                        this.pauseTime = Date.now();
-                    } else {
-                        this.pauseTime = null;
-                    }
+                    this.pauseTime = this.isPaused ? Date.now() : null;
                 });
-                
+
+                document.getElementById('clearBtn').addEventListener('click', () => {
+                    Object.keys(this.channels).forEach(name => {
+                        const ch = this.channels[name];
+                        ch.data = [];
+                        ch.history = [];
+                        ch.current = 0;
+                        ch.min = 0;
+                        ch.max = 0;
+                    });
+                    this.logEntries = [];
+                    this.updateLogDisplay();
+                });
+
                 this.canvas.addEventListener('mousemove', e => {
                     const rect = this.canvas.getBoundingClientRect();
-                    this.mouseX = e.clientX - rect.left;
-                    this.mouseY = e.clientY - rect.top;
+                    const dpr = this.canvas._dpr || 1;
+                    this.mouseX = (e.clientX - rect.left);
+                    this.mouseY = (e.clientY - rect.top);
                 });
-                
+
                 this.canvas.addEventListener('mouseleave', () => {
                     this.mouseX = -1;
                     this.mouseY = -1;
@@ -516,7 +897,7 @@
                     this.clearHighlight();
                 });
             }
-            
+
             async connect() {
                 if (!('serial' in navigator)) {
                     alert('Use Chrome/Edge 89+');
@@ -532,7 +913,7 @@
                     alert(e.message);
                 }
             }
-            
+
             async disconnect() {
                 this.isConnected = false;
                 if (this.reader) await this.reader.cancel();
@@ -540,7 +921,7 @@
                 this.port = null;
                 this.updateUI();
             }
-            
+
             async readLoop() {
                 while (this.port?.readable && this.isConnected) {
                     try {
@@ -559,11 +940,11 @@
                     }
                 }
             }
-            
+
             processData(uint8Array) {
                 const text = new TextDecoder().decode(uint8Array);
                 this.textBuffer += text;
-                
+
                 const { objects, remaining } = this.extractJsonObjects(this.textBuffer);
                 objects.forEach(str => {
                     try {
@@ -571,17 +952,18 @@
                         if (!this.isPaused) {
                             this.processJson(json);
                         }
+                        this.addLogEntry(str);
                     } catch(e) {}
                 });
-                
+
                 this.textBuffer = remaining;
                 if (this.textBuffer.length > 4096) this.textBuffer = '';
             }
-            
+
             extractJsonObjects(text) {
                 const objects = [];
                 let depth = 0, start = -1;
-                
+
                 for (let i = 0; i < text.length; i++) {
                     if (text[i] === '{') {
                         if (depth === 0) start = i;
@@ -596,149 +978,210 @@
                 }
                 return { objects, remaining: (depth > 0 && start !== -1) ? text.substring(start) : '' };
             }
-            
-            // 关键修复：正确处理多通道创建
+
             processJson(json) {
                 const timestamp = Date.now();
                 let isFirstChannel = Object.keys(this.channels).length === 0 && !this.hasClearedEmptyState;
-                
+
                 Object.keys(json).forEach(key => {
                     const value = json[key];
                     if (typeof value !== 'number') return;
-                    
+
                     if (!this.channels[key]) {
-                        // 只有在第一次创建通道时才清空 empty-state
                         if (isFirstChannel) {
                             document.getElementById('channelsContainer').innerHTML = '';
                             document.getElementById('statsContainer').innerHTML = '';
                             this.hasClearedEmptyState = true;
-                            isFirstChannel = false; // 后续通道不再清空
+                            isFirstChannel = false;
                         }
                         this.addChannel(key);
                     }
-                    
+
                     const ch = this.channels[key];
                     ch.data.push({ value, time: timestamp });
+                    ch.history.push({ value, time: timestamp });
                     if (ch.data.length > this.maxPoints) ch.data.shift();
-                    
+
                     ch.current = value;
-                    if (ch.data.length > 0) {
-                        const values = ch.data.map(d => d.value);
-                        ch.min = Math.min(...values);
-                        ch.max = Math.max(...values);
-                        
-                        if (ch.autoScale && ch.max !== ch.min) {
-                            ch.scale = (ch.max - ch.min) / 2; // 2格显示
-                            if (ch.scale === 0) ch.scale = 1;
-                            
-                            const scaleInput = document.querySelector(`input[data-ch="${key}"][data-type="scale"]`);
-                            const scaleText = document.getElementById(`scale-txt-${key}`);
-                            if (scaleInput) scaleInput.value = ch.scale.toFixed(3);
-                            if (scaleText) scaleText.textContent = `Auto (${ch.scale.toFixed(2)}/div, 2grids)`;
-                        }
+
+                    this.updateChannelStats(ch);
+
+                    if (ch.autoScale && ch.max !== ch.min) {
+                        ch.scale = (ch.max - ch.min) / 2;
+                        if (ch.scale === 0) ch.scale = 1;
+                        const scaleInput = document.querySelector(`input[data-ch="${key}"][data-type="scale"]`);
+                        const scaleText = document.getElementById(`scale-txt-${key}`);
+                        if (scaleInput) scaleInput.value = ch.scale.toFixed(3);
+                        if (scaleText) scaleText.textContent = `Auto (${ch.scale.toFixed(2)}/div, 2grids)`;
                     }
                 });
-                
-                this.updateStats();
+
+                this.updateStatsUI();
+                this.updateMeterDisplay();
                 document.getElementById('chCount').textContent = Object.keys(this.channels).length;
             }
-            
+
+            updateChannelStats(ch) {
+                const now = Date.now();
+                const cutoff = now - this.statsWindowMs;
+
+                while (ch.history.length > 0 && ch.history[0].time < cutoff) {
+                    ch.history.shift();
+                }
+
+                const maxHistory = Math.max(50000, this.statsWindowMs / 10);
+                if (ch.history.length > maxHistory) {
+                    ch.history = ch.history.slice(-maxHistory);
+                }
+
+                if (ch.history.length > 0) {
+                    const values = ch.history.map(d => d.value);
+                    ch.statMin = Math.min(...values);
+                    ch.statMax = Math.max(...values);
+                    ch.statAvg = values.reduce((a, b) => a + b, 0) / values.length;
+                    ch.min = Math.min(...ch.data.map(d => d.value));
+                    ch.max = Math.max(...ch.data.map(d => d.value));
+                }
+            }
+
+            cleanupOldData() {
+                const now = Date.now();
+                const cutoff = now - this.statsWindowMs;
+                Object.keys(this.channels).forEach(name => {
+                    const ch = this.channels[name];
+                    while (ch.history.length > 0 && ch.history[0].time < cutoff) {
+                        ch.history.shift();
+                    }
+                    this.updateChannelStats(ch);
+                });
+                this.updateStatsUI();
+            }
+
             addChannel(name) {
                 const color = this.colors[this.colorIdx % this.colors.length];
                 this.colorIdx++;
-                
+
                 this.channels[name] = {
-                    name, data: [], color,
+                    name, data: [], history: [], color,
                     scale: 1, offset: 0, visible: true,
                     autoScale: true,
-                    current: 0, min: 0, max: 0
+                    current: 0, min: 0, max: 0,
+                    statMin: 0, statMax: 0, statAvg: 0
                 };
-                
+
                 this.createChannelUI(name);
                 this.createStatsUI(name);
+                this.checkMeterVisibility();
             }
-            
+
+            checkMeterVisibility() {
+                const hasVoltage = this.channels['voltage'] !== undefined;
+                const hasCurrent = this.channels['current'] !== undefined;
+
+                document.getElementById('voltageMeterBox').style.display = hasVoltage ? 'flex' : 'none';
+                document.getElementById('currentMeterBox').style.display = hasCurrent ? 'flex' : 'none';
+                document.getElementById('meterPlaceholder').style.display = (hasVoltage || hasCurrent) ? 'none' : 'flex';
+
+                setTimeout(() => {
+                    this.resize();
+                    this.updateMeterDisplay();
+                }, 60);
+            }
+
             createChannelUI(name) {
                 const ch = this.channels[name];
                 const div = document.createElement('div');
                 div.className = 'channel-item';
                 div.id = `ch-${name}`;
                 div.style.borderLeftColor = ch.color;
-                
+
                 div.innerHTML = `
                     <div class="channel-header">
                         <span class="channel-name" style="color:${ch.color}" title="${name}">${name}</span>
-                        <input type="checkbox" checked onchange="scope.toggleChannel('${name}')" 
+                        <input type="checkbox" checked onchange="scope.toggleChannel('${name}')"
                                style="cursor:pointer;transform:scale(1.2);flex-shrink:0">
                     </div>
-                    
+
                     <div class="auto-scale-row">
-                        <input type="checkbox" id="auto-${name}" checked 
+                        <input type="checkbox" id="auto-${name}" checked
                                onchange="scope.toggleAutoScale('${name}')"
                                style="flex-shrink:0">
                         <label for="auto-${name}" style="cursor:pointer">Auto Scale (2 grids)</label>
                     </div>
-                    
+
                     <div class="channel-row">
                         <span class="channel-label">Scale</span>
-                        <input type="range" min="0.001" max="1000" step="0.001" value="1" 
+                        <input type="range" min="0.001" max="1000" step="0.001" value="1"
                                data-ch="${name}" data-type="scale"
                                oninput="scope.setScale('${name}', this.value)">
                     </div>
                     <div class="scale-display" id="scale-txt-${name}">
                         Auto (waiting...)
                     </div>
-                    
+
                     <div class="channel-row">
                         <span class="channel-label">Offset</span>
                         <input type="number" value="0" step="10" min="-500" max="500"
                                oninput="scope.setOffset('${name}', this.value)"
-                               style="background:#0a0a0f;border:1px solid #333;color:#fff;padding:4px;border-radius:3px;width:60px">
+                               style="background:#0a0a0f;border:1px solid #2a2a30;color:#ccc;padding:3px;border-radius:3px;width:50px;font-family:inherit">
                         <span style="font-size:10px;color:#444;flex-shrink:0">px</span>
                     </div>
                 `;
-                
+
                 document.getElementById('channelsContainer').appendChild(div);
             }
-            
+
             createStatsUI(name) {
                 const ch = this.channels[name];
                 const div = document.createElement('div');
                 div.className = 'stat-box';
                 div.id = `stat-${name}`;
                 div.style.borderLeftColor = ch.color;
-                
+
                 div.innerHTML = `
                     <div class="stat-label">
-                        <span style="color:${ch.color};font-weight:bold;word-break:break-all">${name}</span>
-                        <span style="color:#444;font-size:9px;flex-shrink:0">${ch.min.toFixed(1)}~${ch.max.toFixed(1)}</span>
+                        <span style="color:${ch.color};font-weight:700;word-break:break-all">${name}</span>
+                        <span style="color:#444;font-size:8px;flex-shrink:0" id="range-${name}">--</span>
                     </div>
                     <div class="stat-value" id="val-${name}" style="color:${ch.color}">0.000</div>
+                    <div class="stat-sub">
+                        <div class="stat-sub-item">
+                            <div>Max</div>
+                            <div class="stat-sub-val" id="max-${name}">--</div>
+                        </div>
+                        <div class="stat-sub-item">
+                            <div>Avg</div>
+                            <div class="stat-sub-val" id="avg-${name}">--</div>
+                        </div>
+                        <div class="stat-sub-item">
+                            <div>Min</div>
+                            <div class="stat-sub-val" id="min-${name}">--</div>
+                        </div>
+                    </div>
                 `;
-                
+
                 div.addEventListener('mouseenter', () => this.highlightChannel(name));
                 div.addEventListener('mouseleave', () => this.clearHighlight());
-                
+
                 document.getElementById('statsContainer').appendChild(div);
             }
-            
+
             toggleChannel(name) {
                 if (!this.channels[name]) return;
                 this.channels[name].visible = !this.channels[name].visible;
                 const stat = document.getElementById(`stat-${name}`);
                 if (stat) stat.classList.toggle('inactive', !this.channels[name].visible);
-                document.getElementById(`ch-${name}`).style.opacity = this.channels[name].visible ? '1' : '0.5';
+                document.getElementById(`ch-${name}`).style.opacity = this.channels[name].visible ? '1' : '0.4';
             }
-            
+
             toggleAutoScale(name) {
                 if (!this.channels[name]) return;
                 const ch = this.channels[name];
                 ch.autoScale = !ch.autoScale;
-                
                 const scaleText = document.getElementById(`scale-txt-${name}`);
-                
+
                 if (ch.autoScale) {
-                    if (scaleText) scaleText.style.color = '#666';
+                    if (scaleText) scaleText.style.color = '#444';
                     if (ch.max !== ch.min) {
                         ch.scale = (ch.max - ch.min) / 2;
                         const scaleInput = document.querySelector(`input[data-ch="${name}"][data-type="scale"]`);
@@ -748,82 +1191,332 @@
                 } else {
                     if (scaleText) {
                         scaleText.textContent = `Manual (${ch.scale.toFixed(2)}/div)`;
-                        scaleText.style.color = '#888';
+                        scaleText.style.color = '#666';
                     }
                 }
             }
-            
+
             setScale(name, value) {
                 if (!this.channels[name]) return;
                 const ch = this.channels[name];
                 ch.scale = parseFloat(value);
                 const txt = document.getElementById(`scale-txt-${name}`);
                 if (txt) {
-                    if (ch.autoScale) {
-                        txt.textContent = `Auto (${ch.scale.toFixed(2)}/div)`;
-                    } else {
-                        txt.textContent = `Manual (${ch.scale.toFixed(2)}/div)`;
-                    }
+                    txt.textContent = ch.autoScale ? `Auto (${ch.scale.toFixed(2)}/div)` : `Manual (${ch.scale.toFixed(2)}/div)`;
                 }
             }
-            
+
             setOffset(name, value) {
                 if (this.channels[name]) this.channels[name].offset = parseInt(value);
             }
-            
+
             highlightChannel(name) {
                 Object.keys(this.channels).forEach(n => {
                     const el = document.getElementById(`stat-${n}`);
                     if (el) el.classList.toggle('highlight', n === name);
                 });
             }
-            
+
             clearHighlight() {
                 Object.keys(this.channels).forEach(n => {
                     const el = document.getElementById(`stat-${n}`);
                     if (el) el.classList.remove('highlight');
                 });
             }
-            
-            updateStats() {
+
+            formatValue(v) {
+                if (v === undefined || v === null) return '--';
+                const abs = Math.abs(v);
+                if (abs === 0) return '0.00';
+                if (abs < 0.001) return v.toExponential(2);
+                if (abs < 1) return v.toFixed(3);
+                if (abs < 10) return v.toFixed(3);
+                if (abs < 100) return v.toFixed(2);
+                if (abs < 1000) return v.toFixed(1);
+                return v.toFixed(0);
+            }
+
+            updateStatsUI() {
                 Object.keys(this.channels).forEach(name => {
                     const ch = this.channels[name];
                     const el = document.getElementById(`val-${name}`);
                     if (!el) return;
-                    const v = ch.current;
-                    let display = Math.abs(v) >= 100 ? v.toFixed(1) : 
-                                 Math.abs(v) >= 1 ? v.toFixed(2) : 
-                                 Math.abs(v) >= 0.01 ? v.toFixed(3) : v.toExponential(2);
-                    el.textContent = display;
+
+                    el.textContent = this.formatValue(ch.current);
+
+                    const maxEl = document.getElementById(`max-${name}`);
+                    const avgEl = document.getElementById(`avg-${name}`);
+                    const minEl = document.getElementById(`min-${name}`);
+                    const rangeEl = document.getElementById(`range-${name}`);
+
+                    if (maxEl) maxEl.textContent = ch.history.length > 0 ? this.formatValue(ch.statMax) : '--';
+                    if (avgEl) avgEl.textContent = ch.history.length > 0 ? this.formatValue(ch.statAvg) : '--';
+                    if (minEl) minEl.textContent = ch.history.length > 0 ? this.formatValue(ch.statMin) : '--';
+                    if (rangeEl) rangeEl.textContent = `${this.formatValue(ch.min)} ~ ${this.formatValue(ch.max)}`;
                 });
             }
-            
+
+            updateMeterDisplay() {
+                const vCh = this.channels['voltage'];
+                const cCh = this.channels['current'];
+
+                if (vCh) {
+                    const v = vCh.current;
+                    let range, maxV;
+                    if (v > 15) { range = '0-30V'; maxV = 30; }
+                    else if (v > 5) { range = '0-15V'; maxV = 15; }
+                    else { range = '0-5V'; maxV = 5; }
+                    document.getElementById('voltageRange').textContent = range;
+                    document.getElementById('voltageMeterValue').innerHTML =
+                        this.formatValue(v) + '<span class="meter-unit">V</span>';
+                    this.drawMeter('voltage', v, maxV, '#39ff14');
+                }
+
+                if (cCh) {
+                    const c = cCh.current;
+                    let range, maxC;
+                    if (c > 5) { range = '0-10A'; maxC = 10; }
+                    else if (c > 3) { range = '0-5A'; maxC = 5; }
+                    else if (c > 0.5) { range = '0-3A'; maxC = 3; }
+                    else { range = '0-500mA'; maxC = 0.5; }
+                    document.getElementById('currentRange').textContent = range;
+                    const displayVal = c <= 0.5 ? (c * 1000).toFixed(1) : this.formatValue(c);
+                    const unit = c <= 0.5 ? 'mA' : 'A';
+                    document.getElementById('currentMeterValue').innerHTML =
+                        displayVal + '<span class="meter-unit">' + unit + '</span>';
+                    this.drawMeter('current', c, maxC, '#ff3366');
+                }
+            }
+
+            drawMeter(type, value, maxVal, color) {
+                const canvas = this.meterCanvas[type];
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                const dpr = canvas._dpr || 1;
+                const w = canvas.width / dpr;
+                const h = canvas.height / dpr;
+
+                if (w === 0 || h === 0) return;
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                const cx = w / 2;
+                const cy = h * 0.58;
+                const radius = Math.min(w * 0.68, h * 0.50);
+                const startAngle = Math.PI * 0.80;
+                const endAngle = Math.PI * 2.20;
+
+                // Outer glow ring
+                ctx.beginPath();
+                ctx.arc(cx, cy, radius + 4, startAngle, endAngle);
+                const r = parseInt(color.slice(1, 3), 16);
+                const g = parseInt(color.slice(3, 5), 16);
+                const b = parseInt(color.slice(5, 7), 16);
+                ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, 0.06)`;
+                ctx.lineWidth = 10;
+                ctx.stroke();
+
+                // Background arc
+                ctx.beginPath();
+                ctx.arc(cx, cy, radius, startAngle, endAngle);
+                ctx.strokeStyle = '#151518';
+                ctx.lineWidth = 10;
+                ctx.lineCap = 'round';
+                ctx.stroke();
+
+                // Tick marks
+                const tickCount = 21;
+                for (let i = 0; i < tickCount; i++) {
+                    const t = i / (tickCount - 1);
+                    const angle = startAngle + (endAngle - startAngle) * t;
+                    const isMajor = i % 4 === 0;
+                    const isMedium = i % 2 === 0;
+                    const r1 = radius - (isMajor ? 16 : isMedium ? 10 : 6);
+                    const r2 = radius - 1;
+
+                    ctx.beginPath();
+                    ctx.moveTo(cx + Math.cos(angle) * r1, cy + Math.sin(angle) * r1);
+                    ctx.lineTo(cx + Math.cos(angle) * r2, cy + Math.sin(angle) * r2);
+                    ctx.strokeStyle = isMajor ? 'rgba(57,255,20,0.45)' : isMedium ? 'rgba(57,255,20,0.18)' : 'rgba(57,255,20,0.08)';
+                    ctx.lineWidth = isMajor ? 2.5 : 1;
+                    ctx.stroke();
+
+                    if (isMajor) {
+                        const labelR = radius - 28;
+                        const labelVal = maxVal * t;
+                        let labelText;
+                        if (maxVal <= 0.5) {
+                            labelText = (labelVal * 1000).toFixed(0);
+                        } else if (labelVal < 1 && maxVal <= 5) {
+                            labelText = labelVal.toFixed(1);
+                        } else {
+                            labelText = Number.isInteger(labelVal) ? labelVal.toString() : labelVal.toFixed(1);
+                        }
+                        ctx.fillStyle = 'rgba(57,255,20,0.55)';
+                        ctx.font = 'bold 10px "JetBrains Mono", monospace';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(labelText, cx + Math.cos(angle) * labelR, cy + Math.sin(angle) * labelR);
+                    }
+                }
+
+                // Value arc (glowing)
+                const ratio = Math.min(Math.max(value / maxVal, 0), 1);
+                const valueAngle = startAngle + (endAngle - startAngle) * ratio;
+
+                // Glow effect
+                ctx.beginPath();
+                ctx.arc(cx, cy, radius, startAngle, valueAngle);
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 8;
+                ctx.lineCap = 'round';
+                ctx.shadowColor = color;
+                ctx.shadowBlur = 16;
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+
+                // Inner bright line
+                ctx.beginPath();
+                ctx.arc(cx, cy, radius, startAngle, valueAngle);
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Needle - longer and thicker
+                const needleLen = radius + 8;
+                const nx = cx + Math.cos(valueAngle) * needleLen;
+                const ny = cy + Math.sin(valueAngle) * needleLen;
+
+                // Needle glow (thick)
+                ctx.beginPath();
+                ctx.moveTo(cx, cy);
+                ctx.lineTo(nx, ny);
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 5;
+                ctx.shadowColor = color;
+                ctx.shadowBlur = 14;
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+
+                // Needle core (white)
+                ctx.beginPath();
+                ctx.moveTo(cx, cy);
+                ctx.lineTo(nx, ny);
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+
+                // Counter-weight (small triangle opposite)
+                const backAngle = valueAngle + Math.PI;
+                const backLen = 10;
+                ctx.beginPath();
+                ctx.moveTo(cx, cy);
+                ctx.lineTo(cx + Math.cos(backAngle - 0.15) * backLen, cy + Math.sin(backAngle - 0.15) * backLen);
+                ctx.lineTo(cx + Math.cos(backAngle + 0.15) * backLen, cy + Math.sin(backAngle + 0.15) * backLen);
+                ctx.closePath();
+                ctx.fillStyle = color;
+                ctx.shadowColor = color;
+                ctx.shadowBlur = 6;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                // Center dot outer
+                ctx.beginPath();
+                ctx.arc(cx, cy, 9, 0, Math.PI * 2);
+                ctx.fillStyle = '#0a0a0e';
+                ctx.fill();
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Center dot inner
+                ctx.beginPath();
+                ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+                ctx.fillStyle = color;
+                ctx.shadowColor = color;
+                ctx.shadowBlur = 12;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                // Center dot core
+                ctx.beginPath();
+                ctx.arc(cx, cy, 2.5, 0, Math.PI * 2);
+                ctx.fillStyle = '#fff';
+                ctx.fill();
+            }
+
+            addLogEntry(rawData) {
+                const now = new Date();
+                const time = now.toTimeString().split(' ')[0];
+                this.logEntries.unshift({ time, data: rawData });
+                if (this.logEntries.length > this.maxLogEntries) {
+                    this.logEntries.pop();
+                }
+                this.updateLogDisplay();
+            }
+
+            updateLogDisplay() {
+                const container = document.getElementById('logContent');
+                if (this.logEntries.length === 0) {
+                    container.innerHTML = '<div class="log-entry"><span class="log-time">--:--:--</span>Waiting for data...</div>';
+                    return;
+                }
+                container.innerHTML = this.logEntries.map(e =>
+                    `<div class="log-entry"><span class="log-time">${e.time}</span><span class="log-data">${this.escapeHtml(e.data)}</span></div>`
+                ).join('');
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
             updateUI() {
                 const dot = document.getElementById('statusDot');
                 const text = document.getElementById('statusText');
                 const conn = document.getElementById('connectBtn');
                 const disconn = document.getElementById('disconnectBtn');
-                
+
                 if (this.isConnected) {
                     dot.classList.add('connected');
                     text.textContent = 'CONNECTED';
-                    text.style.color = '#00ff88';
+                    text.style.color = 'var(--neon)';
                     conn.disabled = true;
                     disconn.disabled = false;
                 } else {
                     dot.classList.remove('connected');
                     text.textContent = 'DISCONNECTED';
-                    text.style.color = '#555';
+                    text.style.color = '#444';
                     conn.disabled = false;
                     disconn.disabled = true;
                 }
             }
-            
+
             drawGrid() {
-                const w = this.canvas.width, h = this.canvas.height;
-                this.ctx.strokeStyle = '#1a1a24';
+                const dpr = this.canvas._dpr || 1;
+                const w = this.canvas.width / dpr;
+                const h = this.canvas.height / dpr;
+
+                // Fine grid
+                this.ctx.strokeStyle = 'rgba(57, 255, 20, 0.04)';
                 this.ctx.lineWidth = 1;
-                
+                for (let i = 0; i <= 20; i++) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo((w/20)*i, 0);
+                    this.ctx.lineTo((w/20)*i, h);
+                    this.ctx.stroke();
+                }
+                for (let i = 0; i <= 16; i++) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(0, (h/16)*i);
+                    this.ctx.lineTo(w, (h/16)*i);
+                    this.ctx.stroke();
+                }
+
+                // Major grid (10x8)
+                this.ctx.strokeStyle = 'rgba(57, 255, 20, 0.08)';
+                this.ctx.lineWidth = 1;
                 for (let i = 0; i <= 10; i++) {
                     this.ctx.beginPath();
                     this.ctx.moveTo((w/10)*i, 0);
@@ -836,43 +1529,53 @@
                     this.ctx.lineTo(w, (h/8)*i);
                     this.ctx.stroke();
                 }
-                
-                this.ctx.strokeStyle = '#2a2a35';
-                this.ctx.lineWidth = 2;
+
+                // Center cross (thicker)
+                this.ctx.strokeStyle = 'rgba(57, 255, 20, 0.18)';
+                this.ctx.lineWidth = 1.5;
                 this.ctx.beginPath();
                 this.ctx.moveTo(w/2, 0); this.ctx.lineTo(w/2, h);
                 this.ctx.moveTo(0, h/2); this.ctx.lineTo(w, h/2);
                 this.ctx.stroke();
+
+                // Border
+                this.ctx.strokeStyle = 'rgba(57, 255, 20, 0.1)';
+                this.ctx.lineWidth = 1;
+                this.ctx.strokeRect(0.5, 0.5, w-1, h-1);
             }
-            
+
             drawTraces() {
-                const w = this.canvas.width, h = this.canvas.height;
+                const dpr = this.canvas._dpr || 1;
+                const w = this.canvas.width / dpr;
+                const h = this.canvas.height / dpr;
                 const now = this.isPaused ? this.pauseTime : Date.now();
                 const timeWindow = this.timePerDiv * 10;
-                
+
                 Object.keys(this.channels).forEach(name => {
                     const ch = this.channels[name];
                     if (!ch.visible || ch.data.length < 2) return;
-                    
+
                     const scaleY = (h * 0.8) / (ch.scale * 8);
                     const centerY = h/2 + ch.offset;
-                    
+
+                    // Glow
                     this.ctx.strokeStyle = ch.color;
-                    this.ctx.lineWidth = name === this.hoveredChannel ? 3 : 2;
-                    this.ctx.shadowBlur = name === this.hoveredChannel ? 12 : 8;
+                    this.ctx.lineWidth = name === this.hoveredChannel ? 4 : 2.5;
+                    this.ctx.shadowBlur = name === this.hoveredChannel ? 20 : 12;
                     this.ctx.shadowColor = ch.color;
-                    
+                    this.ctx.lineJoin = 'round';
+
                     this.ctx.beginPath();
                     let first = true;
-                    
+
                     for (let i = 0; i < ch.data.length; i++) {
                         const p = ch.data[i];
                         const age = now - p.time;
                         const x = w - (age / timeWindow) * w;
-                        
+
                         if (x < -10) continue;
                         const y = centerY - (p.value * scaleY);
-                        
+
                         if (first || x > w + 10) {
                             this.ctx.moveTo(x, y);
                             first = false;
@@ -880,32 +1583,58 @@
                             this.ctx.lineTo(x, y);
                         }
                     }
-                    
+
                     this.ctx.stroke();
                     this.ctx.shadowBlur = 0;
+
+                    // Bright core line
+                    this.ctx.strokeStyle = '#fff';
+                    this.ctx.lineWidth = name === this.hoveredChannel ? 1.5 : 0.8;
+                    this.ctx.shadowBlur = 0;
+                    this.ctx.globalAlpha = 0.6;
+
+                    this.ctx.beginPath();
+                    first = true;
+                    for (let i = 0; i < ch.data.length; i++) {
+                        const p = ch.data[i];
+                        const age = now - p.time;
+                        const x = w - (age / timeWindow) * w;
+                        if (x < -10) continue;
+                        const y = centerY - (p.value * scaleY);
+                        if (first || x > w + 10) {
+                            this.ctx.moveTo(x, y);
+                            first = false;
+                        } else {
+                            this.ctx.lineTo(x, y);
+                        }
+                    }
+                    this.ctx.stroke();
+                    this.ctx.globalAlpha = 1;
                 });
             }
-            
+
             drawHover() {
                 if (this.mouseX < 0 || Object.keys(this.channels).length === 0) {
                     this.hoveredChannel = null;
                     return;
                 }
-                
-                const w = this.canvas.width, h = this.canvas.height;
+
+                const dpr = this.canvas._dpr || 1;
+                const w = this.canvas.width / dpr;
+                const h = this.canvas.height / dpr;
                 const now = this.isPaused ? this.pauseTime : Date.now();
                 const timeWindow = this.timePerDiv * 10;
                 const timeAtMouse = now - ((w - this.mouseX) / w) * timeWindow;
-                
+
                 let closestCh = null;
                 let minDistance = 25;
                 let closestValue = null;
                 let closestY = 0;
-                
+
                 Object.keys(this.channels).forEach(name => {
                     const ch = this.channels[name];
                     if (!ch.visible) return;
-                    
+
                     let valueAtX = null;
                     for (let i = 0; i < ch.data.length - 1; i++) {
                         const p1 = ch.data[i];
@@ -916,13 +1645,13 @@
                             break;
                         }
                     }
-                    
+
                     if (valueAtX !== null && ch.data.length > 0) {
                         const scaleY = (h * 0.8) / (ch.scale * 8);
                         const centerY = h/2 + ch.offset;
                         const yAtX = centerY - (valueAtX * scaleY);
                         const distance = Math.abs(this.mouseY - yAtX);
-                        
+
                         if (distance < minDistance) {
                             minDistance = distance;
                             closestCh = ch;
@@ -931,70 +1660,86 @@
                         }
                     }
                 });
-                
+
                 const tooltip = document.getElementById('hoverTooltip');
-                
+
                 if (closestCh) {
                     this.hoveredChannel = closestCh.name;
                     this.highlightChannel(closestCh.name);
-                    
+
                     tooltip.style.display = 'block';
                     tooltip.style.borderColor = closestCh.color;
-                    tooltip.style.left = Math.min(this.mouseX + 15, w - 160) + 'px';
-                    tooltip.style.top = Math.max(this.mouseY - 40, 10) + 'px';
-                    
+                    tooltip.style.borderLeftColor = closestCh.color;
+                    tooltip.style.left = Math.min(this.mouseX + 15, w - 180) + 'px';
+                    tooltip.style.top = Math.max(this.mouseY - 50, 10) + 'px';
+
                     document.getElementById('hoverName').textContent = closestCh.name;
                     document.getElementById('hoverName').style.color = closestCh.color;
-                    
-                    let valStr = Math.abs(closestValue) >= 100 ? closestValue.toFixed(1) : 
-                                Math.abs(closestValue) >= 1 ? closestValue.toFixed(2) : 
-                                closestValue.toFixed(3);
-                    document.getElementById('hoverValue').textContent = valStr;
-                    
+                    document.getElementById('hoverValue').textContent = this.formatValue(closestValue);
+                    document.getElementById('hoverValue').style.color = closestCh.color;
+
                     const relativeTime = ((timeAtMouse - now) / 1000).toFixed(2);
                     document.getElementById('hoverTime').textContent = `T: ${relativeTime}s`;
-                    
+
+                    // Crosshair
                     this.ctx.strokeStyle = closestCh.color;
                     this.ctx.lineWidth = 1;
-                    this.ctx.setLineDash([3, 3]);
-                    this.ctx.globalAlpha = 0.6;
-                    
+                    this.ctx.setLineDash([4, 4]);
+                    this.ctx.globalAlpha = 0.5;
+                    this.ctx.shadowBlur = 6;
+                    this.ctx.shadowColor = closestCh.color;
+
                     this.ctx.beginPath();
                     this.ctx.moveTo(this.mouseX, 0);
                     this.ctx.lineTo(this.mouseX, h);
                     this.ctx.moveTo(0, closestY);
                     this.ctx.lineTo(w, closestY);
                     this.ctx.stroke();
-                    
+
                     this.ctx.globalAlpha = 1;
                     this.ctx.setLineDash([]);
-                    
+                    this.ctx.shadowBlur = 0;
+
+                    // Draw point highlight
+                    this.ctx.beginPath();
+                    this.ctx.arc(this.mouseX, closestY, 5, 0, Math.PI * 2);
+                    this.ctx.fillStyle = closestCh.color;
+                    this.ctx.shadowBlur = 15;
+                    this.ctx.shadowColor = closestCh.color;
+                    this.ctx.fill();
+                    this.ctx.shadowBlur = 0;
+
+                    this.ctx.beginPath();
+                    this.ctx.arc(this.mouseX, closestY, 2, 0, Math.PI * 2);
+                    this.ctx.fillStyle = '#fff';
+                    this.ctx.fill();
+
                 } else {
                     this.hoveredChannel = null;
                     tooltip.style.display = 'none';
                     this.clearHighlight();
                 }
             }
-            
+
             animate() {
-                this.ctx.fillStyle = '#000000';
-                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-                
+                const dpr = this.canvas._dpr || 1;
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
                 this.drawGrid();
                 this.drawTraces();
                 this.drawHover();
-                
+
                 const now = Date.now();
                 if (now - this.lastRxTime >= 1000) {
                     document.getElementById('rxRate').textContent = this.rxBytes;
                     this.rxBytes = 0;
                     this.lastRxTime = now;
                 }
-                
+
                 requestAnimationFrame(() => this.animate());
             }
         }
-        
+
         const scope = new JsonOscilloscope();
     </script>
 </body>
