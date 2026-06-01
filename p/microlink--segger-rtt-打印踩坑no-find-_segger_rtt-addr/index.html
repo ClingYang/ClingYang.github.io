@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="MicroLink 读取 RTT 打印时提示找不到 _SEGGER_RTT 地址？本文记录完整的排查思路和解决方案，以及如何绕开 AC6 链接器 ZI/RW 混合限制">
+<title>MicroLink &#43; SEGGER RTT 打印踩坑：no find _SEGGER_RTT addr</title>
+
+<link rel='canonical' href='https://clingyang.github.io/p/microlink--segger-rtt-%E6%89%93%E5%8D%B0%E8%B8%A9%E5%9D%91no-find-_segger_rtt-addr/'>
+
+<link rel="stylesheet" href="/scss/style.min.61d57cd75eec9cf61874fc12617af35f32a2d88c6ed4b65ff3cf62af03ebf48e.css"><meta property='og:title' content="MicroLink + SEGGER RTT 打印踩坑：no find _SEGGER_RTT addr">
+<meta property='og:description' content="MicroLink 读取 RTT 打印时提示找不到 _SEGGER_RTT 地址？本文记录完整的排查思路和解决方案，以及如何绕开 AC6 链接器 ZI/RW 混合限制">
+<meta property='og:url' content='https://clingyang.github.io/p/microlink--segger-rtt-%E6%89%93%E5%8D%B0%E8%B8%A9%E5%9D%91no-find-_segger_rtt-addr/'>
+<meta property='og:site_name' content='CLing'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='AT32F403A' /><meta property='article:tag' content='SEGGER RTT' /><meta property='article:tag' content='MicroLink' /><meta property='article:tag' content='AC6' /><meta property='article:tag' content='调试' /><meta property='article:published_time' content='2026-06-01T08:00:00&#43;08:00'/><meta property='article:modified_time' content='2026-06-01T16:14:36&#43;08:00'/>
+<meta name="twitter:title" content="MicroLink + SEGGER RTT 打印踩坑：no find _SEGGER_RTT addr">
+<meta name="twitter:description" content="MicroLink 读取 RTT 打印时提示找不到 _SEGGER_RTT 地址？本文记录完整的排查思路和解决方案，以及如何绕开 AC6 链接器 ZI/RW 混合限制">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                            height="290" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🏀</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">CLing</a></h1>
+            <h2 class="site-description">你好 欢迎来到我的博客</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>档案</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E6%8A%80%E6%9C%AF%E9%93%BE%E6%8E%A5/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>技术链接</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#问题现象">问题现象</a></li>
+    <li><a href="#排查思路">排查思路</a>
+      <ol>
+        <li><a href="#第一步理解-rtt-的工作原理">第一步：理解 RTT 的工作原理</a></li>
+        <li><a href="#第二步尝试固定地址">第二步：尝试固定地址</a></li>
+        <li><a href="#第三步给初值试试">第三步：给初值试试</a></li>
+        <li><a href="#第四步scatter-文件方案">第四步：scatter 文件方案</a></li>
+      </ol>
+    </li>
+    <li><a href="#最终方案非零初值--at">最终方案：非零初值 + <code>at()</code></a>
+      <ol>
+        <li><a href="#关键点逐个解释">关键点逐个解释</a></li>
+        <li><a href="#为什么-acid0-必须是-0">为什么 <code>acID[0]</code> 必须是 <code>&#39;\0&#39;</code>？</a></li>
+        <li><a href="#内存布局">内存布局</a></li>
+      </ol>
+    </li>
+    <li><a href="#踩坑过程一览">踩坑过程一览</a></li>
+    <li><a href="#验证">验证</a></li>
+    <li><a href="#总结">总结</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/at32/" >
+                AT32
+            </a>
+        
+            <a href="/categories/%E7%AC%94%E8%AE%B0/" >
+                笔记
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/microlink--segger-rtt-%E6%89%93%E5%8D%B0%E8%B8%A9%E5%9D%91no-find-_segger_rtt-addr/">MicroLink &#43; SEGGER RTT 打印踩坑：no find _SEGGER_RTT addr</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            MicroLink 读取 RTT 打印时提示找不到 _SEGGER_RTT 地址？本文记录完整的排查思路和解决方案，以及如何绕开 AC6 链接器 ZI/RW 混合限制
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2026-06-01</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 2 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="问题现象">问题现象
+</h2><p>用 MicroLink 调试 AT32F403A 时，想直接用 SEGGER RTT 做打印输出，工具却报了这么个错：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Addr = 0x20000000, wSize = 1024, Channel = 0
+</span></span><span class="line"><span class="cl">no find _SEGGER_RTT addr
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>明明是按 RTT 的标准流程配的，为什么找不到？</p>
+<hr>
+<h2 id="排查思路">排查思路
+</h2><h3 id="第一步理解-rtt-的工作原理">第一步：理解 RTT 的工作原理
+</h3><p>SEGGER RTT 的核心是一个叫做 <code>_SEGGER_RTT</code> 的控制块，里面存着 <code>&quot;SEGGER RTT&quot;</code> 标识字符串。调试器（或 MicroLink 这类工具）需要在 MCU 的内存里找到这个控制块，才能读取打印数据。</p>
+<p><strong>找控制块的方式有两种：</strong></p>
+<div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>工具</th>
+					<th>扫描方式</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><strong>J-Link</strong></td>
+					<td>自动扫描整个 SRAM 范围，找到标识符就停</td>
+			</tr>
+			<tr>
+					<td><strong>MicroLink</strong></td>
+					<td>从<strong>固定地址</strong> <code>0x20000000</code> 开始扫描</td>
+			</tr>
+	</tbody>
+</table></div>
+<p><strong>问题根源就在这里</strong> —— MicroLink 不会自己找，它只认 <code>0x20000000</code>。但 <code>_SEGGER_RTT</code> 控制块是链接器自由分配的，不一定恰好落在 SRAM 开头。</p>
+<h3 id="第二步尝试固定地址">第二步：尝试固定地址
+</h3><p>既然 MicroLink 只认 <code>0x20000000</code>，那把控制块固定放到那里不就行了？</p>
+<p>第一反应是用 AC6 链接器的 <code>__attribute__((at(0x20000000)))</code>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">__attribute__</span><span class="p">((</span><span class="nf">at</span><span class="p">(</span><span class="mh">0x20000000</span><span class="p">)))</span>
+</span></span><span class="line"><span class="cl"><span class="nf">SEGGER_RTT_CB_ALIGN</span><span class="p">(</span><span class="n">SEGGER_RTT_CB</span> <span class="n">_SEGGER_RTT</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>编译，报错：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">main.o(.data) type RW incompatible with segger_rtt.o(...) type ZI
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>为什么？</strong> AC6 链接器对 ZI（零初始化）和 RW（有初值）数据在同一个执行区域有严格限制。<code>_SEGGER_RTT</code> 没给初值，链接器认为它是 ZI 类型，而 <code>main.c</code> 里其他数据是 RW 类型，混在一个区域就冲突了。</p>
+<h3 id="第三步给初值试试">第三步：给初值试试
+</h3><p>那把初值设成 <code>0</code> 总行了吧？</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>还是报同样的错。<strong>原因是 AC6 对全零初值做了优化，仍然识别为 ZI。</strong></p>
+<h3 id="第四步scatter-文件方案">第四步：scatter 文件方案
+</h3><p>理论上可以在 scatter 文件里专门划一个 UNINIT 区域来放 RTT 控制块：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-armasm" data-lang="armasm"><span class="line"><span class="cl">RTT<span class="err">_CB</span> <span class="err">0</span><span class="nc">x20</span><span class="err">000000</span> <span class="err">UNINIT</span> <span class="err">0</span><span class="nc">x00</span><span class="err">000500</span> <span class="err">{</span>
+</span></span><span class="line"><span class="cl">    segger<span class="err">_rtt.o</span> <span class="err">(.ARM.__AT_0</span><span class="nc">x20</span><span class="err">000000)</span>
+</span></span><span class="line"><span class="cl"><span class="err">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这个方案确实可行，但 scatter 文件一碰就容易牵一发而动全身，能不动最好不动。</p>
+<hr>
+<h2 id="最终方案非零初值--at">最终方案：非零初值 + <code>at()</code>
+</h2><p>核心思路：<strong>让链接器把 RTT 相关变量识别为 RW 类型，这样就不会和 ZI 冲突。</strong></p>
+<p>在 <code>SEGGER_RTT.c</code> 中修改三个变量：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#define SEGGER_RTT_SECTION __attribute__((at(0x20000000)))
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 非零初值使链接器识别为 RW，避免 ZI/RW 混合报错。
+</span></span></span><span class="line"><span class="cl"><span class="cm">   acID[0]=&#39;\0&#39; 保证 INIT() 宏能触发 _DoInit() */</span>
+</span></span><span class="line"><span class="cl"><span class="n">SEGGER_RTT_SECTION</span> <span class="nf">SEGGER_RTT_CB_ALIGN</span><span class="p">(</span><span class="n">SEGGER_RTT_CB</span> <span class="n">_SEGGER_RTT</span><span class="p">)</span> <span class="o">=</span> <span class="p">{{</span><span class="sc">&#39;\0&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">}};</span>
+</span></span><span class="line"><span class="cl"><span class="n">SEGGER_RTT_SECTION</span> <span class="nf">SEGGER_RTT_BUFFER_ALIGN</span><span class="p">(</span><span class="k">static</span> <span class="kt">char</span> <span class="n">_acUpBuffer</span>  <span class="p">[</span><span class="n">BUFFER_SIZE_UP</span><span class="p">])</span>   <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl"><span class="n">SEGGER_RTT_SECTION</span> <span class="nf">SEGGER_RTT_BUFFER_ALIGN</span><span class="p">(</span><span class="k">static</span> <span class="kt">char</span> <span class="n">_acDownBuffer</span><span class="p">[</span><span class="n">BUFFER_SIZE_DOWN</span><span class="p">])</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">};</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="关键点逐个解释">关键点逐个解释
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>写法</th>
+					<th>作用</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>at(0x20000000)</code></td>
+					<td>AC6 链接器自动从该地址开始依次排列三个变量</td>
+			</tr>
+			<tr>
+					<td><code>{'\0', 1}</code></td>
+					<td><code>acID[0]='\0'</code> 满足 <code>INIT()</code> 触发 <code>_DoInit()</code> 的条件；<code>acID[1]=1</code> 非零 → RW 类型</td>
+			</tr>
+			<tr>
+					<td><code>{1}</code></td>
+					<td>数组首字节非零 → RW 类型，避开 ZI/RW 混合错误</td>
+			</tr>
+	</tbody>
+</table></div>
+<h3 id="为什么-acid0-必须是-0">为什么 <code>acID[0]</code> 必须是 <code>'\0'</code>？
+</h3><p>RTT 的 <code>INIT()</code> 宏里面有这样一段逻辑：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#define INIT()  do { if (_SEGGER_RTT.acID[0] == &#39;\0&#39;) _DoInit(); } while (0)
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>如果 <code>acID[0]</code> 不是 <code>'\0'</code>，<code>_DoInit()</code> 不会被调用，控制块就不会被正确初始化（包括写入 <code>&quot;SEGGER RTT&quot;</code> 标识）。所以虽然我们要给非零初值来骗过链接器，但<strong>第一个字节必须留 <code>'\0'</code></strong>，让 <code>_DoInit()</code> 有机会执行。</p>
+<h3 id="内存布局">内存布局
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">0x20000000  ├─ _SEGGER_RTT   (~120 字节)
+</span></span><span class="line"><span class="cl">0x20000078  ├─ _acUpBuffer   (1024 字节)
+</span></span><span class="line"><span class="cl">0x20000478  └─ _acDownBuffer (16 字节)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>总计约 <strong>1160 字节</strong> 固定在 SRAM 开头。AT32F403A 有 96KB SRAM，这点占用完全可以忽略。</p>
+<hr>
+<h2 id="踩坑过程一览">踩坑过程一览
+</h2><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>尝试</th>
+					<th>方案</th>
+					<th>结果</th>
+					<th>原因</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>❌</td>
+					<td><code>__attribute__((section(&quot;.ARM.__at_0x20000000&quot;)))</code></td>
+					<td>ZI/RW 混合报错</td>
+					<td>ZI 类型与 RW 数据冲突</td>
+			</tr>
+			<tr>
+					<td>❌</td>
+					<td>初值 <code>= {0}</code></td>
+					<td>同上</td>
+					<td>AC6 优化全零初值为 ZI</td>
+			</tr>
+			<tr>
+					<td>⚠️</td>
+					<td>修改 scatter 文件</td>
+					<td>可行但麻烦</td>
+					<td>不想碰链接器脚本</td>
+			</tr>
+			<tr>
+					<td>✅</td>
+					<td><code>at()</code> + 非零初值</td>
+					<td>成功</td>
+					<td>RW 类型，scatter 不用改</td>
+			</tr>
+	</tbody>
+</table></div>
+<hr>
+<h2 id="验证">验证
+</h2><p>修改后重新编译，下载程序，用 MicroLink 连接：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Addr = 0x20000000, wSize = 1024, Channel = 0
+</span></span><span class="line"><span class="cl">[OK] _SEGGER_RTT found at 0x20000000
+</span></span><span class="line"><span class="cl">Hello, RTT!
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>RTT 打印正常输出，问题解决。</p>
+<hr>
+<h2 id="总结">总结
+</h2><p>这个问题本质上是<strong>工具行为差异</strong>（J-Link 会扫描全 SRAM，MicroLink 只认固定地址）加上<strong>链接器特性</strong>（AC6 对 ZI/RW 混合很敏感）叠加出来的。</p>
+<p>如果你也遇到类似情况，记住这几条：</p>
+<ol>
+<li><strong>先确认工具的扫描策略</strong> —— 是自动扫描还是固定地址？</li>
+<li><strong>AC6 链接器用 <code>at()</code> 固定地址时，一定要给非零初值</strong> —— 否则会被优化成 ZI</li>
+<li><strong><code>acID[0]</code> 必须保持 <code>'\0'</code></strong> —— 否则 INIT() 不会触发 <code>_DoInit()</code></li>
+<li><strong>能不动 scatter 就不动</strong> —— 用属性语法更干净</li>
+</ol>
+<hr>
+<p><em>环境：AT32F403A + MDK-ARM (AC6) + MicroLink</em></p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/at32f403a/">AT32F403A</a>
+        
+            <a href="/tags/segger-rtt/">SEGGER RTT</a>
+        
+            <a href="/tags/microlink/">MicroLink</a>
+        
+            <a href="/tags/ac6/">AC6</a>
+        
+            <a href="/tags/%E8%B0%83%E8%AF%95/">调试</a>
+        
+    </section>
+
+
+    <section class="article-lastmod">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <span>
+            最后更新于 Jun 01, 2026 16:14 &#43;0800
+        </span>
+    </section></footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/py32f002a-%E9%80%89%E9%A1%B9%E5%AD%97%E8%8A%82%E5%AE%9E%E6%88%98%E6%8A%8A-reset-%E5%BC%95%E8%84%9A%E5%8F%98%E6%88%90%E6%99%AE%E9%80%9A-gpio/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PY32F002A 选项字节实战：把 RESET 引脚变成普通 GPIO</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hugo%E6%A0%BC%E5%BC%8F%E8%AF%B4%E6%98%8E%E8%AE%B0%E8%BD%BD%E7%AC%94%E8%AE%B0/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="https://cdn.jsdelivr.net/gh/ClingYang/img1@latest/20250320145323127.png" loading="lazy" data-key="" data-hash="https://cdn.jsdelivr.net/gh/ClingYang/img1@latest/20250320145323127.png"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">hugo格式说明记载笔记</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="ClingYang/ClingYang.github.io"
+        issue-term="pathname"
+        
+        label="💬comment"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2026 CLing
+    </section>
+    
+    <section class="powerby">
+        
+            世界是你们 <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<style>
+    #TableOfContents > ul, ol {
+        ul, ol {
+            display: none;
+        }
+        .open {
+            display: block;
+        }
+    }
+</style>
+
+<script>
+    function initTocHide() {
+        
+        let toc = document.querySelector(".widget--toc");
+        if (!toc) {
+            return;
+        }
+        
+        window.addEventListener('scroll', function() {
+            
+            let currentLi = document.querySelector(".active-class");
+            if (!currentLi) {
+                return
+            }
+            
+            let elementsByClassName = document.querySelectorAll(".open");
+            if (elementsByClassName.length > 0) {
+                elementsByClassName.forEach((ul) => {
+                    ul.classList.remove("open")
+                })
+            }
+            
+            if (currentLi.children.length > 1) {
+                currentLi.children[1].classList.add("open")
+            }
+            
+            let ul = currentLi.parentElement;
+            do {
+                ul.classList.add("open");
+                ul = ul.parentElement.parentElement
+            } while (ul !== undefined && (ul.localName === 'ul' || ul.localName === 'ol'))
+        });
+    }
+    initTocHide()
+</script>
+
+    </body>
+</html>

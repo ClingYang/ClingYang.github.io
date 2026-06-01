@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>AT32 on CLing</title>
+        <link>https://clingyang.github.io/categories/at32/</link>
+        <description>Recent content in AT32 on CLing</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en-us</language>
+        <copyright>CLing</copyright>
+        <lastBuildDate>Mon, 01 Jun 2026 16:14:36 +0800</lastBuildDate><atom:link href="https://clingyang.github.io/categories/at32/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>MicroLink &#43; SEGGER RTT 打印踩坑：no find _SEGGER_RTT addr</title>
+        <link>https://clingyang.github.io/p/microlink--segger-rtt-%E6%89%93%E5%8D%B0%E8%B8%A9%E5%9D%91no-find-_segger_rtt-addr/</link>
+        <pubDate>Mon, 01 Jun 2026 08:00:00 +0800</pubDate>
+        
+        <guid>https://clingyang.github.io/p/microlink--segger-rtt-%E6%89%93%E5%8D%B0%E8%B8%A9%E5%9D%91no-find-_segger_rtt-addr/</guid>
+        <description>&lt;h2 id=&#34;问题现象&#34;&gt;问题现象
+&lt;/h2&gt;&lt;p&gt;用 MicroLink 调试 AT32F403A 时，想直接用 SEGGER RTT 做打印输出，工具却报了这么个错：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Addr = 0x20000000, wSize = 1024, Channel = 0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;no find _SEGGER_RTT addr
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;明明是按 RTT 的标准流程配的，为什么找不到？&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;排查思路&#34;&gt;排查思路
+&lt;/h2&gt;&lt;h3 id=&#34;第一步理解-rtt-的工作原理&#34;&gt;第一步：理解 RTT 的工作原理
+&lt;/h3&gt;&lt;p&gt;SEGGER RTT 的核心是一个叫做 &lt;code&gt;_SEGGER_RTT&lt;/code&gt; 的控制块，里面存着 &lt;code&gt;&amp;quot;SEGGER RTT&amp;quot;&lt;/code&gt; 标识字符串。调试器（或 MicroLink 这类工具）需要在 MCU 的内存里找到这个控制块，才能读取打印数据。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;找控制块的方式有两种：&lt;/strong&gt;&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;工具&lt;/th&gt;
+					&lt;th&gt;扫描方式&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;strong&gt;J-Link&lt;/strong&gt;&lt;/td&gt;
+					&lt;td&gt;自动扫描整个 SRAM 范围，找到标识符就停&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;strong&gt;MicroLink&lt;/strong&gt;&lt;/td&gt;
+					&lt;td&gt;从&lt;strong&gt;固定地址&lt;/strong&gt; &lt;code&gt;0x20000000&lt;/code&gt; 开始扫描&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;问题根源就在这里&lt;/strong&gt; —— MicroLink 不会自己找，它只认 &lt;code&gt;0x20000000&lt;/code&gt;。但 &lt;code&gt;_SEGGER_RTT&lt;/code&gt; 控制块是链接器自由分配的，不一定恰好落在 SRAM 开头。&lt;/p&gt;
+&lt;h3 id=&#34;第二步尝试固定地址&#34;&gt;第二步：尝试固定地址
+&lt;/h3&gt;&lt;p&gt;既然 MicroLink 只认 &lt;code&gt;0x20000000&lt;/code&gt;，那把控制块固定放到那里不就行了？&lt;/p&gt;
+&lt;p&gt;第一反应是用 AC6 链接器的 &lt;code&gt;__attribute__((at(0x20000000)))&lt;/code&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nf&#34;&gt;__attribute__&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;((&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;at&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;mh&#34;&gt;0x20000000&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)))&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nf&#34;&gt;SEGGER_RTT_CB_ALIGN&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;SEGGER_RTT_CB&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;_SEGGER_RTT&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;编译，报错：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;main.o(.data) type RW incompatible with segger_rtt.o(...) type ZI
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;为什么？&lt;/strong&gt; AC6 链接器对 ZI（零初始化）和 RW（有初值）数据在同一个执行区域有严格限制。&lt;code&gt;_SEGGER_RTT&lt;/code&gt; 没给初值，链接器认为它是 ZI 类型，而 &lt;code&gt;main.c&lt;/code&gt; 里其他数据是 RW 类型，混在一个区域就冲突了。&lt;/p&gt;
+&lt;h3 id=&#34;第三步给初值试试&#34;&gt;第三步：给初值试试
+&lt;/h3&gt;&lt;p&gt;那把初值设成 &lt;code&gt;0&lt;/code&gt; 总行了吧？&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;};&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;还是报同样的错。&lt;strong&gt;原因是 AC6 对全零初值做了优化，仍然识别为 ZI。&lt;/strong&gt;&lt;/p&gt;
+&lt;h3 id=&#34;第四步scatter-文件方案&#34;&gt;第四步：scatter 文件方案
+&lt;/h3&gt;&lt;p&gt;理论上可以在 scatter 文件里专门划一个 UNINIT 区域来放 RTT 控制块：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-armasm&#34; data-lang=&#34;armasm&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;RTT&lt;span class=&#34;err&#34;&gt;_CB&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;nc&#34;&gt;x20&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;000000&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;UNINIT&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;nc&#34;&gt;x00&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;000500&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    segger&lt;span class=&#34;err&#34;&gt;_rtt.o&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;(.ARM.__AT_0&lt;/span&gt;&lt;span class=&#34;nc&#34;&gt;x20&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;000000)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;err&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这个方案确实可行，但 scatter 文件一碰就容易牵一发而动全身，能不动最好不动。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;最终方案非零初值--at&#34;&gt;最终方案：非零初值 + &lt;code&gt;at()&lt;/code&gt;
+&lt;/h2&gt;&lt;p&gt;核心思路：&lt;strong&gt;让链接器把 RTT 相关变量识别为 RW 类型，这样就不会和 ZI 冲突。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;在 &lt;code&gt;SEGGER_RTT.c&lt;/code&gt; 中修改三个变量：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#define SEGGER_RTT_SECTION __attribute__((at(0x20000000)))
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cm&#34;&gt;/* 非零初值使链接器识别为 RW，避免 ZI/RW 混合报错。
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cm&#34;&gt;   acID[0]=&amp;#39;\0&amp;#39; 保证 INIT() 宏能触发 _DoInit() */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;SEGGER_RTT_SECTION&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;SEGGER_RTT_CB_ALIGN&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;SEGGER_RTT_CB&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;_SEGGER_RTT&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{{&lt;/span&gt;&lt;span class=&#34;sc&#34;&gt;&amp;#39;\0&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}};&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;SEGGER_RTT_SECTION&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;SEGGER_RTT_BUFFER_ALIGN&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;static&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;char&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;_acUpBuffer&lt;/span&gt;  &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;BUFFER_SIZE_UP&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt;   &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;};&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;SEGGER_RTT_SECTION&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;SEGGER_RTT_BUFFER_ALIGN&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;static&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;char&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;_acDownBuffer&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;BUFFER_SIZE_DOWN&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;])&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;};&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id=&#34;关键点逐个解释&#34;&gt;关键点逐个解释
+&lt;/h3&gt;&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;写法&lt;/th&gt;
+					&lt;th&gt;作用&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;at(0x20000000)&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;AC6 链接器自动从该地址开始依次排列三个变量&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;{&#39;\0&#39;, 1}&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;acID[0]=&#39;\0&#39;&lt;/code&gt; 满足 &lt;code&gt;INIT()&lt;/code&gt; 触发 &lt;code&gt;_DoInit()&lt;/code&gt; 的条件；&lt;code&gt;acID[1]=1&lt;/code&gt; 非零 → RW 类型&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;&lt;code&gt;{1}&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;数组首字节非零 → RW 类型，避开 ZI/RW 混合错误&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;为什么-acid0-必须是-0&#34;&gt;为什么 &lt;code&gt;acID[0]&lt;/code&gt; 必须是 &lt;code&gt;&#39;\0&#39;&lt;/code&gt;？
+&lt;/h3&gt;&lt;p&gt;RTT 的 &lt;code&gt;INIT()&lt;/code&gt; 宏里面有这样一段逻辑：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#define INIT()  do { if (_SEGGER_RTT.acID[0] == &amp;#39;\0&amp;#39;) _DoInit(); } while (0)
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;如果 &lt;code&gt;acID[0]&lt;/code&gt; 不是 &lt;code&gt;&#39;\0&#39;&lt;/code&gt;，&lt;code&gt;_DoInit()&lt;/code&gt; 不会被调用，控制块就不会被正确初始化（包括写入 &lt;code&gt;&amp;quot;SEGGER RTT&amp;quot;&lt;/code&gt; 标识）。所以虽然我们要给非零初值来骗过链接器，但&lt;strong&gt;第一个字节必须留 &lt;code&gt;&#39;\0&#39;&lt;/code&gt;&lt;/strong&gt;，让 &lt;code&gt;_DoInit()&lt;/code&gt; 有机会执行。&lt;/p&gt;
+&lt;h3 id=&#34;内存布局&#34;&gt;内存布局
+&lt;/h3&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;0x20000000  ├─ _SEGGER_RTT   (~120 字节)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;0x20000078  ├─ _acUpBuffer   (1024 字节)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;0x20000478  └─ _acDownBuffer (16 字节)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;总计约 &lt;strong&gt;1160 字节&lt;/strong&gt; 固定在 SRAM 开头。AT32F403A 有 96KB SRAM，这点占用完全可以忽略。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;踩坑过程一览&#34;&gt;踩坑过程一览
+&lt;/h2&gt;&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;尝试&lt;/th&gt;
+					&lt;th&gt;方案&lt;/th&gt;
+					&lt;th&gt;结果&lt;/th&gt;
+					&lt;th&gt;原因&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;❌&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;__attribute__((section(&amp;quot;.ARM.__at_0x20000000&amp;quot;)))&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;ZI/RW 混合报错&lt;/td&gt;
+					&lt;td&gt;ZI 类型与 RW 数据冲突&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;❌&lt;/td&gt;
+					&lt;td&gt;初值 &lt;code&gt;= {0}&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;同上&lt;/td&gt;
+					&lt;td&gt;AC6 优化全零初值为 ZI&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;⚠️&lt;/td&gt;
+					&lt;td&gt;修改 scatter 文件&lt;/td&gt;
+					&lt;td&gt;可行但麻烦&lt;/td&gt;
+					&lt;td&gt;不想碰链接器脚本&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;✅&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;at()&lt;/code&gt; + 非零初值&lt;/td&gt;
+					&lt;td&gt;成功&lt;/td&gt;
+					&lt;td&gt;RW 类型，scatter 不用改&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;验证&#34;&gt;验证
+&lt;/h2&gt;&lt;p&gt;修改后重新编译，下载程序，用 MicroLink 连接：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Addr = 0x20000000, wSize = 1024, Channel = 0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;[OK] _SEGGER_RTT found at 0x20000000
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Hello, RTT!
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;RTT 打印正常输出，问题解决。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;总结&#34;&gt;总结
+&lt;/h2&gt;&lt;p&gt;这个问题本质上是&lt;strong&gt;工具行为差异&lt;/strong&gt;（J-Link 会扫描全 SRAM，MicroLink 只认固定地址）加上&lt;strong&gt;链接器特性&lt;/strong&gt;（AC6 对 ZI/RW 混合很敏感）叠加出来的。&lt;/p&gt;
+&lt;p&gt;如果你也遇到类似情况，记住这几条：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;先确认工具的扫描策略&lt;/strong&gt; —— 是自动扫描还是固定地址？&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;AC6 链接器用 &lt;code&gt;at()&lt;/code&gt; 固定地址时，一定要给非零初值&lt;/strong&gt; —— 否则会被优化成 ZI&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;acID[0]&lt;/code&gt; 必须保持 &lt;code&gt;&#39;\0&#39;&lt;/code&gt;&lt;/strong&gt; —— 否则 INIT() 不会触发 &lt;code&gt;_DoInit()&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;能不动 scatter 就不动&lt;/strong&gt; —— 用属性语法更干净&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr&gt;
+&lt;p&gt;&lt;em&gt;环境：AT32F403A + MDK-ARM (AC6) + MicroLink&lt;/em&gt;&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>
