@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="INA226 电流检测芯片初始化时读取 Manufacturer ID 返回 0xFFFF？本文记录软件 I2C 与硬件 I2C GPIO 模式冲突的排查全过程">
+<title>INA226 软件 I2C 初始化踩坑：读取返回 0xFFFF</title>
+
+<link rel='canonical' href='https://clingyang.github.io/p/ina226-%E8%BD%AF%E4%BB%B6-i2c-%E5%88%9D%E5%A7%8B%E5%8C%96%E8%B8%A9%E5%9D%91%E8%AF%BB%E5%8F%96%E8%BF%94%E5%9B%9E-0xffff/'>
+
+<link rel="stylesheet" href="/scss/style.min.61d57cd75eec9cf61874fc12617af35f32a2d88c6ed4b65ff3cf62af03ebf48e.css"><meta property='og:title' content="INA226 软件 I2C 初始化踩坑：读取返回 0xFFFF">
+<meta property='og:description' content="INA226 电流检测芯片初始化时读取 Manufacturer ID 返回 0xFFFF？本文记录软件 I2C 与硬件 I2C GPIO 模式冲突的排查全过程">
+<meta property='og:url' content='https://clingyang.github.io/p/ina226-%E8%BD%AF%E4%BB%B6-i2c-%E5%88%9D%E5%A7%8B%E5%8C%96%E8%B8%A9%E5%9D%91%E8%AF%BB%E5%8F%96%E8%BF%94%E5%9B%9E-0xffff/'>
+<meta property='og:site_name' content='CLing'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='AT32F403A' /><meta property='article:tag' content='INA226' /><meta property='article:tag' content='I2C' /><meta property='article:tag' content='软件 I2C' /><meta property='article:tag' content='GPIO' /><meta property='article:published_time' content='2026-06-03T08:00:00&#43;08:00'/><meta property='article:modified_time' content='2026-06-03T10:32:55&#43;08:00'/>
+<meta name="twitter:title" content="INA226 软件 I2C 初始化踩坑：读取返回 0xFFFF">
+<meta name="twitter:description" content="INA226 电流检测芯片初始化时读取 Manufacturer ID 返回 0xFFFF？本文记录软件 I2C 与硬件 I2C GPIO 模式冲突的排查全过程">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                            height="290" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🏀</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">CLing</a></h1>
+            <h2 class="site-description">你好 欢迎来到我的博客</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>档案</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E6%8A%80%E6%9C%AF%E9%93%BE%E6%8E%A5/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>技术链接</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#问题现象">问题现象</a></li>
+    <li><a href="#根因分析">根因分析</a>
+      <ol>
+        <li><a href="#1-两套-i2c-初始化逻辑">1. 两套 I2C 初始化逻辑</a></li>
+        <li><a href="#2-软件-i2c-到底怎么操作引脚">2. 软件 I2C 到底怎么操作引脚？</a></li>
+        <li><a href="#3-为什么先-scan-就能工作">3. 为什么先 Scan 就能工作？</a></li>
+      </ol>
+    </li>
+    <li><a href="#修复方案">修复方案</a>
+      <ol>
+        <li><a href="#思路">思路</a></li>
+        <li><a href="#代码改动">代码改动</a>
+          <ol>
+            <li><a href="#1-新增-ina226_swi2cinit">1. 新增 <code>INA226_Swi2cInit()</code></a></li>
+            <li><a href="#2-三个调用点全部加上">2. 三个调用点全部加上</a></li>
+          </ol>
+        </li>
+        <li><a href="#修复后的路径">修复后的路径</a></li>
+      </ol>
+    </li>
+    <li><a href="#延伸思考">延伸思考</a>
+      <ol>
+        <li><a href="#硬件-i2c-会碰到这个问题吗">硬件 I2C 会碰到这个问题吗？</a></li>
+        <li><a href="#软件-i2c-和硬件-i2c-能混用吗">软件 I2C 和硬件 I2C 能混用吗？</a></li>
+        <li><a href="#怎么避免以后再踩这个坑">怎么避免以后再踩这个坑？</a></li>
+      </ol>
+    </li>
+    <li><a href="#总结">总结</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/at32/" >
+                AT32
+            </a>
+        
+            <a href="/categories/%E7%AC%94%E8%AE%B0/" >
+                笔记
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/ina226-%E8%BD%AF%E4%BB%B6-i2c-%E5%88%9D%E5%A7%8B%E5%8C%96%E8%B8%A9%E5%9D%91%E8%AF%BB%E5%8F%96%E8%BF%94%E5%9B%9E-0xffff/">INA226 软件 I2C 初始化踩坑：读取返回 0xFFFF</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            INA226 电流检测芯片初始化时读取 Manufacturer ID 返回 0xFFFF？本文记录软件 I2C 与硬件 I2C GPIO 模式冲突的排查全过程
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2026-06-03</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 3 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="问题现象">问题现象
+</h2><p>项目里用了两颗 INA226（U3 和 U7）做电流检测，驱动是自己写的软件 I2C。测试时发现一个奇怪的现象：</p>
+<blockquote>
+<p>不调用 <code>INA226_Scan()</code> 直接初始化时，<code>INA226_Init_U3()</code> / <code>INA226_Init_U7()</code> 读取 Manufacturer ID 返回 <code>0xFFFF</code>，芯片识别失败。</p>
+<p>必须先执行一次 <code>INA226_Scan()</code>，后续的 Init 和读取才能正常工作。</p>
+</blockquote>
+<p>问题来了：<code>Scan</code> 和 <code>Init</code> 明明是两回事，为什么必须先 Scan 才能 Init？</p>
+<hr>
+<h2 id="根因分析">根因分析
+</h2><h3 id="1-两套-i2c-初始化逻辑">1. 两套 I2C 初始化逻辑
+</h3><p>系统中存在两套 I2C 初始化代码，都操作 PB6/PB7，但配置的模式完全不同：</p>
+<div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>初始化来源</th>
+					<th>配置模式</th>
+					<th>目的</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>wk_i2c1_init()</code>（<code>src/wk_i2c.c</code>）</td>
+					<td><code>GPIO_MODE_MUX</code>（复用模式）</td>
+					<td>硬件 I2C1 外设</td>
+			</tr>
+			<tr>
+					<td><code>swi2c_gpio_init()</code>（<code>drivers/ina226/ina226.c</code>）</td>
+					<td><code>GPIO_MODE_OUTPUT</code>（通用输出）</td>
+					<td>软件 I2C bit-bang</td>
+			</tr>
+	</tbody>
+</table></div>
+<p><code>wk_i2c1_init()</code> 的代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cm">/* configure the SCL pin */</span>
+</span></span><span class="line"><span class="cl"><span class="n">gpio_init_struct</span><span class="p">.</span><span class="n">gpio_mode</span> <span class="o">=</span> <span class="n">GPIO_MODE_MUX</span><span class="p">;</span>   <span class="c1">// ← 复用模式
+</span></span></span><span class="line"><span class="cl"><span class="n">gpio_init_struct</span><span class="p">.</span><span class="n">gpio_pins</span> <span class="o">=</span> <span class="n">GPIO_PINS_6</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="nf">gpio_init</span><span class="p">(</span><span class="n">GPIOB</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">gpio_init_struct</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* configure the SDA pin */</span>
+</span></span><span class="line"><span class="cl"><span class="n">gpio_init_struct</span><span class="p">.</span><span class="n">gpio_mode</span> <span class="o">=</span> <span class="n">GPIO_MODE_MUX</span><span class="p">;</span>   <span class="c1">// ← 复用模式
+</span></span></span><span class="line"><span class="cl"><span class="n">gpio_init_struct</span><span class="p">.</span><span class="n">gpio_pins</span> <span class="o">=</span> <span class="n">GPIO_PINS_7</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="nf">gpio_init</span><span class="p">(</span><span class="n">GPIOB</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">gpio_init_struct</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>swi2c_gpio_init()</code> 的代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">gpio_init_struct</span><span class="p">.</span><span class="n">gpio_mode</span> <span class="o">=</span> <span class="n">GPIO_MODE_OUTPUT</span><span class="p">;</span>  <span class="c1">// ← 通用输出模式
+</span></span></span><span class="line"><span class="cl"><span class="n">gpio_init_struct</span><span class="p">.</span><span class="n">gpio_pins</span> <span class="o">=</span> <span class="n">SWI2C_SCL_PIN</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="nf">gpio_init</span><span class="p">(</span><span class="n">SWI2C_SCL_PORT</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">gpio_init_struct</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">gpio_init_struct</span><span class="p">.</span><span class="n">gpio_pins</span> <span class="o">=</span> <span class="n">SWI2C_SDA_PIN</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="nf">gpio_init</span><span class="p">(</span><span class="n">SWI2C_SDA_PORT</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">gpio_init_struct</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="2-软件-i2c-到底怎么操作引脚">2. 软件 I2C 到底怎么操作引脚？
+</h3><p>当前驱动使用软件 I2C（<code>INA226_USE_HW_I2C = 0</code>），通过直接操作 GPIO 寄存器实现时序：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#define SCL_H()   SWI2C_SCL_PORT-&gt;scr = SWI2C_SCL_PIN
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define SCL_L()   SWI2C_SCL_PORT-&gt;clr = SWI2C_SCL_PIN
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define SDA_H()   SWI2C_SDA_PORT-&gt;scr = SWI2C_SDA_PIN
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define SDA_L()   SWI2C_SDA_PORT-&gt;clr = SWI2C_SDA_PIN
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define SDA_READ()  ((SWI2C_SDA_PORT-&gt;idt &amp; SWI2C_SDA_PIN) != 0)
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><code>scr</code>（set output data register）：写 1 输出高电平</li>
+<li><code>clr</code>（clear output data register）：写 1 输出低电平</li>
+<li><code>idt</code>（input data register）：读取引脚输入电平</li>
+</ul>
+<p><strong>关键发现</strong>：<code>scr</code>/<code>clr</code>/<code>idt</code> 这些寄存器只有在引脚处于 <strong>通用 GPIO 模式</strong> 时才有效。当引脚配置为 <strong>复用模式（MUX）</strong> 时，GPIO 寄存器操作无法影响引脚电平，软件 I2C 的 START、STOP、ACK/NACK 全部失效。</p>
+<h3 id="3-为什么先-scan-就能工作">3. 为什么先 Scan 就能工作？
+</h3><p>把两条路径画出来就清楚了：</p>
+<p><strong>正常路径（有 Scan）：</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">main()
+</span></span><span class="line"><span class="cl">  └─ wk_i2c1_init()          → PB6/PB7 = MUX 模式
+</span></span><span class="line"><span class="cl">  └─ INA226_Scan()
+</span></span><span class="line"><span class="cl">       └─ swi2c_gpio_init()  → PB6/PB7 = OUTPUT 模式 ← 切过来了！
+</span></span><span class="line"><span class="cl">       └─ ... 扫描成功
+</span></span><span class="line"><span class="cl">  └─ INA226_Init_U3/U7()     → 软件 I2C 正常工作 ✓
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>问题路径（无 Scan）：</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">main()
+</span></span><span class="line"><span class="cl">  └─ wk_i2c1_init()          → PB6/PB7 = MUX 模式
+</span></span><span class="line"><span class="cl">  └─ INA226_Init_U3/U7()     → 软件 I2C 操作无效 ✗
+</span></span><span class="line"><span class="cl">       └─ 读 ManufID → 0xFFFF（全部 NACK）
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>真相</strong>：<code>INA226_Scan()</code> 内部调用了 <code>swi2c_gpio_init()</code>，把 PB6/PB7 从 MUX 模式切回了 OUTPUT 模式。所以先 Scan 再 Init 是&quot;歪打正着&quot;，真正起作用的是 <code>swi2c_gpio_init()</code>。</p>
+<hr>
+<h2 id="修复方案">修复方案
+</h2><h3 id="思路">思路
+</h3><p>把 <code>swi2c_gpio_init()</code> 的调用从 <code>INA226_Scan()</code> 中提取出来，封装为公共函数，确保 <strong>任何</strong> 需要进行软件 I2C 通信的地方都先初始化 GPIO。</p>
+<h3 id="代码改动">代码改动
+</h3><h4 id="1-新增-ina226_swi2cinit">1. 新增 <code>INA226_Swi2cInit()</code>
+</h4><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * @brief  软件 I2C GPIO 初始化（确保 PB6/PB7 为通用开漏输出）
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * @note   wk_i2c1_init() 把 PB6/PB7 配成了 MUX 复用模式，软件 I2C 需要切回 OUTPUT
+</span></span></span><span class="line"><span class="cl"><span class="cm"> */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">INA226_Swi2cInit</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="cp">#if !INA226_USE_HW_I2C
+</span></span></span><span class="line"><span class="cl">    <span class="nf">swi2c_gpio_init</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="cp">#endif
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="2-三个调用点全部加上">2. 三个调用点全部加上
+</h4><p><strong><code>INA226_Scan()</code></strong>（替换原有的直接调用）：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="nf">INA226_Scan</span><span class="p">(</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="n">found_addrs</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="n">max_num</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="cp">#if !INA226_USE_HW_I2C
+</span></span></span><span class="line"><span class="cl">    <span class="nf">INA226_Swi2cInit</span><span class="p">();</span>   <span class="c1">// ← 替代 swi2c_gpio_init()
+</span></span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nf">swi2c_check_pullup</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span> <span class="p">...</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="cp">#endif
+</span></span></span><span class="line"><span class="cl">    <span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong><code>INA226_Init_U3()</code></strong>（新增）：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="nf">INA226_Init_U3</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint16_t</span> <span class="n">manuf_id</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">INA226_Swi2cInit</span><span class="p">();</span>   <span class="c1">// ← 新增
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">manuf_id</span> <span class="o">=</span> <span class="nf">INA226_ReadReg_Addr</span><span class="p">(</span><span class="n">INA226_U3_ADDR</span><span class="p">,</span> <span class="n">INA226_REG_MANUF_ID</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong><code>INA226_Init_U7()</code></strong>（新增）：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="nf">INA226_Init_U7</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint16_t</span> <span class="n">manuf_id</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">INA226_Swi2cInit</span><span class="p">();</span>   <span class="c1">// ← 新增
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">manuf_id</span> <span class="o">=</span> <span class="nf">INA226_ReadReg_Addr</span><span class="p">(</span><span class="n">INA226_U7_ADDR</span><span class="p">,</span> <span class="n">INA226_REG_MANUF_ID</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="修复后的路径">修复后的路径
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">main()
+</span></span><span class="line"><span class="cl">  └─ wk_i2c1_init()          → PB6/PB7 = MUX 模式
+</span></span><span class="line"><span class="cl">  └─ INA226_Init_U3/U7()     → INA226_Swi2cInit() → OUTPUT 模式
+</span></span><span class="line"><span class="cl">       └─ 软件 I2C 正常工作 ✓
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>现在不需要先 Scan 也能直接 Init 了。</p>
+<hr>
+<h2 id="延伸思考">延伸思考
+</h2><h3 id="硬件-i2c-会碰到这个问题吗">硬件 I2C 会碰到这个问题吗？
+</h3><p>不会。如果 <code>INA226_USE_HW_I2C = 1</code>，驱动使用 AT32 I2C1 外设，通过标准库函数（<code>i2c_start_generate()</code>、<code>i2c_data_send()</code> 等）通信。此时 PB6/PB7 保持 MUX 模式即可，硬件外设自动控制引脚，不存在 GPIO 模式切换问题。</p>
+<h3 id="软件-i2c-和硬件-i2c-能混用吗">软件 I2C 和硬件 I2C 能混用吗？
+</h3><p><strong>不能同时工作。</strong> 两套机制共用 PB6/PB7，软件 I2C 要求 OUTPUT 模式，硬件 I2C 要求 MUX 模式。切换时必须先调用对应的 GPIO 初始化函数。</p>
+<p>当前项目使用软件 I2C（<code>INA226_USE_HW_I2C = 0</code>），因此 <code>wk_i2c1_init()</code> 实际上只起到&quot;总线解锁&quot;的作用（发送 9 个 SCL 脉冲），后续 INA226 驱动完全走软件 I2C。</p>
+<h3 id="怎么避免以后再踩这个坑">怎么避免以后再踩这个坑？
+</h3><p><strong>核心原则</strong>：软件 I2C 的读写函数<strong>自身</strong>应该保证 GPIO 模式正确，不能依赖外部先调用某个初始化函数。</p>
+<p>更彻底的修复方式：在 <code>i2c1_write()</code> / <code>i2c1_read()</code> 的开头调用 <code>swi2c_gpio_init()</code>，这样任何 I2C 操作都自动确保 GPIO 模式正确。GPIO 初始化本身很快（几条寄存器写），实际性能影响可忽略。</p>
+<hr>
+<h2 id="总结">总结
+</h2><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>问题</th>
+					<th>原因</th>
+					<th>解决</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>读取返回 <code>0xFFFF</code></td>
+					<td>PB6/PB7 处于 MUX 模式，软件 I2C 寄存器操作无效</td>
+					<td>在 Init 前调用 <code>swi2c_gpio_init()</code> 切回 OUTPUT 模式</td>
+			</tr>
+			<tr>
+					<td>必须先 Scan 才能 Init</td>
+					<td><code>INA226_Scan()</code> 内部调了 <code>swi2c_gpio_init()</code></td>
+					<td>提取为公共函数 <code>INA226_Swi2cInit()</code>，所有 I2C 操作前都调用</td>
+			</tr>
+	</tbody>
+</table></div>
+<p>这个 bug 最坑的地方在于：<strong>它不是每次必现</strong>。如果你的代码恰好先调了 Scan，一切正常；一旦跳过 Scan，问题才暴露。这种&quot;隐式依赖&quot;是嵌入式开发中最容易踩的坑之一。</p>
+<hr>
+<p><em>环境：AT32F403A + INA226 + 软件 I2C (bit-bang)</em></p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/at32f403a/">AT32F403A</a>
+        
+            <a href="/tags/ina226/">INA226</a>
+        
+            <a href="/tags/i2c/">I2C</a>
+        
+            <a href="/tags/%E8%BD%AF%E4%BB%B6-i2c/">软件 I2C</a>
+        
+            <a href="/tags/gpio/">GPIO</a>
+        
+    </section>
+
+
+    <section class="article-lastmod">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <span>
+            最后更新于 Jun 03, 2026 10:32 &#43;0800
+        </span>
+    </section></footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/microlink--segger-rtt-%E6%89%93%E5%8D%B0%E8%B8%A9%E5%9D%91no-find-_segger_rtt-addr/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">MicroLink &#43; SEGGER RTT 打印踩坑：no find _SEGGER_RTT addr</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/py32f002a-%E9%80%89%E9%A1%B9%E5%AD%97%E8%8A%82%E5%AE%9E%E6%88%98%E6%8A%8A-reset-%E5%BC%95%E8%84%9A%E5%8F%98%E6%88%90%E6%99%AE%E9%80%9A-gpio/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PY32F002A 选项字节实战：把 RESET 引脚变成普通 GPIO</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hugo%E6%A0%BC%E5%BC%8F%E8%AF%B4%E6%98%8E%E8%AE%B0%E8%BD%BD%E7%AC%94%E8%AE%B0/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="https://cdn.jsdelivr.net/gh/ClingYang/img1@latest/20250320145323127.png" loading="lazy" data-key="" data-hash="https://cdn.jsdelivr.net/gh/ClingYang/img1@latest/20250320145323127.png"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">hugo格式说明记载笔记</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="ClingYang/ClingYang.github.io"
+        issue-term="pathname"
+        
+        label="💬comment"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2026 CLing
+    </section>
+    
+    <section class="powerby">
+        
+            世界是你们 <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<style>
+    #TableOfContents > ul, ol {
+        ul, ol {
+            display: none;
+        }
+        .open {
+            display: block;
+        }
+    }
+</style>
+
+<script>
+    function initTocHide() {
+        
+        let toc = document.querySelector(".widget--toc");
+        if (!toc) {
+            return;
+        }
+        
+        window.addEventListener('scroll', function() {
+            
+            let currentLi = document.querySelector(".active-class");
+            if (!currentLi) {
+                return
+            }
+            
+            let elementsByClassName = document.querySelectorAll(".open");
+            if (elementsByClassName.length > 0) {
+                elementsByClassName.forEach((ul) => {
+                    ul.classList.remove("open")
+                })
+            }
+            
+            if (currentLi.children.length > 1) {
+                currentLi.children[1].classList.add("open")
+            }
+            
+            let ul = currentLi.parentElement;
+            do {
+                ul.classList.add("open");
+                ul = ul.parentElement.parentElement
+            } while (ul !== undefined && (ul.localName === 'ul' || ul.localName === 'ol'))
+        });
+    }
+    initTocHide()
+</script>
+
+    </body>
+</html>
