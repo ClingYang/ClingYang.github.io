@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="ESP32-S3 连 WiFi 提示 reason=15 4WAY_HANDSHAKE_TIMEOUT，密码明明是对的却连不上？本文记录从密码悬垂指针到架构重写的完整排查过程">
+<title>ESP32-S3 WiFi 连接踩坑：reason=15 不是密码错了</title>
+
+<link rel='canonical' href='https://clingyang.github.io/p/esp32-s3-wifi-%E8%BF%9E%E6%8E%A5%E8%B8%A9%E5%9D%91reason15-%E4%B8%8D%E6%98%AF%E5%AF%86%E7%A0%81%E9%94%99%E4%BA%86/'>
+
+<link rel="stylesheet" href="/scss/style.min.61d57cd75eec9cf61874fc12617af35f32a2d88c6ed4b65ff3cf62af03ebf48e.css"><meta property='og:title' content="ESP32-S3 WiFi 连接踩坑：reason=15 不是密码错了">
+<meta property='og:description' content="ESP32-S3 连 WiFi 提示 reason=15 4WAY_HANDSHAKE_TIMEOUT，密码明明是对的却连不上？本文记录从密码悬垂指针到架构重写的完整排查过程">
+<meta property='og:url' content='https://clingyang.github.io/p/esp32-s3-wifi-%E8%BF%9E%E6%8E%A5%E8%B8%A9%E5%9D%91reason15-%E4%B8%8D%E6%98%AF%E5%AF%86%E7%A0%81%E9%94%99%E4%BA%86/'>
+<meta property='og:site_name' content='CLing'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='ESP32-S3' /><meta property='article:tag' content='WiFi' /><meta property='article:tag' content='LVGL' /><meta property='article:tag' content='FreeRTOS' /><meta property='article:tag' content='ESP-IDF' /><meta property='article:published_time' content='2026-05-26T08:00:00&#43;08:00'/><meta property='article:modified_time' content='2026-06-05T17:26:21&#43;08:00'/>
+<meta name="twitter:title" content="ESP32-S3 WiFi 连接踩坑：reason=15 不是密码错了">
+<meta name="twitter:description" content="ESP32-S3 连 WiFi 提示 reason=15 4WAY_HANDSHAKE_TIMEOUT，密码明明是对的却连不上？本文记录从密码悬垂指针到架构重写的完整排查过程">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                            height="290" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🏀</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">CLing</a></h1>
+            <h2 class="site-description">你好 欢迎来到我的博客</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>档案</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E6%8A%80%E6%9C%AF%E9%93%BE%E6%8E%A5/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>技术链接</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#问题现象">问题现象</a></li>
+    <li><a href="#排查阶段一密码到底输对了没有">排查阶段一：密码到底输对了没有？</a></li>
+    <li><a href="#排查阶段二wifi-配置缺字段">排查阶段二：WiFi 配置缺字段？</a></li>
+    <li><a href="#排查阶段三多余的-esp_wifi_disconnect">排查阶段三：多余的 <code>esp_wifi_disconnect()</code></a></li>
+    <li><a href="#排查阶段四密码变成了状态标签文本根因之一">排查阶段四：密码变成了状态标签文本！（根因之一）</a>
+      <ol>
+        <li><a href="#根因分析">根因分析</a></li>
+        <li><a href="#修复">修复</a></li>
+      </ol>
+    </li>
+    <li><a href="#排查阶段五ui-回调里直接调-wifi-api根因之二">排查阶段五：UI 回调里直接调 WiFi API（根因之二）</a>
+      <ol>
+        <li><a href="#为什么-ui-回调里不能直接连-wifi">为什么 UI 回调里不能直接连 WiFi？</a></li>
+        <li><a href="#修复--重写为后台任务模式">修复 —— 重写为后台任务模式</a></li>
+      </ol>
+    </li>
+    <li><a href="#所有修复点汇总">所有修复点汇总</a></li>
+    <li><a href="#关键教训">关键教训</a>
+      <ol>
+        <li><a href="#1-lvgl-对象删除后指针立即失效">1. LVGL 对象删除后指针立即失效</a></li>
+        <li><a href="#2-ui-线程只做-ui-的事">2. UI 线程只做 UI 的事</a></li>
+        <li><a href="#3-看参考例程要看架构">3. 看参考例程要看架构</a></li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/esp32/" >
+                ESP32
+            </a>
+        
+            <a href="/categories/%E7%AC%94%E8%AE%B0/" >
+                笔记
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/esp32-s3-wifi-%E8%BF%9E%E6%8E%A5%E8%B8%A9%E5%9D%91reason15-%E4%B8%8D%E6%98%AF%E5%AF%86%E7%A0%81%E9%94%99%E4%BA%86/">ESP32-S3 WiFi 连接踩坑：reason=15 不是密码错了</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            ESP32-S3 连 WiFi 提示 reason=15 4WAY_HANDSHAKE_TIMEOUT，密码明明是对的却连不上？本文记录从密码悬垂指针到架构重写的完整排查过程
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2026-05-26</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 4 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="问题现象">问题现象
+</h2><p>点击 WiFi 列表里的网络、输入密码，串口输出：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">I (38676) wifi:state: init -&gt; auth (0xb0)
+</span></span><span class="line"><span class="cl">I (38736) wifi:state: auth -&gt; assoc (0x0)
+</span></span><span class="line"><span class="cl">I (38796) wifi:state: assoc -&gt; run (0x10)
+</span></span><span class="line"><span class="cl">W (41966) main: WiFi disconnected, reason=15 (ssid=Redmi Note 12 Turbo)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>reason=15</code> 对应 <code>WIFI_REASON_4WAY_HANDSHAKE_TIMEOUT</code>，看起来是 4-way handshake 超时——<strong>通常意味着密码错了</strong>。</p>
+<p>但密码是纯数字 <code>1234567890</code>，输了好几遍，绝对没错，为什么还是连不上？</p>
+<hr>
+<h2 id="排查阶段一密码到底输对了没有">排查阶段一：密码到底输对了没有？
+</h2><p>项目用 <code>lv_roller</code> 滚轮输入密码，确实容易手滑。先加一行日志确认：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">ESP_LOGI</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span> <span class="s">&#34;UI: password=&#39;%s&#39;&#34;</span><span class="p">,</span> <span class="n">password</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>结果</strong>：日志输出 <code>password='1234567890'</code>，密码完全正确。排除输错密码。</p>
+<hr>
+<h2 id="排查阶段二wifi-配置缺字段">排查阶段二：WiFi 配置缺字段？
+</h2><p>对比参考例程 <code>09-wifi_scan_connect</code>，发现例程的 <code>wifi_config_t</code> 多了两个字段：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">wifi_config_t</span> <span class="n">wifi_config</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="p">.</span><span class="n">sta</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="p">.</span><span class="n">threshold</span><span class="p">.</span><span class="n">authmode</span> <span class="o">=</span> <span class="n">WIFI_AUTH_WPA2_PSK</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="p">.</span><span class="n">sae_pwe_h2e</span> <span class="o">=</span> <span class="n">WPA3_SAE_PWE_BOTH</span><span class="p">,</span>        <span class="c1">// ← 原来没有
+</span></span></span><span class="line"><span class="cl">        <span class="p">.</span><span class="n">sae_h2e_identifier</span> <span class="o">=</span> <span class="s">&#34;&#34;</span><span class="p">,</span>                  <span class="c1">// ← 原来没有
+</span></span></span><span class="line"><span class="cl">    <span class="p">},</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>现在的手机和路由器很多是 WPA2/WPA3 混合模式，不配置这两个字段 handshake 可能失败。</p>
+<p><strong>修复</strong>：加上这两个字段。</p>
+<p><strong>结果</strong>：仍然连不上。</p>
+<hr>
+<h2 id="排查阶段三多余的-esp_wifi_disconnect">排查阶段三：多余的 <code>esp_wifi_disconnect()</code>
+</h2><p>原始代码连接前调了 <code>esp_wifi_disconnect()</code>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">esp_wifi_disconnect</span><span class="p">();</span>              <span class="c1">// ← 参考例程里没有这行
+</span></span></span><span class="line"><span class="cl"><span class="nf">esp_wifi_set_config</span><span class="p">(</span><span class="n">WIFI_IF_STA</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">wifi_config</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">esp_wifi_connect</span><span class="p">();</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>修复</strong>：删掉这行。</p>
+<p><strong>结果</strong>：还是连不上，但日志出现了更诡异的现象。</p>
+<hr>
+<h2 id="排查阶段四密码变成了状态标签文本根因之一">排查阶段四：密码变成了状态标签文本！（根因之一）
+</h2><p>日志突然变成这样：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">I (38666) page_wifi: wifi_connect_task: SSID=&#39;Redmi Note 12 Turbo&#39; PASS=&#39;正在连接 Redmi Note 12 Turbo...&#39;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>密码变成了 <code>&quot;正在连接 Redmi Note 12 Turbo...&quot;</code>？！</strong></p>
+<p>这不是密码，这是状态标签的文本！</p>
+<h3 id="根因分析">根因分析
+</h3><p>看回调函数：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">wifi_connect_cb</span><span class="p">(</span><span class="kt">lv_event_t</span> <span class="o">*</span><span class="n">e</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">password</span> <span class="o">=</span> <span class="nf">lv_textarea_get_text</span><span class="p">(</span><span class="n">s_ta_pass</span><span class="p">);</span>  <span class="c1">// ① 获取密码指针
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">lv_obj_del</span><span class="p">(</span><span class="n">s_pwnd</span><span class="p">);</span>                                       <span class="c1">// ② 删除弹窗！
+</span></span></span><span class="line"><span class="cl">    <span class="c1">// s_ta_pass 是 s_pwnd 的子对象，删除弹窗后内部缓冲区被释放
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">lv_label_set_text_fmt</span><span class="p">(</span><span class="n">s_status_label</span><span class="p">,</span> <span class="s">&#34;正在连接 %s...&#34;</span><span class="p">,</span> <span class="n">s_selected_ssid</span><span class="p">);</span>  <span class="c1">// ③ 写状态标签
+</span></span></span><span class="line"><span class="cl">    <span class="c1">// 释放的内存可能被 LVGL 内存管理器重用了
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">xQueueSend</span><span class="p">(</span><span class="n">s_wifi_queue</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="p">...);</span>  <span class="c1">// ④ 发送的是悬空指针指向的垃圾数据！
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>问题很清晰：</p>
+<ol>
+<li><code>lv_textarea_get_text()</code> 返回的是对象内部缓冲区的指针</li>
+<li><code>lv_obj_del(s_pwnd)</code> 删除弹窗，连带释放了 <code>s_ta_pass</code> 的缓冲区</li>
+<li>后面 <code>lv_label_set_text_fmt()</code> 写状态标签时，那块内存可能被重用了</li>
+<li><code>xQueueSend()</code> 发送的 <code>password</code> 已经指向了状态标签的文本！</li>
+</ol>
+<h3 id="修复">修复
+</h3><p><strong>先复制密码到局部缓冲区，再删除弹窗：</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">wifi_connect_cb</span><span class="p">(</span><span class="kt">lv_event_t</span> <span class="o">*</span><span class="n">e</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">password</span> <span class="o">=</span> <span class="nf">lv_textarea_get_text</span><span class="p">(</span><span class="n">s_ta_pass</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">password</span> <span class="o">||</span> <span class="n">password</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="sc">&#39;\0&#39;</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* ✅ 先复制密码到局部缓冲区，再删除弹窗 */</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">char</span> <span class="n">pass_copy</span><span class="p">[</span><span class="mi">64</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">strncpy</span><span class="p">(</span><span class="n">pass_copy</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">pass_copy</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">pass_copy</span><span class="p">[</span><span class="k">sizeof</span><span class="p">(</span><span class="n">pass_copy</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="sc">&#39;\0&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">ESP_LOGI</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span> <span class="s">&#34;UI: password=&#39;%s&#39;&#34;</span><span class="p">,</span> <span class="n">pass_copy</span><span class="p">);</span>  <span class="c1">// 确认密码正确
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">lv_obj_del</span><span class="p">(</span><span class="n">s_pwnd</span><span class="p">);</span>  <span class="c1">// 现在可以安全删除弹窗了
+</span></span></span><span class="line"><span class="cl">    <span class="n">s_pwnd</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 通过队列发送给后台任务 */</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">wifi_account_t</span> <span class="n">account</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">strncpy</span><span class="p">(</span><span class="n">account</span><span class="p">.</span><span class="n">ssid</span><span class="p">,</span> <span class="n">s_selected_ssid</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">account</span><span class="p">.</span><span class="n">ssid</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">strncpy</span><span class="p">(</span><span class="n">account</span><span class="p">.</span><span class="n">password</span><span class="p">,</span> <span class="n">pass_copy</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">account</span><span class="p">.</span><span class="n">password</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>  <span class="c1">// ✅ 使用安全副本
+</span></span></span><span class="line"><span class="cl">    <span class="nf">xQueueSend</span><span class="p">(</span><span class="n">s_wifi_queue</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">account</span><span class="p">,</span> <span class="n">portMAX_DELAY</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>结果</strong>：密码正确传输了，但 WiFi 仍然连不上。继续排查。</p>
+<hr>
+<h2 id="排查阶段五ui-回调里直接调-wifi-api根因之二">排查阶段五：UI 回调里直接调 WiFi API（根因之二）
+</h2><p>前面的修复解决了密码传输问题，但连接仍然失败 <code>reason=15</code>。</p>
+<p>再仔细对比参考例程，发现<strong>核心差异不在某一行代码，而在架构</strong>：</p>
+<div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>项目</th>
+					<th>我们的项目</th>
+					<th>参考例程</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>连接触发</td>
+					<td>UI 事件回调中直接 <code>esp_wifi_connect()</code></td>
+					<td>UI 只发队列，<strong>后台任务</strong>处理连接</td>
+			</tr>
+			<tr>
+					<td>同步方式</td>
+					<td>没有同步，直接返回</td>
+					<td><code>xEventGroupWaitBits</code> 等待结果</td>
+			</tr>
+			<tr>
+					<td>重试逻辑</td>
+					<td>没有</td>
+					<td>断开时自动重试 3 次</td>
+			</tr>
+			<tr>
+					<td>任务分离</td>
+					<td>UI 和 WiFi 混在一起</td>
+					<td>UI 线程 ↔ 队列 ↔ WiFi 线程</td>
+			</tr>
+	</tbody>
+</table></div>
+<h3 id="为什么-ui-回调里不能直接连-wifi">为什么 UI 回调里不能直接连 WiFi？
+</h3><ol>
+<li><strong>时序问题</strong>：WiFi 驱动在某些状态下不接受配置变更</li>
+<li><strong>事件冲突</strong>：<code>esp_wifi_connect()</code> 是异步的，回调返回后事件处理可能还没完</li>
+<li><strong>缺少重试</strong>：断开后没有重试，一次失败就彻底凉了</li>
+</ol>
+<h3 id="修复--重写为后台任务模式">修复 —— 重写为后台任务模式
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cm">/* 队列和 EventGroup */</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="n">QueueHandle_t</span> <span class="n">s_wifi_queue</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="n">EventGroupHandle_t</span> <span class="n">s_wifi_event_group</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define WIFI_CONNECTED_BIT  BIT0
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define WIFI_FAIL_BIT       BIT1
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">char</span> <span class="n">ssid</span><span class="p">[</span><span class="mi">32</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">char</span> <span class="n">password</span><span class="p">[</span><span class="mi">64</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="kt">wifi_account_t</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* ---------- 后台连接任务 ---------- */</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">wifi_connect_task</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">arg</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">wifi_account_t</span> <span class="n">account</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="nf">xQueueReceive</span><span class="p">(</span><span class="n">s_wifi_queue</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">account</span><span class="p">,</span> <span class="n">portMAX_DELAY</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="kt">wifi_config_t</span> <span class="n">wifi_config</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="p">.</span><span class="n">sta</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="p">.</span><span class="n">threshold</span><span class="p">.</span><span class="n">authmode</span> <span class="o">=</span> <span class="n">WIFI_AUTH_WPA2_PSK</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                    <span class="p">.</span><span class="n">sae_pwe_h2e</span> <span class="o">=</span> <span class="n">WPA3_SAE_PWE_BOTH</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                    <span class="p">.</span><span class="n">sae_h2e_identifier</span> <span class="o">=</span> <span class="s">&#34;&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                <span class="p">},</span>
+</span></span><span class="line"><span class="cl">            <span class="p">};</span>
+</span></span><span class="line"><span class="cl">            <span class="nf">strcpy</span><span class="p">((</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">wifi_config</span><span class="p">.</span><span class="n">sta</span><span class="p">.</span><span class="n">ssid</span><span class="p">,</span> <span class="n">account</span><span class="p">.</span><span class="n">ssid</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="nf">strcpy</span><span class="p">((</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">wifi_config</span><span class="p">.</span><span class="n">sta</span><span class="p">.</span><span class="n">password</span><span class="p">,</span> <span class="n">account</span><span class="p">.</span><span class="n">password</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="nf">ESP_ERROR_CHECK</span><span class="p">(</span><span class="nf">esp_wifi_set_config</span><span class="p">(</span><span class="n">WIFI_IF_STA</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">wifi_config</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">            <span class="nf">esp_wifi_connect</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="n">EventBits_t</span> <span class="n">bits</span> <span class="o">=</span> <span class="nf">xEventGroupWaitBits</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">                <span class="n">s_wifi_event_group</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                <span class="n">WIFI_CONNECTED_BIT</span> <span class="o">|</span> <span class="n">WIFI_FAIL_BIT</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                <span class="n">pdFALSE</span><span class="p">,</span> <span class="n">pdFALSE</span><span class="p">,</span> <span class="n">portMAX_DELAY</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">bits</span> <span class="o">&amp;</span> <span class="n">WIFI_CONNECTED_BIT</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="nf">ESP_LOGI</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span> <span class="s">&#34;WiFi connected OK&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">bits</span> <span class="o">&amp;</span> <span class="n">WIFI_FAIL_BIT</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="nf">ESP_LOGW</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span> <span class="s">&#34;WiFi connect failed&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* ---------- UI 回调：只发队列 ---------- */</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">wifi_connect_cb</span><span class="p">(</span><span class="kt">lv_event_t</span> <span class="o">*</span><span class="n">e</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">password</span> <span class="o">=</span> <span class="nf">lv_textarea_get_text</span><span class="p">(</span><span class="n">s_ta_pass</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">password</span> <span class="o">||</span> <span class="n">password</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="sc">&#39;\0&#39;</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kt">char</span> <span class="n">pass_copy</span><span class="p">[</span><span class="mi">64</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">strncpy</span><span class="p">(</span><span class="n">pass_copy</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">pass_copy</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">pass_copy</span><span class="p">[</span><span class="k">sizeof</span><span class="p">(</span><span class="n">pass_copy</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="sc">&#39;\0&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">lv_obj_del</span><span class="p">(</span><span class="n">s_pwnd</span><span class="p">);</span>  <span class="c1">// 关闭弹窗
+</span></span></span><span class="line"><span class="cl">    <span class="n">s_pwnd</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kt">wifi_account_t</span> <span class="n">account</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">strncpy</span><span class="p">(</span><span class="n">account</span><span class="p">.</span><span class="n">ssid</span><span class="p">,</span> <span class="n">s_selected_ssid</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">account</span><span class="p">.</span><span class="n">ssid</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">strncpy</span><span class="p">(</span><span class="n">account</span><span class="p">.</span><span class="n">password</span><span class="p">,</span> <span class="n">pass_copy</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">account</span><span class="p">.</span><span class="n">password</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">xQueueSend</span><span class="p">(</span><span class="n">s_wifi_queue</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">account</span><span class="p">,</span> <span class="n">portMAX_DELAY</span><span class="p">);</span>  <span class="c1">// ✅ 发给后台任务
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* ---------- 初始化时创建任务 ---------- */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">page_wifi_init</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">s_wifi_event_group</span> <span class="o">=</span> <span class="nf">xEventGroupCreate</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">s_wifi_queue</span> <span class="o">=</span> <span class="nf">xQueueCreate</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">wifi_account_t</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">xTaskCreatePinnedToCore</span><span class="p">(</span><span class="n">wifi_connect_task</span><span class="p">,</span> <span class="s">&#34;wifi_conn&#34;</span><span class="p">,</span> <span class="mi">4</span><span class="o">*</span><span class="mi">1024</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>同时加上重试机制：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">int</span> <span class="n">s_wifi_retry_num</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define WIFI_MAX_RETRY  3
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">wifi_event_handle</span><span class="p">(...)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// ...
+</span></span></span><span class="line"><span class="cl">    <span class="k">case</span> <span class="nl">WIFI_EVENT_STA_DISCONNECTED</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">s_wifi_retry_num</span> <span class="o">&lt;</span> <span class="n">WIFI_MAX_RETRY</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nf">esp_wifi_connect</span><span class="p">();</span>  <span class="c1">// 自动重试
+</span></span></span><span class="line"><span class="cl">            <span class="n">s_wifi_retry_num</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nf">page_wifi_on_failed</span><span class="p">();</span>  <span class="c1">// 通知 UI
+</span></span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// ...
+</span></span></span><span class="line"><span class="cl">    <span class="k">case</span> <span class="nl">IP_EVENT_STA_GOT_IP</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="n">s_wifi_retry_num</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>  <span class="c1">// 重置重试计数
+</span></span></span><span class="line"><span class="cl">        <span class="nf">page_wifi_on_connected</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>结果：连接成功！</strong></p>
+<hr>
+<h2 id="所有修复点汇总">所有修复点汇总
+</h2><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>#</th>
+					<th>问题</th>
+					<th>修复</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>1</td>
+					<td><code>wifi_config_t</code> 缺 WPA3 字段</td>
+					<td>加 <code>.sae_pwe_h2e = WPA3_SAE_PWE_BOTH</code> 和 <code>.sae_h2e_identifier = &quot;&quot;</code></td>
+			</tr>
+			<tr>
+					<td>2</td>
+					<td>多余的 <code>esp_wifi_disconnect()</code></td>
+					<td><strong>删除</strong>这行</td>
+			</tr>
+			<tr>
+					<td>3</td>
+					<td><strong>悬垂指针</strong>：删弹窗后缓冲区失效</td>
+					<td><strong>先复制密码到局部变量，再删弹窗</strong></td>
+			</tr>
+			<tr>
+					<td>4</td>
+					<td>UI 回调直接操作 WiFi</td>
+					<td>改用<strong>队列 + 后台 FreeRTOS 任务</strong></td>
+			</tr>
+			<tr>
+					<td>5</td>
+					<td>缺少自动重试</td>
+					<td>事件处理中加 <code>WIFI_MAX_RETRY</code></td>
+			</tr>
+	</tbody>
+</table></div>
+<hr>
+<h2 id="关键教训">关键教训
+</h2><h3 id="1-lvgl-对象删除后指针立即失效">1. LVGL 对象删除后指针立即失效
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="c1">// ❌ 错误：先删对象，再用指针
+</span></span></span><span class="line"><span class="cl"><span class="nf">lv_obj_del</span><span class="p">(</span><span class="n">parent</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">xQueueSend</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">child_text</span><span class="p">);</span>   <span class="c1">// 指向已释放内存
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// ✅ 正确：先复制数据，再删对象
+</span></span></span><span class="line"><span class="cl"><span class="kt">char</span> <span class="n">buf</span><span class="p">[</span><span class="mi">64</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="nf">strncpy</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="n">child_text</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">lv_obj_del</span><span class="p">(</span><span class="n">parent</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">xQueueSend</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">buf</span><span class="p">);</span>          <span class="c1">// 安全
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong><code>lv_obj_get_text()</code> / <code>lv_textarea_get_text()</code> 返回的是对象内部缓冲区的指针，对象删除后立即失效。</strong></p>
+<h3 id="2-ui-线程只做-ui-的事">2. UI 线程只做 UI 的事
+</h3><p>WiFi 连接涉及异步事件、状态机、超时重试，这些都应该放在<strong>后台任务</strong>。UI 只负责：</p>
+<ul>
+<li>显示界面</li>
+<li>收集用户输入</li>
+<li>通过队列/事件通知后台</li>
+</ul>
+<h3 id="3-看参考例程要看架构">3. 看参考例程要看架构
+</h3><p>不要只看参考例程的某一行代码，要看整体：</p>
+<ul>
+<li>任务怎么划分的</li>
+<li>同步用什么机制</li>
+<li>初始化顺序</li>
+<li>错误怎么处理</li>
+</ul>
+<hr>
+<p><em>硬件：立创实战派 ESP32-S3 开发板 | 环境：ESP-IDF v5.5 + LVGL 8.3</em></p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/esp32-s3/">ESP32-S3</a>
+        
+            <a href="/tags/wifi/">WiFi</a>
+        
+            <a href="/tags/lvgl/">LVGL</a>
+        
+            <a href="/tags/freertos/">FreeRTOS</a>
+        
+            <a href="/tags/esp-idf/">ESP-IDF</a>
+        
+    </section>
+
+
+    <section class="article-lastmod">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <span>
+            最后更新于 Jun 05, 2026 17:26 &#43;0800
+        </span>
+    </section></footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/ina226-%E8%BD%AF%E4%BB%B6-i2c-%E5%88%9D%E5%A7%8B%E5%8C%96%E8%B8%A9%E5%9D%91%E8%AF%BB%E5%8F%96%E8%BF%94%E5%9B%9E-0xffff/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">INA226 软件 I2C 初始化踩坑：读取返回 0xFFFF</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/microlink--segger-rtt-%E6%89%93%E5%8D%B0%E8%B8%A9%E5%9D%91no-find-_segger_rtt-addr/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">MicroLink &#43; SEGGER RTT 打印踩坑：no find _SEGGER_RTT addr</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/py32f002a-%E9%80%89%E9%A1%B9%E5%AD%97%E8%8A%82%E5%AE%9E%E6%88%98%E6%8A%8A-reset-%E5%BC%95%E8%84%9A%E5%8F%98%E6%88%90%E6%99%AE%E9%80%9A-gpio/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PY32F002A 选项字节实战：把 RESET 引脚变成普通 GPIO</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/esp32-arduino-%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="https://cdn.jsdelivr.net/gh/ClingYang/img1@latest/20250320145935000.png" loading="lazy" data-key="" data-hash="https://cdn.jsdelivr.net/gh/ClingYang/img1@latest/20250320145935000.png"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">ESP32 ARDUINO 开发环境搭建</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hugo%E6%A0%BC%E5%BC%8F%E8%AF%B4%E6%98%8E%E8%AE%B0%E8%BD%BD%E7%AC%94%E8%AE%B0/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="https://cdn.jsdelivr.net/gh/ClingYang/img1@latest/20250320145323127.png" loading="lazy" data-key="" data-hash="https://cdn.jsdelivr.net/gh/ClingYang/img1@latest/20250320145323127.png"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">hugo格式说明记载笔记</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="ClingYang/ClingYang.github.io"
+        issue-term="pathname"
+        
+        label="💬comment"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2026 CLing
+    </section>
+    
+    <section class="powerby">
+        
+            世界是你们 <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<style>
+    #TableOfContents > ul, ol {
+        ul, ol {
+            display: none;
+        }
+        .open {
+            display: block;
+        }
+    }
+</style>
+
+<script>
+    function initTocHide() {
+        
+        let toc = document.querySelector(".widget--toc");
+        if (!toc) {
+            return;
+        }
+        
+        window.addEventListener('scroll', function() {
+            
+            let currentLi = document.querySelector(".active-class");
+            if (!currentLi) {
+                return
+            }
+            
+            let elementsByClassName = document.querySelectorAll(".open");
+            if (elementsByClassName.length > 0) {
+                elementsByClassName.forEach((ul) => {
+                    ul.classList.remove("open")
+                })
+            }
+            
+            if (currentLi.children.length > 1) {
+                currentLi.children[1].classList.add("open")
+            }
+            
+            let ul = currentLi.parentElement;
+            do {
+                ul.classList.add("open");
+                ul = ul.parentElement.parentElement
+            } while (ul !== undefined && (ul.localName === 'ul' || ul.localName === 'ol'))
+        });
+    }
+    initTocHide()
+</script>
+
+    </body>
+</html>
