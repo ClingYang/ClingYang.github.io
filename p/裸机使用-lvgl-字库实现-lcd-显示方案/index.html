@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="在 AT32F421 等无 OS 单片机上不跑完整 LVGL，只提取其字库数据和渲染器实现高质量 4bpp 抗锯齿文字显示">
+<title>裸机使用 LVGL 字库实现 LCD 显示方案</title>
+
+<link rel='canonical' href='https://clingyang.github.io/p/%E8%A3%B8%E6%9C%BA%E4%BD%BF%E7%94%A8-lvgl-%E5%AD%97%E5%BA%93%E5%AE%9E%E7%8E%B0-lcd-%E6%98%BE%E7%A4%BA%E6%96%B9%E6%A1%88/'>
+
+<link rel="stylesheet" href="/scss/style.min.61d57cd75eec9cf61874fc12617af35f32a2d88c6ed4b65ff3cf62af03ebf48e.css"><meta property='og:title' content="裸机使用 LVGL 字库实现 LCD 显示方案">
+<meta property='og:description' content="在 AT32F421 等无 OS 单片机上不跑完整 LVGL，只提取其字库数据和渲染器实现高质量 4bpp 抗锯齿文字显示">
+<meta property='og:url' content='https://clingyang.github.io/p/%E8%A3%B8%E6%9C%BA%E4%BD%BF%E7%94%A8-lvgl-%E5%AD%97%E5%BA%93%E5%AE%9E%E7%8E%B0-lcd-%E6%98%BE%E7%A4%BA%E6%96%B9%E6%A1%88/'>
+<meta property='og:site_name' content='CLing'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='AT32F421' /><meta property='article:tag' content='LVGL' /><meta property='article:tag' content='LCD' /><meta property='article:tag' content='字库' /><meta property='article:tag' content='裸机' /><meta property='article:published_time' content='2026-06-29T08:00:00&#43;08:00'/><meta property='article:modified_time' content='2026-06-29T13:44:37&#43;08:00'/>
+<meta name="twitter:title" content="裸机使用 LVGL 字库实现 LCD 显示方案">
+<meta name="twitter:description" content="在 AT32F421 等无 OS 单片机上不跑完整 LVGL，只提取其字库数据和渲染器实现高质量 4bpp 抗锯齿文字显示">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                            height="290" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🏀</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">CLing</a></h1>
+            <h2 class="site-description">你好 欢迎来到我的博客</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>档案</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E6%8A%80%E6%9C%AF%E9%93%BE%E6%8E%A5/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>技术链接</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#前言">前言</a></li>
+    <li><a href="#一方案对比">一、方案对比</a></li>
+    <li><a href="#二文件结构">二、文件结构</a></li>
+    <li><a href="#三核心原理">三、核心原理</a>
+      <ol>
+        <li><a href="#31-lvgl-字库文件格式">3.1 LVGL 字库文件格式</a></li>
+        <li><a href="#32-关键数据结构">3.2 关键数据结构</a></li>
+        <li><a href="#33-cmap-映射类型">3.3 cmap 映射类型</a></li>
+      </ol>
+    </li>
+    <li><a href="#四渲染器实现">四、渲染器实现</a>
+      <ol>
+        <li><a href="#41-字形查找">4.1 字形查找</a></li>
+        <li><a href="#42-坐标计算">4.2 坐标计算</a></li>
+        <li><a href="#43-两种渲染模式">4.3 两种渲染模式</a>
+          <ol>
+            <li><a href="#模式-a非透明bg--0xffff-批量写快">模式 A：非透明（bg != 0xFFFF）— 批量写，快</a></li>
+            <li><a href="#模式-b透明bg--0xffff-逐像素慢但安全">模式 B：透明（bg == 0xFFFF）— 逐像素，慢但安全</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#五ui-驱动设计">五、UI 驱动设计</a>
+      <ol>
+        <li><a href="#51-布局参考">5.1 布局参考</a></li>
+        <li><a href="#52-初始化">5.2 初始化</a></li>
+        <li><a href="#53-动态刷新与防闪">5.3 动态刷新与防闪</a></li>
+      </ol>
+    </li>
+    <li><a href="#六字库文件适配">六、字库文件适配</a>
+      <ol>
+        <li><a href="#61-修改-include">6.1 修改 include</a></li>
+        <li><a href="#62-开启-c99">6.2 开启 C99</a></li>
+        <li><a href="#63-字体对应关系示例">6.3 字体对应关系示例</a></li>
+      </ol>
+    </li>
+    <li><a href="#七常见问题">七、常见问题</a>
+      <ol>
+        <li><a href="#q字体完全不显示">Q：字体完全不显示</a></li>
+        <li><a href="#q字形位置偏移--显示在屏幕外">Q：字形位置偏移 / 显示在屏幕外</a></li>
+        <li><a href="#q刷新时频闪">Q：刷新时频闪</a></li>
+        <li><a href="#q字体边缘灰色光晕">Q：字体边缘灰色光晕</a></li>
+        <li><a href="#q数字残影如-0--1">Q：数字残影（如 &ldquo;0&rdquo; → &ldquo;1&rdquo;）</a></li>
+      </ol>
+    </li>
+    <li><a href="#八mainc-调用示例">八、main.c 调用示例</a></li>
+    <li><a href="#九移植到新项目">九、移植到新项目</a></li>
+    <li><a href="#总结">总结</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/at32/" >
+                AT32
+            </a>
+        
+            <a href="/categories/%E7%AC%94%E8%AE%B0/" >
+                笔记
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E8%A3%B8%E6%9C%BA%E4%BD%BF%E7%94%A8-lvgl-%E5%AD%97%E5%BA%93%E5%AE%9E%E7%8E%B0-lcd-%E6%98%BE%E7%A4%BA%E6%96%B9%E6%A1%88/">裸机使用 LVGL 字库实现 LCD 显示方案</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            在 AT32F421 等无 OS 单片机上不跑完整 LVGL，只提取其字库数据和渲染器实现高质量 4bpp 抗锯齿文字显示
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2026-06-29</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 5 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="前言">前言
+</h2><p>做仪表类产品时，经常会遇到这样的需求：</p>
+<ul>
+<li>屏幕不大，不需要复杂 UI、动画、触控</li>
+<li>只要显示几个数字、标签、单位，字要好看（抗锯齿）</li>
+<li>单片机资源有限，跑不动完整 LVGL</li>
+</ul>
+<p>完整的 LVGL 虽然功能强大，但在一颗小资源 MCU 上可能要占 100KB+ ROM，还要引入内存管理、事件循环等一整套机制。</p>
+<p>有没有办法<strong>只拿 LVGL 的字库，自己画字</strong>？</p>
+<p>有。本文介绍一种在 <strong>AT32F421G8U7</strong>（Cortex-M4、无 OS）上，不依赖 LVGL 框架，只提取其字库数据和轻量渲染器实现 LCD 显示的方案。</p>
+<hr>
+<h2 id="一方案对比">一、方案对比
+</h2><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>方案</th>
+					<th>ROM 占用</th>
+					<th>依赖</th>
+					<th>适用场景</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>完整 LVGL</td>
+					<td>~100KB+</td>
+					<td><code>lvgl.h</code>、内存管理、OS 可选</td>
+					<td>复杂 UI、动画、触控</td>
+			</tr>
+			<tr>
+					<td>本方案 <code>lv_font_render</code></td>
+					<td>~13KB</td>
+					<td>仅 <code>lcd.h</code> 基础驱动</td>
+					<td>仪表盘等固定布局</td>
+			</tr>
+	</tbody>
+</table></div>
+<p>本方案的核心思路：<strong>用 GUI Guider 生成漂亮的 LVGL 字库，但文字渲染用自己写的轻量代码。</strong></p>
+<hr>
+<h2 id="二文件结构">二、文件结构
+</h2><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">drivers/lcd/
+</span></span><span class="line"><span class="cl">├── lcd.h / lcd.c              # LCD 底层驱动 (SPI, 初始化, LCD_Fill 等)
+</span></span><span class="line"><span class="cl">├── lcd_draw.c                 # 基础绘图 + 旧式 ASCII 字库 (lcdfont.h)
+</span></span><span class="line"><span class="cl">├── lcdfont.h                  # 点阵字库 (1206/1608/2412/3216)
+</span></span><span class="line"><span class="cl">├── lv_font_render.h           # LVGL 字体渲染器头文件
+</span></span><span class="line"><span class="cl">├── lv_font_render.c           # LVGL 字体渲染器实现
+</span></span><span class="line"><span class="cl">├── lv_customer_font_*.c       # LVGL 字库数据文件 (GUI Guider 生成)
+</span></span><span class="line"><span class="cl">├── ui_screen.h / ui_screen.c  # UI 布局驱动
+</span></span><span class="line"><span class="cl">└── setup_scr_screen.c         # 参考: GUI Guider 的 LVGL 布局设计文件
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="三核心原理">三、核心原理
+</h2><h3 id="31-lvgl-字库文件格式">3.1 LVGL 字库文件格式
+</h3><p>GUI Guider 生成的字库文件（如 <code>lv_customer_font_Swis721BlkcnBtBlack_65.c</code>）主要包含四部分：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="c1">// 1. 字形位图 (4bpp 抗锯齿, 每像素 4bit 透明度)
+</span></span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="k">const</span> <span class="kt">uint8_t</span> <span class="n">glyph_bitmap</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span> <span class="p">...</span> <span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 2. 字形描述符
+</span></span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="k">const</span> <span class="kt">lv_font_fmt_txt_glyph_dsc_t</span> <span class="n">glyph_dsc</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{.</span><span class="n">bitmap_index</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="p">.</span><span class="n">adv_w</span> <span class="o">=</span> <span class="mi">308</span><span class="p">,</span> <span class="p">.</span><span class="n">box_w</span> <span class="o">=</span> <span class="mi">21</span><span class="p">,</span> <span class="p">.</span><span class="n">box_h</span> <span class="o">=</span> <span class="mi">22</span><span class="p">,</span> <span class="p">.</span><span class="n">ofs_x</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">.</span><span class="n">ofs_y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">},</span>
+</span></span><span class="line"><span class="cl">    <span class="p">...</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 3. 字符映射表 (unicode → glyph_id)
+</span></span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="k">const</span> <span class="kt">lv_font_fmt_txt_cmap_t</span> <span class="n">cmaps</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="p">.</span><span class="n">range_start</span> <span class="o">=</span> <span class="mi">46</span><span class="p">,</span> <span class="p">.</span><span class="n">range_length</span> <span class="o">=</span> <span class="mi">12</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="p">.</span><span class="n">glyph_id_start</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="p">.</span><span class="n">unicode_list</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="p">.</span><span class="n">glyph_id_ofs_list</span> <span class="o">=</span> <span class="n">glyph_id_ofs_list_0</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="p">.</span><span class="n">list_length</span> <span class="o">=</span> <span class="mi">12</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="p">.</span><span class="n">type</span> <span class="o">=</span> <span class="n">LV_FONT_FMT_TXT_CMAP_FORMAT0_FULL</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 4. 字体总描述
+</span></span></span><span class="line"><span class="cl"><span class="k">const</span> <span class="kt">lv_font_t</span> <span class="n">lv_customer_font_Swis721BlkcnBtBlack_65</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="p">.</span><span class="n">get_glyph_dsc</span> <span class="o">=</span> <span class="n">lv_font_get_glyph_dsc_fmt_txt</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="p">.</span><span class="n">get_glyph_bitmap</span> <span class="o">=</span> <span class="n">lv_font_get_bitmap_fmt_txt</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="p">.</span><span class="n">line_height</span> <span class="o">=</span> <span class="mi">65</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="p">.</span><span class="n">base_line</span> <span class="o">=</span> <span class="mi">11</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="p">.</span><span class="n">dsc</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">font_dsc</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="32-关键数据结构">3.2 关键数据结构
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint32_t</span> <span class="n">bitmap_index</span><span class="p">;</span>  <span class="c1">// 在 glyph_bitmap[] 中的起始偏移
+</span></span></span><span class="line"><span class="cl">    <span class="kt">uint32_t</span> <span class="n">adv_w</span><span class="p">;</span>         <span class="c1">// 字符前进量 (1/16 像素单位)
+</span></span></span><span class="line"><span class="cl">    <span class="kt">uint8_t</span>  <span class="n">box_w</span><span class="p">,</span> <span class="n">box_h</span><span class="p">;</span>  <span class="c1">// 字形包围盒宽高
+</span></span></span><span class="line"><span class="cl">    <span class="kt">int8_t</span>   <span class="n">ofs_x</span><span class="p">,</span> <span class="n">ofs_y</span><span class="p">;</span>  <span class="c1">// 相对基线的偏移
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="kt">lv_font_fmt_txt_glyph_dsc_t</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint16_t</span> <span class="n">range_start</span><span class="p">;</span>       <span class="c1">// 起始 unicode
+</span></span></span><span class="line"><span class="cl">    <span class="kt">uint16_t</span> <span class="n">range_length</span><span class="p">;</span>      <span class="c1">// 范围长度
+</span></span></span><span class="line"><span class="cl">    <span class="kt">uint16_t</span> <span class="n">glyph_id_start</span><span class="p">;</span>    <span class="c1">// glyph 起始 ID
+</span></span></span><span class="line"><span class="cl">    <span class="k">const</span> <span class="kt">uint16_t</span> <span class="o">*</span><span class="n">unicode_list</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">const</span> <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">glyph_id_ofs_list</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint32_t</span> <span class="n">list_length</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint8_t</span>  <span class="n">type</span><span class="p">;</span>              <span class="c1">// 映射类型
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="kt">lv_font_fmt_txt_cmap_t</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">_lv_font_t</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint16_t</span> <span class="n">line_height</span><span class="p">;</span>   <span class="c1">// 行高 (像素)
+</span></span></span><span class="line"><span class="cl">    <span class="kt">uint16_t</span> <span class="n">base_line</span><span class="p">;</span>     <span class="c1">// 基线距顶部距离 (像素)
+</span></span></span><span class="line"><span class="cl">    <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">dsc</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="kt">lv_font_t</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="33-cmap-映射类型">3.3 cmap 映射类型
+</h3><p>字库文件使用 3 种字符映射方式，渲染器必须全部支持：</p>
+<div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>类型</th>
+					<th>说明</th>
+					<th>查找方式</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>FORMAT0_TINY</code></td>
+					<td>连续范围，一一对应</td>
+					<td><code>glyph_id = start + (letter - range_start)</code></td>
+			</tr>
+			<tr>
+					<td><code>FORMAT0_FULL</code></td>
+					<td>连续范围，偏移表</td>
+					<td><code>glyph_id = start + ofs_list[letter - range_start]</code></td>
+			</tr>
+			<tr>
+					<td><code>SPARSE_TINY</code></td>
+					<td>稀疏列表</td>
+					<td><code>unicode_list[j] == (letter - range_start)</code></td>
+			</tr>
+	</tbody>
+</table></div>
+<p><strong>关键坑</strong>：<code>SPARSE_TINY</code> 的 <code>unicode_list</code> 存的是<strong>相对于 <code>range_start</code> 的偏移</strong>，不是 unicode 值本身。</p>
+<hr>
+<h2 id="四渲染器实现">四、渲染器实现
+</h2><h3 id="41-字形查找">4.1 字形查找
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">const</span> <span class="kt">lv_font_fmt_txt_glyph_dsc_t</span> <span class="o">*</span><span class="nf">lv_font_get_glyph_dsc_fmt_txt</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="k">const</span> <span class="kt">lv_font_t</span> <span class="o">*</span><span class="n">font</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">cache</span><span class="p">,</span> <span class="kt">uint32_t</span> <span class="n">letter</span><span class="p">,</span> <span class="kt">uint32_t</span> <span class="n">letter_next</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 1. 遍历 cmap 表
+</span></span></span><span class="line"><span class="cl">    <span class="c1">// 2. 根据 type 用不同方式查找 glyph_id
+</span></span></span><span class="line"><span class="cl">    <span class="c1">// 3. 返回 &amp;glyph_dsc[gid]
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="42-坐标计算">4.2 坐标计算
+</h3><p>LVGL 官方的字形左上角坐标公式：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">py = y + (line_height - base_line) - box_h - ofs_y
+</span></span><span class="line"><span class="cl">px = x + ofs_x
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><code>y</code>：文字行顶部坐标</li>
+<li><code>line_height</code>：字体行高</li>
+<li><code>base_line</code>：基线距顶部距离</li>
+<li><code>box_h</code>：字形高度</li>
+<li><code>ofs_y</code>：字形相对基线的偏移（可负）</li>
+</ul>
+<p><strong>注意</strong>：计算结果可能为负值（字形超出屏幕上方），必须用 <code>int32_t</code> 并做裁剪：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int32_t</span> <span class="n">py_s</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int32_t</span><span class="p">)</span><span class="n">y</span> <span class="o">+</span> <span class="p">(</span><span class="n">font</span><span class="o">-&gt;</span><span class="n">line_height</span> <span class="o">-</span> <span class="n">font</span><span class="o">-&gt;</span><span class="n">base_line</span><span class="p">)</span> <span class="o">-</span> <span class="n">box_h</span> <span class="o">-</span> <span class="n">ofs_y</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="n">py_s</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span> <span class="n">row_start</span> <span class="o">=</span> <span class="o">-</span><span class="n">py_s</span><span class="p">;</span> <span class="n">h</span> <span class="o">+=</span> <span class="n">py_s</span><span class="p">;</span> <span class="n">py_s</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="43-两种渲染模式">4.3 两种渲染模式
+</h3><h4 id="模式-a非透明bg--0xffff-批量写快">模式 A：非透明（bg != 0xFFFF）— 批量写，快
+</h4><p>用于动态数值刷新，一次设窗口，整行像素写入行缓冲后 DMA 批量发送：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">LCD_Address_Set</span><span class="p">(</span><span class="n">px</span><span class="p">,</span> <span class="n">py</span><span class="p">,</span> <span class="n">px</span> <span class="o">+</span> <span class="n">w</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">py</span> <span class="o">+</span> <span class="n">h</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">for</span> <span class="p">(</span><span class="n">row</span> <span class="p">...)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="n">col</span> <span class="p">...)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 取 4bpp alpha，与前景色/背景色混合
+</span></span></span><span class="line"><span class="cl">        <span class="n">s_line_buf</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">blend_table</span><span class="p">[</span><span class="n">alpha</span><span class="p">];</span>  <span class="c1">// alpha 0..15
+</span></span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 整行一次性 DMA 发送，CS 保持低电平
+</span></span></span><span class="line"><span class="cl">    <span class="nf">LCD_SPI_SendBytes_DMA</span><span class="p">(</span><span class="n">s_line_buf</span><span class="p">,</span> <span class="n">w</span> <span class="o">*</span> <span class="mi">2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>优化点：同一段文字前景/背景色固定，可预先计算 <code>blend_table[16]</code>，避免逐像素做乘除法。</p>
+<h4 id="模式-b透明bg--0xffff-逐像素慢但安全">模式 B：透明（bg == 0xFFFF）— 逐像素，慢但安全
+</h4><p>用于彩色背景上的标签文字，只画前景像素，不碰背景：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">for</span> <span class="p">(</span><span class="n">row</span> <span class="p">...)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="n">col</span> <span class="p">...)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">alpha</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="nf">LCD_DrawPoint</span><span class="p">(</span><span class="n">px</span> <span class="o">+</span> <span class="n">col</span><span class="p">,</span> <span class="n">py</span> <span class="o">+</span> <span class="n">row</span><span class="p">,</span> <span class="n">color</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p>⚠️ <strong>注意</strong>：透明模式下 alpha 混合目标默认是<strong>黑色</strong>，会导致 4bpp 抗锯齿字体边缘出现灰色光晕。彩色背景应使用模式 A 并传入真实背景色。</p>
+</blockquote>
+<hr>
+<h2 id="五ui-驱动设计">五、UI 驱动设计
+</h2><h3 id="51-布局参考">5.1 布局参考
+</h3><p>布局完全参照 GUI Guider 生成的 <code>setup_scr_screen.c</code>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"> y=9    电压数值    172x57   Swis721_65   白色  居中
+</span></span><span class="line"><span class="cl"> y=72   V标签       172x36   SourceHan_30  黑字  青底
+</span></span><span class="line"><span class="cl"> y=111  电流数值    172x57   Swis721_65   白色  居中
+</span></span><span class="line"><span class="cl"> y=171  A标签       172x36   SourceHan_30  黑字  绿底
+</span></span><span class="line"><span class="cl"> y=207  功率数值    125x45   Swis721_50   白色  左对齐
+</span></span><span class="line"><span class="cl"> y=210  功率单位w   34x45    Swis721_50   白色
+</span></span><span class="line"><span class="cl"> y=255  Total Power 172x36   SourceHan_27  黑字  橙底
+</span></span><span class="line"><span class="cl"> y=296  计时器      172x19   Swis721_20   白色  居中
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="52-初始化">5.2 初始化
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">UI_Init</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">LCD_Fill</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">UI_W</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">UI_H</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">UI_BLACK</span><span class="p">);</span>  <span class="c1">// 清屏
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 标签: LCD_Fill 铺色底 + 传入真实背景色画字
+</span></span></span><span class="line"><span class="cl">    <span class="nf">LCD_Fill</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">65</span><span class="p">,</span> <span class="mi">171</span><span class="p">,</span> <span class="mi">99</span><span class="p">,</span> <span class="n">UI_CYAN</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">LV_Font_DrawStringCentered</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UI_W</span><span class="p">,</span> <span class="mi">72</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">font_30</span><span class="p">,</span> <span class="s">&#34;V     voltage&#34;</span><span class="p">,</span> <span class="n">UI_BLACK</span><span class="p">,</span> <span class="n">UI_CYAN</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="53-动态刷新与防闪">5.3 动态刷新与防闪
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">UI_UpdateVoltage</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">text</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nf">strcmp</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">prev_v</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>  <span class="c1">// 数值不变不重画
+</span></span></span><span class="line"><span class="cl">    <span class="nf">strcpy</span><span class="p">(</span><span class="n">prev_v</span><span class="p">,</span> <span class="n">text</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// bg=UI_BLACK → 非透明批量写路径，不闪
+</span></span></span><span class="line"><span class="cl">    <span class="nf">LV_Font_DrawStringCentered</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">UI_W</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">font_65</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">UI_WHITE</span><span class="p">,</span> <span class="n">UI_BLACK</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>防闪策略</strong>：</p>
+<ul>
+<li><code>strcmp</code> 比较，数值不变不重画</li>
+<li>静态标签用真实背景色批量画</li>
+<li>动态数值用非透明模式，一次写完整个区域</li>
+</ul>
+<hr>
+<h2 id="六字库文件适配">六、字库文件适配
+</h2><h3 id="61-修改-include">6.1 修改 include
+</h3><p>GUI Guider 生成的字库文件默认 <code>#include &quot;lvgl.h&quot;</code>，需改为：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="c1">// #include &#34;lvgl.h&#34;          // 删除
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;lv_font_render.h&#34;   // 替换为独立渲染器头文件</span><span class="cp">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="62-开启-c99">6.2 开启 C99
+</h3><p>字库文件使用 designated initializer 语法（<code>.member = value</code>），Keil 需在工程配置中开启 C99：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-xml" data-lang="xml"><span class="line"><span class="cl"><span class="nt">&lt;uC99&gt;</span>1<span class="nt">&lt;/uC99&gt;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="63-字体对应关系示例">6.3 字体对应关系示例
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>GUI Guider 字体</th>
+					<th>文件</th>
+					<th>用途</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>Swis721BlkcnBtBlack_65</td>
+					<td><code>lv_customer_font_Swis721BlkcnBtBlack_65.c</code></td>
+					<td>电压/电流数值</td>
+			</tr>
+			<tr>
+					<td>Swis721BlkcnBtBlack_50</td>
+					<td><code>lv_customer_font_Swis721BlkcnBtBlack_50.c</code></td>
+					<td>功率数值/单位</td>
+			</tr>
+			<tr>
+					<td>Swis721BlkcnBtBlack_20</td>
+					<td><code>lv_customer_font_Swis721BlkcnBtBlack_20.c</code></td>
+					<td>计时器</td>
+			</tr>
+			<tr>
+					<td>SourceHanSansSCBold_30</td>
+					<td><code>lv_customer_font_SourceHanSansSCBold_30.c</code></td>
+					<td>V/A 标签</td>
+			</tr>
+			<tr>
+					<td>SourceHanSansSCBold_27</td>
+					<td><code>lv_customer_font_SourceHanSansSCBold_27.c</code></td>
+					<td>Total Power</td>
+			</tr>
+	</tbody>
+</table></div>
+<hr>
+<h2 id="七常见问题">七、常见问题
+</h2><h3 id="q字体完全不显示">Q：字体完全不显示
+</h3><p>检查 cmap 类型是否都支持：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">grep <span class="s2">&#34;type = &#34;</span> lv_customer_font_*.c
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>确保渲染器处理了所有 <code>FORMAT0_TINY</code> / <code>FORMAT0_FULL</code> / <code>SPARSE_TINY</code> 类型。</p>
+<h3 id="q字形位置偏移--显示在屏幕外">Q：字形位置偏移 / 显示在屏幕外
+</h3><p>检查坐标公式：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">py</span> <span class="o">=</span> <span class="n">y</span> <span class="o">+</span> <span class="p">(</span><span class="n">line_height</span> <span class="o">-</span> <span class="n">base_line</span><span class="p">)</span> <span class="o">-</span> <span class="n">box_h</span> <span class="o">-</span> <span class="n">ofs_y</span><span class="p">;</span>  <span class="c1">// 正确
+</span></span></span><span class="line"><span class="cl"><span class="c1">// 不是: py = y + base_line - ofs_y - box_h         // 错误
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>且 <code>py</code> 必须用 <code>int32_t</code> 计算，负值做裁剪。</p>
+<h3 id="q刷新时频闪">Q：刷新时频闪
+</h3><ul>
+<li>静态标签：<code>LCD_Fill</code> 铺底色 + 传入真实背景色画字，不要用 <code>0xFFFF</code></li>
+<li>动态数值：用非透明模式，走批量写路径</li>
+<li>加 <code>strcmp</code> 防抖</li>
+</ul>
+<h3 id="q字体边缘灰色光晕">Q：字体边缘灰色光晕
+</h3><p>这是透明模式（<code>bg == 0xFFFF</code>）下 alpha 与黑色混合导致的。彩色背景必须传入真实背景色：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="c1">// ❌ 错误：透明模式，alpha 与黑色混合
+</span></span></span><span class="line"><span class="cl"><span class="nf">LCD_Fill</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">65</span><span class="p">,</span> <span class="mi">171</span><span class="p">,</span> <span class="mi">99</span><span class="p">,</span> <span class="n">UI_CYAN</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">LV_Font_DrawStringCentered</span><span class="p">(...,</span> <span class="s">&#34;voltage&#34;</span><span class="p">,</span> <span class="n">UI_BLACK</span><span class="p">,</span> <span class="mh">0xFFFF</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// ✅ 正确：传入真实背景色
+</span></span></span><span class="line"><span class="cl"><span class="nf">LCD_Fill</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">65</span><span class="p">,</span> <span class="mi">171</span><span class="p">,</span> <span class="mi">99</span><span class="p">,</span> <span class="n">UI_CYAN</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">LV_Font_DrawStringCentered</span><span class="p">(...,</span> <span class="s">&#34;voltage&#34;</span><span class="p">,</span> <span class="n">UI_BLACK</span><span class="p">,</span> <span class="n">UI_CYAN</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="q数字残影如-0--1">Q：数字残影（如 &ldquo;0&rdquo; → &ldquo;1&rdquo;）
+</h3><p><code>LV_Font_DrawStringCentered</code> 非透明模式下会一次性写完整个区域（包括左右黑边），无需额外 <code>LCD_Fill</code>。</p>
+<hr>
+<h2 id="八mainc-调用示例">八、main.c 调用示例
+</h2><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;ui_screen.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// ... 硬件初始化 ...
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">LCD_Init</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">UI_Init</span><span class="p">();</span>              <span class="c1">// 一次性绘制全部静态元素
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">fmt_v</span><span class="p">(</span><span class="n">vb</span><span class="p">,</span> <span class="n">ina</span><span class="p">.</span><span class="n">voltage</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">UI_UpdateVoltage</span><span class="p">(</span><span class="n">vb</span><span class="p">);</span>   <span class="c1">// 数值不变不重画
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="nf">fmt_i</span><span class="p">(</span><span class="n">ib</span><span class="p">,</span> <span class="n">ina</span><span class="p">.</span><span class="n">current</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">UI_UpdateCurrent</span><span class="p">(</span><span class="n">ib</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="nf">fmt_p</span><span class="p">(</span><span class="n">pb</span><span class="p">,</span> <span class="n">ina</span><span class="p">.</span><span class="n">power</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">UI_UpdatePower</span><span class="p">(</span><span class="n">pb</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="nf">ERTC_GetTimeStr</span><span class="p">(</span><span class="n">tb</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">UI_UpdateTimer</span><span class="p">(</span><span class="n">tb</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="nf">wk_delay_ms</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="九移植到新项目">九、移植到新项目
+</h2><ol>
+<li>复制 <code>lv_font_render.h/c</code> 和所需的 <code>lv_customer_font_*.c</code></li>
+<li>将字库文件的 <code>#include &quot;lvgl.h&quot;</code> 改为 <code>#include &quot;lv_font_render.h&quot;</code></li>
+<li>Keil 开启 C99</li>
+<li>确保 <code>lcd.h</code> 提供 <code>LCD_Address_Set</code>、<code>LCD_WR_DATA</code>、<code>LCD_DrawPoint</code>、<code>LCD_Fill</code>、<code>LCD_SPI_SendBytes_DMA</code></li>
+<li>确保 LCD 驱动已配置为 <strong>16-bit SPI + DMA</strong> 批量传输</li>
+<li>参照 <code>setup_scr_screen.c</code> 的布局编写 <code>ui_screen.c</code></li>
+</ol>
+<hr>
+<h2 id="总结">总结
+</h2><p>这个方案最大的亮点是<strong>按需取用</strong>：不需要完整 LVGL 的运行时，只需要它的字库数据格式。配合自研的轻量渲染器，在小资源 MCU 上也能实现高质量抗锯齿文字显示。</p>
+<p>如果你的项目满足以下条件，这个方案很合适：</p>
+<ul>
+<li>界面布局固定，不需要动画和触控</li>
+<li>对 ROM 占用敏感</li>
+<li>需要漂亮的矢量字体效果</li>
+<li>已有稳定的 LCD 驱动基础</li>
+</ul>
+<hr>
+<p><em>硬件：AT32F421G8U7 (Cortex-M4, 无 OS) | 工具：GUI Guider + Keil AC6</em></p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/at32f421/">AT32F421</a>
+        
+            <a href="/tags/lvgl/">LVGL</a>
+        
+            <a href="/tags/lcd/">LCD</a>
+        
+            <a href="/tags/%E5%AD%97%E5%BA%93/">字库</a>
+        
+            <a href="/tags/%E8%A3%B8%E6%9C%BA/">裸机</a>
+        
+    </section>
+
+
+    <section class="article-lastmod">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <span>
+            最后更新于 Jun 29, 2026 13:44 &#43;0800
+        </span>
+    </section></footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/ina226-%E8%BD%AF%E4%BB%B6-i2c-%E5%88%9D%E5%A7%8B%E5%8C%96%E8%B8%A9%E5%9D%91%E8%AF%BB%E5%8F%96%E8%BF%94%E5%9B%9E-0xffff/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">INA226 软件 I2C 初始化踩坑：读取返回 0xFFFF</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/microlink--segger-rtt-%E6%89%93%E5%8D%B0%E8%B8%A9%E5%9D%91no-find-_segger_rtt-addr/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">MicroLink &#43; SEGGER RTT 打印踩坑：no find _SEGGER_RTT addr</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/esp32-s3-wifi-%E8%BF%9E%E6%8E%A5%E8%B8%A9%E5%9D%91reason15-%E4%B8%8D%E6%98%AF%E5%AF%86%E7%A0%81%E9%94%99%E4%BA%86/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">ESP32-S3 WiFi 连接踩坑：reason=15 不是密码错了</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/py32f002a-%E9%80%89%E9%A1%B9%E5%AD%97%E8%8A%82%E5%AE%9E%E6%88%98%E6%8A%8A-reset-%E5%BC%95%E8%84%9A%E5%8F%98%E6%88%90%E6%99%AE%E9%80%9A-gpio/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PY32F002A 选项字节实战：把 RESET 引脚变成普通 GPIO</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/hugo%E6%A0%BC%E5%BC%8F%E8%AF%B4%E6%98%8E%E8%AE%B0%E8%BD%BD%E7%AC%94%E8%AE%B0/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="https://cdn.jsdelivr.net/gh/ClingYang/img1@latest/20250320145323127.png" loading="lazy" data-key="" data-hash="https://cdn.jsdelivr.net/gh/ClingYang/img1@latest/20250320145323127.png"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">hugo格式说明记载笔记</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="ClingYang/ClingYang.github.io"
+        issue-term="pathname"
+        
+        label="💬comment"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2026 CLing
+    </section>
+    
+    <section class="powerby">
+        
+            世界是你们 <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<style>
+    #TableOfContents > ul, ol {
+        ul, ol {
+            display: none;
+        }
+        .open {
+            display: block;
+        }
+    }
+</style>
+
+<script>
+    function initTocHide() {
+        
+        let toc = document.querySelector(".widget--toc");
+        if (!toc) {
+            return;
+        }
+        
+        window.addEventListener('scroll', function() {
+            
+            let currentLi = document.querySelector(".active-class");
+            if (!currentLi) {
+                return
+            }
+            
+            let elementsByClassName = document.querySelectorAll(".open");
+            if (elementsByClassName.length > 0) {
+                elementsByClassName.forEach((ul) => {
+                    ul.classList.remove("open")
+                })
+            }
+            
+            if (currentLi.children.length > 1) {
+                currentLi.children[1].classList.add("open")
+            }
+            
+            let ul = currentLi.parentElement;
+            do {
+                ul.classList.add("open");
+                ul = ul.parentElement.parentElement
+            } while (ul !== undefined && (ul.localName === 'ul' || ul.localName === 'ol'))
+        });
+    }
+    initTocHide()
+</script>
+
+    </body>
+</html>
