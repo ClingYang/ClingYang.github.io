@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="错误灭火器：把 #DIV/0! 变成友好提示">
+<title>第07章：IFERROR 函数 —— 优雅的&#34;错误灭火器&#34;</title>
+
+<link rel='canonical' href='https://clingyang.github.io/excel/07-iferror/'>
+
+<link rel="stylesheet" href="/scss/style.min.61d57cd75eec9cf61874fc12617af35f32a2d88c6ed4b65ff3cf62af03ebf48e.css"><meta property='og:title' content="第07章：IFERROR 函数 —— 优雅的\"错误灭火器\"">
+<meta property='og:description' content="错误灭火器：把 #DIV/0! 变成友好提示">
+<meta property='og:url' content='https://clingyang.github.io/excel/07-iferror/'>
+<meta property='og:site_name' content='CLing'>
+<meta property='og:type' content='article'><meta property='article:section' content='Excel' /><meta property='article:tag' content='Excel' /><meta property='article:tag' content='函数教程' /><meta property='article:published_time' content='2026-07-28T09:00:00&#43;08:00'/><meta property='article:modified_time' content='2026-07-28T17:40:50&#43;08:00'/>
+<meta name="twitter:title" content="第07章：IFERROR 函数 —— 优雅的\"错误灭火器\"">
+<meta name="twitter:description" content="错误灭火器：把 #DIV/0! 变成友好提示">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                            height="290" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🏀</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">CLing</a></h1>
+            <h2 class="site-description">你好 欢迎来到我的博客</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>档案</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E6%8A%80%E6%9C%AF%E9%93%BE%E6%8E%A5/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>技术链接</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        
+        <li  class='current' >
+            <a href='/excel/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+                
+                <span>Excel教程</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#本章学习目标">本章学习目标</a></li>
+    <li><a href="#一这个函数是干什么的">一、这个函数是干什么的？</a></li>
+    <li><a href="#二语法结构">二、语法结构</a></li>
+    <li><a href="#三基础示例手把手">三、基础示例（手把手）</a>
+      <ol>
+        <li><a href="#示例1除法错误的处理">示例1：除法错误的处理</a></li>
+        <li><a href="#示例2出错显示空白">示例2：出错显示空白</a></li>
+        <li><a href="#示例3出错显示-0">示例3：出错显示 0</a></li>
+      </ol>
+    </li>
+    <li><a href="#四进阶用法">四、进阶用法</a>
+      <ol>
+        <li><a href="#1-iferror-能捕获所有错误">1. IFERROR 能捕获所有错误</a></li>
+        <li><a href="#2-黄金组合预告iferror--vlookup">2. 黄金组合预告：IFERROR + VLOOKUP</a></li>
+        <li><a href="#3-iferror--vs--if--iserror了解即可">3. IFERROR  vs  IF + ISERROR（了解即可）</a></li>
+      </ol>
+    </li>
+    <li><a href="#五常见错误与注意事项">五、常见错误与注意事项</a></li>
+    <li><a href="#六练习题请先独立完成">六、练习题（请先独立完成）</a>
+      <ol>
+        <li><a href="#练习数据准备">练习数据准备</a></li>
+        <li><a href="#题目">题目</a></li>
+      </ol>
+    </li>
+    <li><a href="#七练习讲解做完再看">七、练习讲解（做完再看）</a>
+      <ol>
+        <li><a href="#第1题讲解">第1题讲解</a></li>
+        <li><a href="#第24题讲解">第2~4题讲解</a></li>
+        <li><a href="#第5题讲解">第5题讲解</a></li>
+        <li><a href="#第6题讲解">第6题讲解</a></li>
+      </ol>
+    </li>
+    <li><a href="#八参考答案">八、参考答案</a></li>
+    <li><a href="#本章小结">本章小结</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/excel%E6%95%99%E7%A8%8B/" >
+                Excel教程
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/excel/07-iferror/">第07章：IFERROR 函数 —— 优雅的&#34;错误灭火器&#34;</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            错误灭火器：把 #DIV/0! 变成友好提示
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2026-07-28</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 2 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <blockquote>
+<p>难度：⭐⭐ | 建议用时：25 分钟 | 前置知识：第06章 IF</p>
+</blockquote>
+<h2 id="本章学习目标">本章学习目标
+</h2><ul>
+<li>认识 Excel 的各种错误值及其含义</li>
+<li>会用 IFERROR 把难看的错误值替换成友好的提示</li>
+<li>掌握&quot;先算，出错就兜底&quot;的包装思维</li>
+</ul>
+<hr>
+<h2 id="一这个函数是干什么的">一、这个函数是干什么的？
+</h2><p>公式难免会出错：除以 0 出现 <code>#DIV/0!</code>，查找失败出现 <code>#N/A!</code>……满屏的 <code>#</code> 号既不美观，还会让引用它的其他公式连环出错。</p>
+<p>IFERROR 的作用：<strong>让公式正常计算，一旦出错，就显示你指定的内容</strong>。相当于给公式买了一份&quot;保险&quot;。</p>
+<p>生活化理解：IFERROR 就像灭火器——平时不干活（公式正常时它原样输出结果），着火时顶上去（公式出错时它显示你准备的替代品）。</p>
+<h2 id="二语法结构">二、语法结构
+</h2><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">=IFERROR(要计算的公式, 出错时显示什么)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>参数</th>
+					<th>说明</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>要计算的公式</td>
+					<td>任何可能出错的公式，如 <code>B2/C2</code></td>
+			</tr>
+			<tr>
+					<td>出错时显示什么</td>
+					<td>错误时的替代内容：文字（加引号）、数字、或 <code>&quot;&quot;</code> 空白</td>
+			</tr>
+	</tbody>
+</table></div>
+<p>执行逻辑：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">公式能算出结果？ ──能──→ 显示计算结果（IFERROR 不干预）
+</span></span><span class="line"><span class="cl">   │不能（出错）
+</span></span><span class="line"><span class="cl">   └──→ 显示你指定的替代内容
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="三基础示例手把手">三、基础示例（手把手）
+</h2><h3 id="示例1除法错误的处理">示例1：除法错误的处理
+</h3><p>销售表：B 列销售额，C 列销量，计算单价 = 销售额 ÷ 销量：</p>
+<div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th></th>
+					<th>A</th>
+					<th>B</th>
+					<th>C</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><strong>1</strong></td>
+					<td>产品</td>
+					<td>销售额</td>
+					<td>销量</td>
+			</tr>
+			<tr>
+					<td><strong>2</strong></td>
+					<td>产品A</td>
+					<td>5000</td>
+					<td>10</td>
+			</tr>
+			<tr>
+					<td><strong>3</strong></td>
+					<td>产品B</td>
+					<td>3000</td>
+					<td>0</td>
+			</tr>
+			<tr>
+					<td><strong>4</strong></td>
+					<td>产品C</td>
+					<td>8000</td>
+					<td>（空）</td>
+			</tr>
+	</tbody>
+</table></div>
+<p>在 D2 输入普通公式 <code>=B2/C2</code> 并向下填充：</p>
+<ul>
+<li>D2：5000÷10 = <code>500</code> ✓</li>
+<li>D3：3000÷0 = <code>#DIV/0!</code> ✗（除以零）</li>
+<li>D4：8000÷空 = <code>#DIV/0!</code> ✗（空白当 0 处理）</li>
+</ul>
+<p>用 IFERROR 包装：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">=IFERROR(B2/C2, &#34;无销量&#34;)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>结果：</p>
+<ul>
+<li>D2：<code>500</code>（正常，IFERROR 不干预）</li>
+<li>D3：<code>无销量</code></li>
+<li>D4：<code>无销量</code></li>
+</ul>
+<p><strong>解读</strong>：把整个除法 <code>B2/C2</code> 塞进第一个参数，它出错时才启用第二个参数。注意是&quot;包装&quot;——原公式原封不动放里面。</p>
+<h3 id="示例2出错显示空白">示例2：出错显示空白
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">=IFERROR(B2/C2, &#34;&#34;)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>出错时什么都不显示，表格最干净。</p>
+<h3 id="示例3出错显示-0">示例3：出错显示 0
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">=IFERROR(B2/C2, 0)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>出错按 0 处理，方便后续求和（文本&quot;无销量&quot;会让 SUM 忽略，0 则直接参与计算——按需要选择）。</p>
+<h2 id="四进阶用法">四、进阶用法
+</h2><h3 id="1-iferror-能捕获所有错误">1. IFERROR 能捕获所有错误
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>错误值</th>
+					<th>含义</th>
+					<th>典型场景</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>#DIV/0!</code></td>
+					<td>除以零</td>
+					<td>除数是 0 或空</td>
+			</tr>
+			<tr>
+					<td><code>#N/A</code></td>
+					<td>找不到值</td>
+					<td>VLOOKUP/MATCH 查找失败（第13章重点）</td>
+			</tr>
+			<tr>
+					<td><code>#VALUE!</code></td>
+					<td>数据类型错误</td>
+					<td>拿文字做数学运算</td>
+			</tr>
+			<tr>
+					<td><code>#REF!</code></td>
+					<td>引用失效</td>
+					<td>引用的行/列被删除</td>
+			</tr>
+			<tr>
+					<td><code>#NAME?</code></td>
+					<td>名称错误</td>
+					<td>函数名拼错</td>
+			</tr>
+			<tr>
+					<td><code>#NUM!</code></td>
+					<td>数值错误</td>
+					<td>如 DATEDIF 开始日期晚于结束日期</td>
+			</tr>
+	</tbody>
+</table></div>
+<p>一个 IFERROR 通吃以上所有错误。</p>
+<h3 id="2-黄金组合预告iferror--vlookup">2. 黄金组合预告：IFERROR + VLOOKUP
+</h3><p>第13章学 VLOOKUP 时会大量用到这个组合：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">=IFERROR(VLOOKUP(...), &#34;查无此人&#34;)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>查找成功显示结果，查不到显示&quot;查无此人&quot;，而不是冷冰冰的 <code>#N/A</code>。这是职场报表的标配写法。</p>
+<h3 id="3-iferror--vs--if--iserror了解即可">3. IFERROR  vs  IF + ISERROR（了解即可）
+</h3><p>老版本 Excel 没有 IFERROR，要写成 <code>=IF(ISERROR(B2/C2),&quot;&quot;,B2/C2)</code>（公式要写两遍）。2007 版以后直接用 IFERROR 就行。</p>
+<h2 id="五常见错误与注意事项">五、常见错误与注意事项
+</h2><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>问题</th>
+					<th>说明</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>滥用 IFERROR 掩盖真错误</td>
+					<td>IFERROR 会<strong>吞掉所有错误</strong>，包括函数名拼错这种本该发现的 bug。建议先让公式跑通，再加 IFERROR 做&quot;体面处理&quot;</td>
+			</tr>
+			<tr>
+					<td>第二个参数忘加引号</td>
+					<td>显示文字要写 <code>&quot;无销量&quot;</code>，不是 <code>无销量</code></td>
+			</tr>
+			<tr>
+					<td>包装不完整</td>
+					<td>只包装了一半公式，如 <code>=IFERROR(B2/C2,&quot;&quot;)/D2</code> 后面还可能出错</td>
+			</tr>
+			<tr>
+					<td>该报错的地方别用它</td>
+					<td>比如财务核对时，错误本身是重要信号，不应隐藏</td>
+			</tr>
+	</tbody>
+</table></div>
+<hr>
+<h2 id="六练习题请先独立完成">六、练习题（请先独立完成）
+</h2><h3 id="练习数据准备">练习数据准备
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th></th>
+					<th>A</th>
+					<th>B</th>
+					<th>C</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><strong>1</strong></td>
+					<td>产品</td>
+					<td>销售额</td>
+					<td>销量</td>
+			</tr>
+			<tr>
+					<td><strong>2</strong></td>
+					<td>产品A</td>
+					<td>5000</td>
+					<td>10</td>
+			</tr>
+			<tr>
+					<td><strong>3</strong></td>
+					<td>产品B</td>
+					<td>3000</td>
+					<td>0</td>
+			</tr>
+			<tr>
+					<td><strong>4</strong></td>
+					<td>产品C</td>
+					<td>8000</td>
+					<td>（留空）</td>
+			</tr>
+			<tr>
+					<td><strong>5</strong></td>
+					<td>产品D</td>
+					<td>4000</td>
+					<td>8</td>
+			</tr>
+	</tbody>
+</table></div>
+<h3 id="题目">题目
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>题号</th>
+					<th>题目</th>
+					<th>在何处作答</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>1</td>
+					<td>不用 IFERROR，直接计算单价（销售额÷销量），向下填充，观察哪些行报错、报什么错</td>
+					<td>D2</td>
+			</tr>
+			<tr>
+					<td>2</td>
+					<td>用 IFERROR 改写，出错时显示&quot;无销量&quot;</td>
+					<td>E2</td>
+			</tr>
+			<tr>
+					<td>3</td>
+					<td>用 IFERROR 改写，出错时显示空白</td>
+					<td>F2</td>
+			</tr>
+			<tr>
+					<td>4</td>
+					<td>用 IFERROR 改写，出错时按 0 处理</td>
+					<td>G2</td>
+			</tr>
+			<tr>
+					<td>5</td>
+					<td>思考：计算&quot;均价占比&quot;= 单价 ÷ 全部单价合计，如果第1题的 D3 是错误值，对合计有什么影响？（动手试试 <code>=SUM(D2:D5)</code>）</td>
+					<td>——</td>
+			</tr>
+			<tr>
+					<td>6</td>
+					<td>拓展：A7 输入文字&quot;苹果&quot;，B7 输入 <code>=A7*2</code>，观察错误，再用 IFERROR 改成&quot;无法计算&quot;</td>
+					<td>B7</td>
+			</tr>
+	</tbody>
+</table></div>
+<hr>
+<h2 id="七练习讲解做完再看">七、练习讲解（做完再看）
+</h2><h3 id="第1题讲解">第1题讲解
+</h3><p><code>=B2/C2</code> 向下填充后：</p>
+<ul>
+<li>产品A：500 ✓</li>
+<li>产品B：<code>#DIV/0!</code>（除以 0）</li>
+<li>产品C：<code>#DIV/0!</code>（<strong>空白单元格作除数等同于 0</strong>）</li>
+<li>产品D：500 ✓</li>
+</ul>
+<p>记住这个知识点：<strong>空白单元格参与数学运算时被当作 0</strong>。</p>
+<h3 id="第24题讲解">第2~4题讲解
+</h3><p>三题公式骨架相同，只是兜底内容不同：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">=IFERROR(B2/C2,&#34;无销量&#34;)     ← 文字提示，最友好
+</span></span><span class="line"><span class="cl">=IFERROR(B2/C2,&#34;&#34;)           ← 空白，最干净
+</span></span><span class="line"><span class="cl">=IFERROR(B2/C2,0)            ← 数字0，方便继续计算
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>选择标准：给人看的报表用前两种；还要继续参与计算的列用第三种。</p>
+<h3 id="第5题讲解">第5题讲解
+</h3><p><code>=SUM(D2:D5)</code> 的结果是 <code>#DIV/0!</code>——<strong>错误会传染</strong>：只要区域里有一个错误值，SUM 也跟着报错。这就是为什么报表里要及时处理错误值。用第4题的 0 兜底后，SUM 就能正常算出 1000。</p>
+<h3 id="第6题讲解">第6题讲解
+</h3><p><code>&quot;苹果&quot;*2</code> 报 <code>#VALUE!</code>（文本不能做乘法）。<code>=IFERROR(A7*2,&quot;无法计算&quot;)</code> 显示&quot;无法计算&quot;。说明 IFERROR 不只管除法，任何错误都能兜住。</p>
+<hr>
+<h2 id="八参考答案">八、参考答案
+</h2><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>题号</th>
+					<th>公式</th>
+					<th>产品A</th>
+					<th>产品B</th>
+					<th>产品C</th>
+					<th>产品D</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>1</td>
+					<td><code>=B2/C2</code></td>
+					<td>500</td>
+					<td>#DIV/0!</td>
+					<td>#DIV/0!</td>
+					<td>500</td>
+			</tr>
+			<tr>
+					<td>2</td>
+					<td><code>=IFERROR(B2/C2,&quot;无销量&quot;)</code></td>
+					<td>500</td>
+					<td>无销量</td>
+					<td>无销量</td>
+					<td>500</td>
+			</tr>
+			<tr>
+					<td>3</td>
+					<td><code>=IFERROR(B2/C2,&quot;&quot;)</code></td>
+					<td>500</td>
+					<td>（空）</td>
+					<td>（空）</td>
+					<td>500</td>
+			</tr>
+			<tr>
+					<td>4</td>
+					<td><code>=IFERROR(B2/C2,0)</code></td>
+					<td>500</td>
+					<td>0</td>
+					<td>0</td>
+					<td>500</td>
+			</tr>
+			<tr>
+					<td>5</td>
+					<td><code>=SUM(D2:D5)</code> → 报错；改用第4题数据后为 1000</td>
+					<td>——</td>
+					<td>——</td>
+					<td>——</td>
+					<td>——</td>
+			</tr>
+			<tr>
+					<td>6</td>
+					<td><code>=IFERROR(A7*2,&quot;无法计算&quot;)</code></td>
+					<td>无法计算</td>
+					<td>——</td>
+					<td>——</td>
+					<td>——</td>
+			</tr>
+	</tbody>
+</table></div>
+<hr>
+<h2 id="本章小结">本章小结
+</h2><ul>
+<li><code>=IFERROR(公式, 出错时显示的内容)</code>：<strong>正常时原样输出，出错时兜底</strong></li>
+<li>空白单元格作除数 = 除以 0，会报 <code>#DIV/0!</code></li>
+<li>错误值会<strong>传染</strong>给引用它的公式（如 SUM），要及时处理</li>
+<li>别滥用 IFERROR 掩盖真正的 bug，先跑通公式再包装</li>
+</ul>
+<p>下一章：<a class="link" href="/excel/08-countif/" >第08章：COUNTIF 函数</a></p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/excel/">Excel</a>
+        
+            <a href="/tags/%E5%87%BD%E6%95%B0%E6%95%99%E7%A8%8B/">函数教程</a>
+        
+    </section>
+
+
+    <section class="article-lastmod">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <span>
+            最后更新于 Jul 28, 2026 17:40 &#43;0800
+        </span>
+    </section></footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/excel/01-today/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第01章：TODAY 函数 —— 获取今天的日期</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/excel/02-max/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第02章：MAX 函数 —— 求最大值</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/excel/03-round/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第03章：ROUND 函数 —— 四舍五入</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/excel/04-right/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第04章：RIGHT 函数 —— 从右边提取字符</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/excel/05-mid/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">第05章：MID 函数 —— 从中间提取字符</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="ClingYang/ClingYang.github.io"
+        issue-term="pathname"
+        
+        label="💬comment"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2026 CLing
+    </section>
+    
+    <section class="powerby">
+        
+            世界是你们 <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<style>
+    #TableOfContents > ul, ol {
+        ul, ol {
+            display: none;
+        }
+        .open {
+            display: block;
+        }
+    }
+</style>
+
+<script>
+    function initTocHide() {
+        
+        let toc = document.querySelector(".widget--toc");
+        if (!toc) {
+            return;
+        }
+        
+        window.addEventListener('scroll', function() {
+            
+            let currentLi = document.querySelector(".active-class");
+            if (!currentLi) {
+                return
+            }
+            
+            let elementsByClassName = document.querySelectorAll(".open");
+            if (elementsByClassName.length > 0) {
+                elementsByClassName.forEach((ul) => {
+                    ul.classList.remove("open")
+                })
+            }
+            
+            if (currentLi.children.length > 1) {
+                currentLi.children[1].classList.add("open")
+            }
+            
+            let ul = currentLi.parentElement;
+            do {
+                ul.classList.add("open");
+                ul = ul.parentElement.parentElement
+            } while (ul !== undefined && (ul.localName === 'ul' || ul.localName === 'ol'))
+        });
+    }
+    initTocHide()
+</script>
+
+    </body>
+</html>
