@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="GD32 GD32F30x_Firmware_Library V3.0.3 FMC Flash 擦写 示例教学">
+<title>GD32 FMC — Flash 擦写</title>
+
+<link rel='canonical' href='https://clingyang.github.io/p/gd32-fmc-flash-%E6%93%A6%E5%86%99/'>
+
+<link rel="stylesheet" href="/scss/style.min.e14f3ba93baae65b2aef2339f32b6f25d7a0184785ebf4f6bd7d3376ae5dc2d4.css"><meta property='og:title' content="GD32 FMC — Flash 擦写">
+<meta property='og:description' content="GD32 GD32F30x_Firmware_Library V3.0.3 FMC Flash 擦写 示例教学">
+<meta property='og:url' content='https://clingyang.github.io/p/gd32-fmc-flash-%E6%93%A6%E5%86%99/'>
+<meta property='og:site_name' content='CLing'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Erase_Program' /><meta property='article:tag' content='fmc' /><meta property='article:tag' content='V3.0.3' /><meta property='article:published_time' content='2026-09-08T14:52:21&#43;08:00'/><meta property='article:modified_time' content='2026-09-08T16:03:27&#43;08:00'/>
+<meta name="twitter:title" content="GD32 FMC — Flash 擦写">
+<meta name="twitter:description" content="GD32 GD32F30x_Firmware_Library V3.0.3 FMC Flash 擦写 示例教学">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                            height="290" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🏀</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">CLing</a></h1>
+            <h2 class="site-description">你好 欢迎来到我的博客</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>档案</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E6%8A%80%E6%9C%AF%E9%93%BE%E6%8E%A5/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>技术链接</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/excel/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+                
+                <span>Excel教程</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#功能简介">功能简介</a></li>
+    <li><a href="#硬件准备">硬件准备</a></li>
+    <li><a href="#完整代码带中文注释">完整代码（带中文注释）</a></li>
+    <li><a href="#代码分段讲解">代码分段讲解</a>
+      <ol>
+        <li><a href="#1-全局宏与页数字数计算">1. 全局宏与&quot;页数/字数&quot;计算</a></li>
+        <li><a href="#2-解锁--清标志--操作--上锁四步曲">2. &ldquo;解锁 → 清标志 → 操作 → 上锁&quot;四步曲</a></li>
+        <li><a href="#3-擦除整页擦成-0xff">3. 擦除：整页擦成 0xFF</a></li>
+        <li><a href="#4-编程按字写-0x01234567">4. 编程：按字写 0x01234567</a></li>
+        <li><a href="#5-两段校验只读不写">5. 两段校验：只读不写</a></li>
+        <li><a href="#6-main两步串起来led4-表成功">6. main：两步串起来，LED4 表成功</a></li>
+      </ol>
+    </li>
+    <li><a href="#实验现象">实验现象</a></li>
+    <li><a href="#常见问题">常见问题</a></li>
+    <li><a href="#小结">小结</a></li>
+    <li><a href="#拓展应用">拓展应用</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/gd32/" >
+                GD32
+            </a>
+        
+            <a href="/categories/fmc/" >
+                FMC
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/gd32-fmc-flash-%E6%93%A6%E5%86%99/">GD32 FMC — Flash 擦写</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            GD32 GD32F30x_Firmware_Library V3.0.3 FMC Flash 擦写 示例教学
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2026-09-08</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 5 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="fmc--flash-擦写">FMC — Flash 擦写
+</h1><blockquote>
+<p><strong>固件库</strong>: GD32F30x_Firmware_Library V3.0.3<br>
+<strong>芯片</strong>: GD32F30x（以 GD32F307 评估板为例）<br>
+<strong>源文件</strong>: <code>GD32F30x_Firmware_Library_V3.0.3/Examples/FMC/Erase_Program/main.c</code><br>
+<strong>配套</strong>: <code>main.h</code>（定义 <code>led_typedef_enum</code>、全局 <code>lednum</code> 等）</p>
+</blockquote>
+<hr>
+<h2 id="功能简介">功能简介
+</h2><p>本示例演示 <strong>FMC（Flash 控制器）</strong> 最基础也最重要的两项操作：<strong>擦除（Erase）</strong> 和 <strong>编程（Program / 写）</strong> 片内 Flash，并对结果做校验。</p>
+<p>整个流程分两步：</p>
+<ol>
+<li><strong>擦除</strong>：把 <code>0x08004000 ~ 0x08004800</code> 这一页 Flash 擦成全 <code>0xFF</code>（擦除后该页所有字节变为 <code>0xFFFFFFFF</code>）。</li>
+<li><strong>编程</strong>：把固定数据 <code>0x01234567</code> 逐字（每 4 字节）写入刚才擦除的那一页。</li>
+<li><strong>校验</strong>：
+<ul>
+<li>擦除后检查是否全为 <code>0xFFFFFFFF</code>；若不是 → <strong>点亮 LED2</strong> 表示擦除失败。</li>
+<li>写入后检查是否全为 <code>0x01234567</code>；若不是 → <strong>点亮 LED3</strong> 表示写入失败。</li>
+<li>全成功 → <strong>点亮 LED4</strong>。</li>
+</ul>
+</li>
+</ol>
+<blockquote>
+<p>这是一个&quot;纯片内 Flash 自操作&quot;的例子，无需任何外部器件，下载即可观察 LED，是理解 Flash 存储机制的绝佳起点。</p>
+</blockquote>
+<hr>
+<h2 id="硬件准备">硬件准备
+</h2><ul>
+<li>GD32F30x 评估板一块（例程用 LED2 / LED3 / LED4，<code>gd_eval_led_init</code> 初始化）。</li>
+<li><strong>无需外部接线</strong>。完全片内操作。</li>
+<li>若用调试器，可在擦除/编程后观察 <code>0x08004000</code> 处内存：擦除后应为连续的 <code>0xFFFFFFFF</code>，编程后应为连续的 <code>0x01234567</code>。</li>
+</ul>
+<blockquote>
+<p>⚠️ <strong>地址安全</strong>：本例写的 <code>0x08004000</code> 是评估板默认空闲的 Flash 页。若你移植到自己的工程，请确认该地址<strong>不在你的程序代码区</strong>（查 .map 文件找空闲区），否则擦写会破坏正在运行的程序。</p>
+</blockquote>
+<hr>
+<h2 id="完整代码带中文注释">完整代码（带中文注释）
+</h2><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span><span class="lnt">113
+</span><span class="lnt">114
+</span><span class="lnt">115
+</span><span class="lnt">116
+</span><span class="lnt">117
+</span><span class="lnt">118
+</span><span class="lnt">119
+</span><span class="lnt">120
+</span><span class="lnt">121
+</span><span class="lnt">122
+</span><span class="lnt">123
+</span><span class="lnt">124
+</span><span class="lnt">125
+</span><span class="lnt">126
+</span><span class="lnt">127
+</span><span class="lnt">128
+</span><span class="lnt">129
+</span><span class="lnt">130
+</span><span class="lnt">131
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;gd32f30x.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;gd32f307c_eval.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;main.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#define FMC_PAGE_SIZE           ((uint16_t)0x800U)   </span><span class="cm">/* Flash 每页 2KB */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define FMC_WRITE_START_ADDR    ((uint32_t)0x08004000U) </span><span class="cm">/* 操作起始地址 */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define FMC_WRITE_END_ADDR      ((uint32_t)0x08004800U) </span><span class="cm">/* 操作结束地址（含） */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">uint32_t</span> <span class="o">*</span><span class="n">ptrd</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">uint32_t</span> <span class="n">address</span> <span class="o">=</span> <span class="mh">0x00000000U</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">uint32_t</span> <span class="n">data0</span>   <span class="o">=</span> <span class="mh">0x01234567U</span><span class="p">;</span>        <span class="cm">/* 要写入的固定数据 */</span>
+</span></span><span class="line"><span class="cl"><span class="n">led_typedef_enum</span> <span class="n">lednum</span> <span class="o">=</span> <span class="n">LED4</span><span class="p">;</span>        <span class="cm">/* 最终状态灯，默认 LED4（成功） */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 要计算的页数：(0x08004800 - 0x08004000) / 0x800 = 1 页 */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">uint32_t</span> <span class="n">PageNum</span> <span class="o">=</span> <span class="p">(</span><span class="n">FMC_WRITE_END_ADDR</span> <span class="o">-</span> <span class="n">FMC_WRITE_START_ADDR</span><span class="p">)</span> <span class="o">/</span> <span class="n">FMC_PAGE_SIZE</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="cm">/* 要计算的字数：(0x800) / 4 = 512 个字（即 2048 字节） */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">uint32_t</span> <span class="n">WordNum</span> <span class="o">=</span> <span class="p">((</span><span class="n">FMC_WRITE_END_ADDR</span> <span class="o">-</span> <span class="n">FMC_WRITE_START_ADDR</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="mi">2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/*!
+</span></span></span><span class="line"><span class="cl"><span class="cm">    \brief      擦除 FMC 页（从起始地址到结束地址）
+</span></span></span><span class="line"><span class="cl"><span class="cm">*/</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">fmc_erase_pages</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint32_t</span> <span class="n">EraseCounter</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">fmc_unlock</span><span class="p">();</span>   <span class="cm">/* ① 解锁 Flash（写前必做） */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* ② 清除所有待处理标志 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">fmc_flag_clear</span><span class="p">(</span><span class="n">FMC_FLAG_BANK0_END</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">fmc_flag_clear</span><span class="p">(</span><span class="n">FMC_FLAG_BANK0_WPERR</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">fmc_flag_clear</span><span class="p">(</span><span class="n">FMC_FLAG_BANK0_PGERR</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* ③ 逐页擦除 */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span><span class="p">(</span><span class="n">EraseCounter</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">EraseCounter</span> <span class="o">&lt;</span> <span class="n">PageNum</span><span class="p">;</span> <span class="n">EraseCounter</span><span class="o">++</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">fmc_page_erase</span><span class="p">(</span><span class="n">FMC_WRITE_START_ADDR</span> <span class="o">+</span> <span class="p">(</span><span class="n">FMC_PAGE_SIZE</span> <span class="o">*</span> <span class="n">EraseCounter</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">fmc_flag_clear</span><span class="p">(</span><span class="n">FMC_FLAG_BANK0_END</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">fmc_flag_clear</span><span class="p">(</span><span class="n">FMC_FLAG_BANK0_WPERR</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">fmc_flag_clear</span><span class="p">(</span><span class="n">FMC_FLAG_BANK0_PGERR</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">fmc_lock</span><span class="p">();</span>     <span class="cm">/* ④ 擦完上锁 */</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/*!
+</span></span></span><span class="line"><span class="cl"><span class="cm">    \brief      逐字编程 FMC（把 data0 写入每一字）
+</span></span></span><span class="line"><span class="cl"><span class="cm">*/</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">fmc_program</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">fmc_unlock</span><span class="p">();</span>   <span class="cm">/* ① 解锁 */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* ② 清除标志 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">fmc_flag_clear</span><span class="p">(</span><span class="n">FMC_FLAG_BANK0_END</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">fmc_flag_clear</span><span class="p">(</span><span class="n">FMC_FLAG_BANK0_WPERR</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">fmc_flag_clear</span><span class="p">(</span><span class="n">FMC_FLAG_BANK0_PGERR</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">address</span> <span class="o">=</span> <span class="n">FMC_WRITE_START_ADDR</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* ③ 从起始地址到结束地址，每 4 字节写一个字 */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span><span class="p">(</span><span class="n">address</span> <span class="o">&lt;</span> <span class="n">FMC_WRITE_END_ADDR</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">fmc_word_program</span><span class="p">(</span><span class="n">address</span><span class="p">,</span> <span class="n">data0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">address</span> <span class="o">+=</span> <span class="mi">4</span><span class="p">;</span>    <span class="cm">/* Flash 按字（4字节）编程 */</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">fmc_flag_clear</span><span class="p">(</span><span class="n">FMC_FLAG_BANK0_END</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">fmc_flag_clear</span><span class="p">(</span><span class="n">FMC_FLAG_BANK0_WPERR</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">fmc_flag_clear</span><span class="p">(</span><span class="n">FMC_FLAG_BANK0_PGERR</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">fmc_lock</span><span class="p">();</span>     <span class="cm">/* ④ 写上锁 */</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/*!
+</span></span></span><span class="line"><span class="cl"><span class="cm">    \brief      校验擦除结果（应全为 0xFFFFFFFF）
+</span></span></span><span class="line"><span class="cl"><span class="cm">*/</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">fmc_erase_pages_check</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint32_t</span> <span class="n">i</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">ptrd</span> <span class="o">=</span> <span class="p">(</span><span class="kt">uint32_t</span> <span class="o">*</span><span class="p">)</span><span class="n">FMC_WRITE_START_ADDR</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">for</span><span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">WordNum</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span><span class="p">(</span><span class="mh">0xFFFFFFFF</span> <span class="o">!=</span> <span class="p">(</span><span class="o">*</span><span class="n">ptrd</span><span class="p">)){</span>   <span class="cm">/* 有任一个字不是全 1，说明没擦干净 */</span>
+</span></span><span class="line"><span class="cl">            <span class="n">lednum</span> <span class="o">=</span> <span class="n">LED2</span><span class="p">;</span>           <span class="cm">/* 标记擦除失败 */</span>
+</span></span><span class="line"><span class="cl">            <span class="nf">gd_eval_led_on</span><span class="p">(</span><span class="n">lednum</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">ptrd</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/*!
+</span></span></span><span class="line"><span class="cl"><span class="cm">    \brief      校验编程结果（应全为 data0=0x01234567）
+</span></span></span><span class="line"><span class="cl"><span class="cm">*/</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">fmc_program_check</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint32_t</span> <span class="n">i</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">ptrd</span> <span class="o">=</span> <span class="p">(</span><span class="kt">uint32_t</span> <span class="o">*</span><span class="p">)</span><span class="n">FMC_WRITE_START_ADDR</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">for</span><span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">WordNum</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span><span class="p">((</span><span class="o">*</span><span class="n">ptrd</span><span class="p">)</span> <span class="o">!=</span> <span class="n">data0</span><span class="p">){</span>        <span class="cm">/* 有任一个字不等于写入值，说明写失败 */</span>
+</span></span><span class="line"><span class="cl">            <span class="n">lednum</span> <span class="o">=</span> <span class="n">LED3</span><span class="p">;</span>           <span class="cm">/* 标记写入失败 */</span>
+</span></span><span class="line"><span class="cl">            <span class="nf">gd_eval_led_on</span><span class="p">(</span><span class="n">lednum</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">ptrd</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 初始化 LED2/LED3/LED4 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gd_eval_led_init</span><span class="p">(</span><span class="n">LED2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gd_eval_led_init</span><span class="p">(</span><span class="n">LED3</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gd_eval_led_init</span><span class="p">(</span><span class="n">LED4</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 步骤1：擦除并校验；失败则点亮 LED2 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">fmc_erase_pages</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">fmc_erase_pages_check</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 步骤2：编程并校验；失败则点亮 LED3 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">fmc_program</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">fmc_program_check</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 全部成功（lednum 仍为默认 LED4）→ 点亮 LED4 */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span><span class="p">(</span><span class="n">LED4</span> <span class="o">==</span> <span class="n">lednum</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">gd_eval_led_on</span><span class="p">(</span><span class="n">LED4</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">while</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="代码分段讲解">代码分段讲解
+</h2><h3 id="1-全局宏与页数字数计算">1. 全局宏与&quot;页数/字数&quot;计算
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#define FMC_PAGE_SIZE        0x800     </span><span class="c1">// 每页 2KB
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define FMC_WRITE_START_ADDR 0x08004000
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define FMC_WRITE_END_ADDR   0x08004800
+</span></span></span><span class="line"><span class="cl"><span class="kt">uint32_t</span> <span class="n">PageNum</span> <span class="o">=</span> <span class="p">(</span><span class="mh">0x08004800</span> <span class="o">-</span> <span class="mh">0x08004000</span><span class="p">)</span> <span class="o">/</span> <span class="mh">0x800</span><span class="p">;</span>  <span class="c1">// = 1 页
+</span></span></span><span class="line"><span class="cl"><span class="kt">uint32_t</span> <span class="n">WordNum</span> <span class="o">=</span> <span class="p">(</span><span class="mh">0x08004800</span> <span class="o">-</span> <span class="mh">0x08004000</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="mi">2</span><span class="p">;</span>     <span class="c1">// = 0x200 = 512 字
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>操作区间是 <code>0x08004000 ~ 0x08004800</code>，跨度 <code>0x800 = 2KB</code>，正好是 <strong>1 个 Flash 页</strong>，所以擦除循环只擦 1 页。</li>
+<li><code>WordNum = 512</code>：这一页共 2048 字节，按 32 位（4 字节）字算就是 512 个字，写入/校验都按这 512 个字循环。</li>
+</ul>
+<h3 id="2-解锁--清标志--操作--上锁四步曲">2. &ldquo;解锁 → 清标志 → 操作 → 上锁&quot;四步曲
+</h3><p>擦除和编程函数结构完全对称，都遵循这条黄金流程：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">fmc_unlock</span><span class="p">();</span>                              <span class="c1">// ① 解锁（Flash 默认锁着，不解锁写不进）
+</span></span></span><span class="line"><span class="cl"><span class="nf">fmc_flag_clear</span><span class="p">(</span><span class="n">FMC_FLAG_BANK0_END</span><span class="p">);</span>        <span class="c1">// ② 清标志（避免上次残留状态干扰）
+</span></span></span><span class="line"><span class="cl"><span class="nf">fmc_flag_clear</span><span class="p">(</span><span class="n">FMC_FLAG_BANK0_WPERR</span><span class="p">);</span>      <span class="c1">//    写保护错误标志
+</span></span></span><span class="line"><span class="cl"><span class="nf">fmc_flag_clear</span><span class="p">(</span><span class="n">FMC_FLAG_BANK0_PGERR</span><span class="p">);</span>      <span class="c1">//    编程错误标志
+</span></span></span><span class="line"><span class="cl"><span class="cm">/* ... 具体操作 ... */</span>
+</span></span><span class="line"><span class="cl"><span class="nf">fmc_lock</span><span class="p">();</span>                                <span class="c1">// ④ 上锁（写完保护 Flash）
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><strong>解锁</strong>：Flash 上电后处于锁定状态，任何写操作都会被拒绝。<code>fmc_unlock()</code> 内部写入特定密钥序列来解锁。每次重新解锁前若已锁，需先 <code>lock</code> 再 <code>unlock</code>（例程每次操作开头都 unlock，结尾都 lock，规范）。</li>
+<li><strong>清标志</strong>：Flash 操作会产生 <code>END</code>（完成）、<code>WPERR</code>（写保护错）、<code>PGERR</code>（编程错）等状态位。操作前清一次、每次操作后也清，确保状态干净、便于判断本次结果。</li>
+</ul>
+<h3 id="3-擦除整页擦成-0xff">3. 擦除：整页擦成 0xFF
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">fmc_page_erase</span><span class="p">(</span><span class="n">FMC_WRITE_START_ADDR</span> <span class="o">+</span> <span class="mh">0x800</span> <span class="o">*</span> <span class="n">EraseCounter</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Flash <strong>不能单独改某个字节</strong>，只能&quot;整页擦除&rdquo;。擦除后该页每个位都回到 1，即读出 <code>0xFFFFFFFF</code>。所以擦除校验就是判断&quot;是不是全 <code>0xFFFFFFFF</code>&quot;。<strong>这也是为什么想改写 Flash 必须先擦</strong>——不擦直接写，旧数据会和新数据&quot;与&quot;在一起出错。</p>
+<h3 id="4-编程按字写-0x01234567">4. 编程：按字写 0x01234567
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">while</span><span class="p">(</span><span class="n">address</span> <span class="o">&lt;</span> <span class="n">FMC_WRITE_END_ADDR</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">fmc_word_program</span><span class="p">(</span><span class="n">address</span><span class="p">,</span> <span class="n">data0</span><span class="p">);</span>  <span class="c1">// 在 address 处写一个 32 位字
+</span></span></span><span class="line"><span class="cl">    <span class="n">address</span> <span class="o">+=</span> <span class="mi">4</span><span class="p">;</span>                      <span class="c1">// 字 = 4 字节，地址 +4
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><code>fmc_word_program</code> 一次写 <strong>4 字节（一个字）</strong>。所以循环里 <code>address += 4</code>，从 <code>0x08004000</code> 一直写到 <code>0x08004800</code>。</li>
+<li>写入的值是固定 <code>0x01234567</code>，写满整页 512 个字。</li>
+<li>注意写入<strong>前必须确保该页已擦除</strong>（本例先擦后写，顺序正确）。</li>
+</ul>
+<h3 id="5-两段校验只读不写">5. 两段校验：只读不写
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">ptrd</span> <span class="o">=</span> <span class="p">(</span><span class="kt">uint32_t</span> <span class="o">*</span><span class="p">)</span><span class="n">FMC_WRITE_START_ADDR</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">for</span><span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">WordNum</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span><span class="p">(</span><span class="mh">0xFFFFFFFF</span> <span class="o">!=</span> <span class="o">*</span><span class="n">ptrd</span><span class="p">){</span> <span class="n">lednum</span> <span class="o">=</span> <span class="n">LED2</span><span class="p">;</span> <span class="p">...</span> <span class="k">break</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ptrd</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>校验就是把 Flash 当普通内存（<code>uint32_t *</code> 指针）读出来比一比：擦除后应为全 <code>0xFFFFFFFF</code>，写之后应为全 <code>0x01234567</code>。<strong>读 Flash 不需要解锁</strong>，直接指针访问即可。一旦有字不符，就通过 <code>lednum</code> 记下是哪步失败（LED2=擦除失败，LED3=写入失败）并点亮对应灯。</p>
+<h3 id="6-main两步串起来led4-表成功">6. main：两步串起来，LED4 表成功
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">fmc_erase_pages</span><span class="p">();</span>        <span class="nf">fmc_erase_pages_check</span><span class="p">();</span>   <span class="c1">// 第一步
+</span></span></span><span class="line"><span class="cl"><span class="nf">fmc_program</span><span class="p">();</span>            <span class="nf">fmc_program_check</span><span class="p">();</span>        <span class="c1">// 第二步
+</span></span></span><span class="line"><span class="cl"><span class="k">if</span><span class="p">(</span><span class="n">LED4</span> <span class="o">==</span> <span class="n">lednum</span><span class="p">)</span> <span class="nf">gd_eval_led_on</span><span class="p">(</span><span class="n">LED4</span><span class="p">);</span>             <span class="c1">// 都没出错才亮 LED4
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>lednum</code> 初值设为 <code>LED4</code>（成功态）。只有擦除和写入<strong>全程无误</strong>，<code>lednum</code> 才保持 <code>LED4</code>，最后点亮 LED4；任一步出错，<code>lednum</code> 会被改成 <code>LED2</code> 或 <code>LED3</code>，LED4 就不会亮。这是一种简洁的&quot;状态灯&quot;写法。</p>
+<hr>
+<h2 id="实验现象">实验现象
+</h2><ol>
+<li>下载程序并复位后，Flash 自动被擦除、写入、校验。</li>
+<li>正常情况：<strong>只有 LED4 亮</strong>（代表擦除 + 写入 + 校验全部成功）。</li>
+<li>异常情况：
+<ul>
+<li>擦除失败 → <strong>LED2 亮</strong>（LED4 不亮）。</li>
+<li>写入失败 → <strong>LED3 亮</strong>（LED4 不亮）。</li>
+</ul>
+</li>
+<li>用调试器查看 <code>0x08004000</code>：
+<ul>
+<li>擦除后：<code>FF FF FF FF FF FF FF FF ...</code>（全 1）。</li>
+<li>写入后：<code>67 45 23 01 67 45 23 01 ...</code>（小端存储 <code>0x01234567</code>）。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="常见问题">常见问题
+</h2><p><strong>Q1：为什么一写就进 HardFault / 程序跑飞？</strong><br>
+最常见是<strong>写到了正在运行的代码区</strong>。Flash 不能擦写当前执行代码的页。请确认 <code>FMC_WRITE_START_ADDR</code> 在你的程序代码范围之外（末尾空闲页）。评估板 <code>0x08004000</code> 默认空闲，但大工程可能代码已占满到此。</p>
+<p><strong>Q2：为什么擦除后某个字不是 0xFFFFFFFF？</strong><br>
+擦除不完整通常因为：① 没有先 <code>fmc_unlock()</code>；② 上一次操作残留的 <code>PGERR/WPERR</code> 没清；③ 该页被<strong>写保护</strong>了（见 <code>Write_Protection</code> 例程）。先确认解锁和清标志都做了。</p>
+<p><strong>Q3：想改某个字节的数据，必须整页擦除吗？</strong><br>
+是的，Flash 的最小擦除单位就是&quot;页&quot;（2KB）。如果某页里还存有不想丢的数据，标准做法是：先把整页读出来备份到 RAM，修改目标字节，再整页擦除、把备份写回去。这也叫&quot;Flash 模拟 EEPROM&quot;的惯用手法。</p>
+<p><strong>Q4：写入函数一定要按 4 字节（字）吗？</strong><br>
+本例用 <code>fmc_word_program</code>（32 位）。库也提供 <code>fmc_halfword_program</code>（16 位）、<code>fmc_byte_program</code>（8 位，视型号支持）。但底层仍受 Flash 物理对齐约束，<strong>写之前该地址必须已擦除</strong>。</p>
+<p><strong>Q5：写之前一定要清 END/WPERR/PGERR 标志吗？</strong><br>
+强烈建议清。不清的话，若之前有错误标志残留，本次操作可能立刻被判失败或卡住。例程在每次操作前后都清，是稳妥写法。</p>
+<p><strong>Q6：擦写 Flash 会不会很慢、影响中断？</strong><br>
+Flash 擦除一页需要若干毫秒，写一字约几十微秒，期间 CPU 仍可运行（GD32 有 Flash 缓存/预取），但<strong>擦写期间若要从该 Flash 取指令可能等待</strong>。对时序极苛刻的中断，关键代码可放在 RAM 里执行。一般应用无需担心。</p>
+<hr>
+<h2 id="小结">小结
+</h2><p>本示例把 FMC 的黄金流程讲得干干净净：</p>
+<ol>
+<li><strong>算好范围</strong>：确定要操作的页数和字数（按页擦、按字写）。</li>
+<li><strong>解锁</strong>：<code>fmc_unlock()</code> 是写 Flash 的前置条件。</li>
+<li><strong>清标志</strong>：操作前后清 <code>END / WPERR / PGERR</code>。</li>
+<li><strong>擦页</strong>：<code>fmc_page_erase()</code> 把整页擦成 <code>0xFFFFFFFF</code>（不能只改字节）。</li>
+<li><strong>写字</strong>：<code>fmc_word_program()</code> 按 4 字节逐字写入。</li>
+<li><strong>上锁 + 校验</strong>：<code>fmc_lock()</code> 保护；用指针读回比对，LED 指示成败。</li>
+</ol>
+<p>记住 <strong>Flash = &ldquo;先整页擦、再按字写、写前必解锁&rdquo;</strong> 这三句话，你就掌握了片内存储的底层逻辑。</p>
+<hr>
+<h2 id="拓展应用">拓展应用
+</h2><p>掌握 Flash 擦写后，可以做很多&quot;掉电不丢&quot;的实用功能：</p>
+<ul>
+<li><strong>保存配置参数</strong>：把设备的校准值、用户设置写到指定 Flash 页，上电读取恢复；修改时按&quot;备份→擦除→回写&quot;流程。</li>
+<li><strong>IAP / OTA 升级</strong>：旧程序通过 FMC 把新固件写到另一块 Flash 区，再用跳转指令接管运行——这是绝大多数单片机远程升级的基础。</li>
+<li><strong>运行计数器 / 公里数</strong>：如电机累计转数、设备累计工作时间，定期写入 Flash 持久化。</li>
+<li><strong>黑匣子 / 日志</strong>：记录最近一次异常现场数据，掉电后仍能读取排查。</li>
+<li><strong>数据加密存储</strong>：配合唯一 ID 与简单加解密，把敏感参数存进 Flash。</li>
+<li><strong>结合 DMA</strong>：如 <code>Flash_to_ram</code> 例程，先把数据写进 Flash，再用 DMA 高速搬回 RAM 做处理。</li>
+</ul>
+<blockquote>
+<p>想给 Flash 加保护防止误擦写，可阅读同模块 <code>Write_Protection</code> 例程。</p>
+</blockquote>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/erase_program/">Erase_Program</a>
+        
+            <a href="/tags/fmc/">Fmc</a>
+        
+            <a href="/tags/v3.0.3/">V3.0.3</a>
+        
+    </section>
+
+
+    <section class="article-lastmod">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <span>
+            最后更新于 Sep 08, 2026 16:03 &#43;0800
+        </span>
+    </section></footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/gd32-fmc-flash-%E5%86%99%E4%BF%9D%E6%8A%A4/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">GD32 FMC — Flash 写保护</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/gd32-adc-adc--dma-%E9%87%87%E9%9B%86/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">GD32 ADC — ADC &#43; DMA 采集</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/gd32-adc-adc-%E4%B8%8D%E8%BF%9E%E7%BB%AD%E6%A8%A1%E5%BC%8F/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">GD32 ADC — ADC 不连续模式</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/gd32-adc-adc-%E5%88%86%E8%BE%A8%E7%8E%87%E9%85%8D%E7%BD%AE/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">GD32 ADC — ADC 分辨率配置</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/gd32-adc-adc-%E6%A8%A1%E6%8B%9F%E7%9C%8B%E9%97%A8%E7%8B%97/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">GD32 ADC — ADC 模拟看门狗</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="ClingYang/ClingYang.github.io"
+        issue-term="pathname"
+        
+        label="💬comment"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2026 CLing
+    </section>
+    
+    <section class="powerby">
+        
+            世界是你们 <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<style>
+    #TableOfContents > ul, ol {
+        ul, ol {
+            display: none;
+        }
+        .open {
+            display: block;
+        }
+    }
+</style>
+
+<script>
+    function initTocHide() {
+        
+        let toc = document.querySelector(".widget--toc");
+        if (!toc) {
+            return;
+        }
+        
+        window.addEventListener('scroll', function() {
+            
+            let currentLi = document.querySelector(".active-class");
+            if (!currentLi) {
+                return
+            }
+            
+            let elementsByClassName = document.querySelectorAll(".open");
+            if (elementsByClassName.length > 0) {
+                elementsByClassName.forEach((ul) => {
+                    ul.classList.remove("open")
+                })
+            }
+            
+            if (currentLi.children.length > 1) {
+                currentLi.children[1].classList.add("open")
+            }
+            
+            let ul = currentLi.parentElement;
+            do {
+                ul.classList.add("open");
+                ul = ul.parentElement.parentElement
+            } while (ul !== undefined && (ul.localName === 'ul' || ul.localName === 'ol'))
+        });
+    }
+    initTocHide()
+</script>
+
+    </body>
+</html>

@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="PUYA PY32F403_Firmware V1.4.5 ESMC 外部串行存储器读写轮询（ESMC_ReadWrite_Polling）示例教学">
+<title>PUYA ESMC — 外部串行存储器控制器（QSPI Flash 读写）</title>
+
+<link rel='canonical' href='https://clingyang.github.io/p/puya-esmc-%E5%A4%96%E9%83%A8%E4%B8%B2%E8%A1%8C%E5%AD%98%E5%82%A8%E5%99%A8%E6%8E%A7%E5%88%B6%E5%99%A8qspi-flash-%E8%AF%BB%E5%86%99/'>
+
+<link rel="stylesheet" href="/scss/style.min.e14f3ba93baae65b2aef2339f32b6f25d7a0184785ebf4f6bd7d3376ae5dc2d4.css"><meta property='og:title' content="PUYA ESMC — 外部串行存储器控制器（QSPI Flash 读写）">
+<meta property='og:description' content="PUYA PY32F403_Firmware V1.4.5 ESMC 外部串行存储器读写轮询（ESMC_ReadWrite_Polling）示例教学">
+<meta property='og:url' content='https://clingyang.github.io/p/puya-esmc-%E5%A4%96%E9%83%A8%E4%B8%B2%E8%A1%8C%E5%AD%98%E5%82%A8%E5%99%A8%E6%8E%A7%E5%88%B6%E5%99%A8qspi-flash-%E8%AF%BB%E5%86%99/'>
+<meta property='og:site_name' content='CLing'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='ESMC_ReadWrite_Polling' /><meta property='article:tag' content='esmc' /><meta property='article:tag' content='qspi' /><meta property='article:tag' content='V1.4.5' /><meta property='article:tag' content='PY32F403' /><meta property='article:published_time' content='2026-09-08T14:52:21&#43;08:00'/><meta property='article:modified_time' content='2026-09-08T16:03:27&#43;08:00'/>
+<meta name="twitter:title" content="PUYA ESMC — 外部串行存储器控制器（QSPI Flash 读写）">
+<meta name="twitter:description" content="PUYA PY32F403_Firmware V1.4.5 ESMC 外部串行存储器读写轮询（ESMC_ReadWrite_Polling）示例教学">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                            height="290" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🏀</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">CLing</a></h1>
+            <h2 class="site-description">你好 欢迎来到我的博客</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>档案</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E6%8A%80%E6%9C%AF%E9%93%BE%E6%8E%A5/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>技术链接</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/excel/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+                
+                <span>Excel教程</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#功能简介">功能简介</a></li>
+    <li><a href="#硬件准备">硬件准备</a></li>
+    <li><a href="#完整代码核心流程">完整代码（核心流程）</a></li>
+    <li><a href="#代码分段讲解">代码分段讲解</a>
+      <ol>
+        <li><a href="#1-esmc-的命令模型">1. ESMC 的命令模型</a></li>
+        <li><a href="#2-单线-vs-四线">2. 单线 vs 四线</a></li>
+        <li><a href="#3-写使能与-busy-轮询">3. 写使能与 BUSY 轮询</a></li>
+        <li><a href="#4-qe-位与页编程">4. QE 位与页编程</a></li>
+      </ol>
+    </li>
+    <li><a href="#实验现象">实验现象</a></li>
+    <li><a href="#常见问题">常见问题</a></li>
+    <li><a href="#小结">小结</a></li>
+    <li><a href="#拓展应用">拓展应用</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/puya/" >
+                PUYA
+            </a>
+        
+            <a href="/categories/esmc/" >
+                ESMC
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/puya-esmc-%E5%A4%96%E9%83%A8%E4%B8%B2%E8%A1%8C%E5%AD%98%E5%82%A8%E5%99%A8%E6%8E%A7%E5%88%B6%E5%99%A8qspi-flash-%E8%AF%BB%E5%86%99/">PUYA ESMC — 外部串行存储器控制器（QSPI Flash 读写）</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            PUYA PY32F403_Firmware V1.4.5 ESMC 外部串行存储器读写轮询（ESMC_ReadWrite_Polling）示例教学
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2026-09-08</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 3 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="esmc--外部串行存储器控制器qspi-flash-读写">ESMC — 外部串行存储器控制器（QSPI Flash 读写）
+</h1><blockquote>
+<p><strong>固件库</strong>: PY32F403_Firmware V1.4.5<br>
+<strong>芯片</strong>: PY32F403<br>
+<strong>源文件</strong>: <code>PUYA/PY32F403_Firmware_V1.4.5/Projects/PY32F403-STK/Example/ESMC/ESMC_ReadWrite_Polling/Src/main.c</code></p>
+</blockquote>
+<hr>
+<h2 id="功能简介">功能简介
+</h2><p>PY32F403 带有 <strong>ESMC（External Serial Memory Controller，外部串行存储器控制器）</strong>，可硬件驱动 <strong>QSPI / Octo-SPI / HyperBus</strong> 等串行存储器。相比用 GPIO 软件模拟，ESMC 由硬件时序控制器直接发指令/地址/数据，支持单线、双线、四线（Quad）模式，速度快且 CPU 负担小。</p>
+<p>本示例演示用 ESMC 驱动板载 <strong>P25Q64（容量 8MB 的 QSPI NOR Flash）</strong>，完成完整写读流程：</p>
+<ol>
+<li>准备 4096 字节测试数据（0,1,2,…,255 循环）；</li>
+<li>ESMC 初始化（时钟分频、单线模式、关闭双 Flash）；</li>
+<li><strong>写使能</strong> → 等状态寄存器 BUSY 清零；</li>
+<li><strong>扇区擦除</strong>（4KB）；</li>
+<li>开启 <strong>QE（Quad Enable）</strong> 位，使能四线模式；</li>
+<li><strong>四线页编程</strong>（按 256 字节/页写入）；</li>
+<li><strong>四线快读</strong> 回读；</li>
+<li>校验一致则点亮绿灯。</li>
+</ol>
+<blockquote>
+<p>这是 F403 的“特色外设”示例：把外置 Flash 当大容量存储用，典型用于字库、图片、音频、固件备份。</p>
+</blockquote>
+<h2 id="硬件准备">硬件准备
+</h2><ul>
+<li>PY32F403 开发板（板载或外接 P25Q64 QSPI Flash，接 ESMC 的 IO0~IO3 / CLK / CS）</li>
+<li>板载 LED（指示结果）</li>
+<li>无需串口，结果用 LED 表示</li>
+</ul>
+<h2 id="完整代码核心流程">完整代码（核心流程）
+</h2><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span><span class="lnt">80
+</span><span class="lnt">81
+</span><span class="lnt">82
+</span><span class="lnt">83
+</span><span class="lnt">84
+</span><span class="lnt">85
+</span><span class="lnt">86
+</span><span class="lnt">87
+</span><span class="lnt">88
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;main.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define BUFFERSIZE 4096
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">ESMC_HandleTypeDef</span> <span class="n">hesmc</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">ESMC_InitTypeDef</span>   <span class="n">ESMC_initTypeDef</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="n">aRxBuffer</span><span class="p">[</span><span class="n">BUFFERSIZE</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="n">aTxBuffer</span><span class="p">[</span><span class="n">BUFFERSIZE</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">uint32_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">cnt</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">progAddr</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">pData</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">uint32_t</span> <span class="n">address</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nf">HAL_Init</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">BSP_LED_Init</span><span class="p">(</span><span class="n">LED_GREEN</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">BUFFERSIZE</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="n">aTxBuffer</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">256</span><span class="p">;</span> <span class="cm">/* 测试数据 */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nf">APP_EsmcInit</span><span class="p">();</span>              <span class="cm">/* 1. ESMC 初始化 */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nf">APP_WriteEnable</span><span class="p">();</span>           <span class="cm">/* 2. 写使能 */</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="nf">APP_GetFlashStatus</span><span class="p">(</span><span class="mh">0x05</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x01</span><span class="p">)</span> <span class="p">{}</span>   <span class="cm">/* 等 BUSY 清 */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nf">APP_EraseSector</span><span class="p">(</span><span class="n">address</span><span class="p">);</span>    <span class="cm">/* 3. 扇区擦除 */</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="nf">APP_GetFlashStatus</span><span class="p">(</span><span class="n">P25Q64_READ_STATUS_REG_CMD</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x01</span><span class="p">)</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 4. 开启 QE 位（四线使能） */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">flashStatus</span> <span class="o">=</span> <span class="nf">APP_GetFlashStatus</span><span class="p">(</span><span class="n">P25Q64_READ_STATUS_REG_1_CMD</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">flashStatus</span> <span class="o">|=</span> <span class="mh">0x02</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">APP_WriteEnable</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="nf">APP_GetFlashStatus</span><span class="p">(</span><span class="mh">0x05</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x01</span><span class="p">)</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">APP_SetFlashStatus</span><span class="p">(</span><span class="n">flashStatus</span><span class="p">,</span> <span class="n">P25Q64_WRITE_STATUS_REG_1_CMD</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="nf">APP_GetFlashStatus</span><span class="p">(</span><span class="n">P25Q64_READ_STATUS_REG_CMD</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x01</span><span class="p">)</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 5. 分页编程（每页 P25Q64_PAGE_SIZE 字节） */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">cnt</span> <span class="o">=</span> <span class="n">BUFFERSIZE</span><span class="p">;</span> <span class="n">progAddr</span> <span class="o">=</span> <span class="n">address</span><span class="p">;</span> <span class="n">pData</span> <span class="o">=</span> <span class="n">aTxBuffer</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="n">cnt</span> <span class="o">/</span> <span class="n">P25Q64_PAGE_SIZE</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">APP_PageProgram</span><span class="p">(</span><span class="n">pData</span><span class="p">,</span> <span class="n">progAddr</span><span class="p">,</span> <span class="n">P25Q64_PAGE_SIZE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="nf">APP_GetFlashStatus</span><span class="p">(</span><span class="n">P25Q64_READ_STATUS_REG_CMD</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x01</span><span class="p">)</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">cnt</span>      <span class="o">-=</span> <span class="n">P25Q64_PAGE_SIZE</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">progAddr</span> <span class="o">+=</span> <span class="n">P25Q64_PAGE_SIZE</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">pData</span>    <span class="o">+=</span> <span class="n">P25Q64_PAGE_SIZE</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">cnt</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span> <span class="nf">APP_PageProgram</span><span class="p">(</span><span class="n">pData</span><span class="p">,</span> <span class="n">progAddr</span><span class="p">,</span> <span class="n">cnt</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                 <span class="k">while</span> <span class="p">(</span><span class="nf">APP_GetFlashStatus</span><span class="p">(</span><span class="n">P25Q64_READ_STATUS_REG_CMD</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x01</span><span class="p">)</span> <span class="p">{}</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 6. 读取并校验 */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">APP_DataRead</span><span class="p">(</span><span class="n">aRxBuffer</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">BUFFERSIZE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">HAL_OK</span> <span class="o">!=</span> <span class="nf">APP_DataCheck</span><span class="p">(</span><span class="n">aRxBuffer</span><span class="p">,</span> <span class="n">aTxBuffer</span><span class="p">,</span> <span class="n">BUFFERSIZE</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">BSP_LED_Off</span><span class="p">(</span><span class="n">LED_GREEN</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">APP_ErrorHandler</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">BSP_LED_On</span><span class="p">(</span><span class="n">LED_GREEN</span><span class="p">);</span>   <span class="cm">/* 成功：绿灯 */</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* ESMC 初始化：开时钟，配分频/模式 */</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">APP_EsmcInit</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">__HAL_RCC_ESMC_CLK_ENABLE</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">hesmc</span><span class="p">.</span><span class="n">Instance</span> <span class="o">=</span> <span class="n">ESMC</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">ESMC_initTypeDef</span><span class="p">.</span><span class="n">ClockPrescaler</span> <span class="o">=</span> <span class="mh">0x8</span><span class="p">;</span>          <span class="cm">/* 时钟分频 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">ESMC_initTypeDef</span><span class="p">.</span><span class="n">ClockMode</span>      <span class="o">=</span> <span class="n">ESMC_CLOCK_MODE_0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">ESMC_initTypeDef</span><span class="p">.</span><span class="n">DualFlash</span>      <span class="o">=</span> <span class="n">ESMC_DUALFLASH_DISABLE</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">hesmc</span><span class="p">.</span><span class="n">Init</span> <span class="o">=</span> <span class="n">ESMC_initTypeDef</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">HAL_ESMC_Init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">hesmc</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 发一条 QSPI 指令：先 HAL_ESMC_Command 描述“指令/地址/数据”格式，再收发数据 */</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">APP_PageProgram</span><span class="p">(</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="n">pData</span><span class="p">,</span> <span class="kt">uint32_t</span> <span class="n">addr</span><span class="p">,</span> <span class="kt">uint32_t</span> <span class="n">nBytes</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">ESMC_CommandTypeDef</span> <span class="n">cmdStc</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">APP_WriteEnable</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">cmdStc</span><span class="p">.</span><span class="n">TransferFormat</span>    <span class="o">=</span> <span class="n">ESMC_TRANSFER_FORMAT_QUAD</span><span class="p">;</span>  <span class="cm">/* 四线传输 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">cmdStc</span><span class="p">.</span><span class="n">InstructionMode</span>   <span class="o">=</span> <span class="n">ESMC_INSTRUCTION_SINGLE_LINE</span><span class="p">;</span> <span class="cm">/* 指令仍单线 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">cmdStc</span><span class="p">.</span><span class="n">Instruction</span>       <span class="o">=</span> <span class="n">P25Q64_QUAD_INPUT_PAGE_PROG_CMD</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">cmdStc</span><span class="p">.</span><span class="n">AddressMode</span>       <span class="o">=</span> <span class="n">ESMC_ADDRESS_SINGLE_LINE</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">cmdStc</span><span class="p">.</span><span class="n">AddressSize</span>       <span class="o">=</span> <span class="n">ESMC_ADDRESS_24_BITS</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">cmdStc</span><span class="p">.</span><span class="n">Address</span>           <span class="o">=</span> <span class="n">addr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">cmdStc</span><span class="p">.</span><span class="n">DataMode</span>          <span class="o">=</span> <span class="n">ESMC_DATA_WRITE</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">cmdStc</span><span class="p">.</span><span class="n">NbData</span>            <span class="o">=</span> <span class="n">nBytes</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">cmdStc</span><span class="p">.</span><span class="n">CSPinSel</span>          <span class="o">=</span> <span class="n">ESMC_SELECT_PIN_CS0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">HAL_ESMC_Command</span><span class="p">(</span><span class="o">&amp;</span><span class="n">hesmc</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">cmdStc</span><span class="p">,</span> <span class="mh">0x0000FFFF</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">HAL_ESMC_Transmit</span><span class="p">(</span><span class="o">&amp;</span><span class="n">hesmc</span><span class="p">,</span> <span class="n">pData</span><span class="p">,</span> <span class="mh">0x0000FFFF</span><span class="p">);</span>   <span class="cm">/* 送出数据 */</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="代码分段讲解">代码分段讲解
+</h2><h3 id="1-esmc-的命令模型">1. ESMC 的命令模型
+</h3><p>ESMC 把一次 Flash 访问拆成 <strong>“命令描述 + 数据传输”</strong> 两步：</p>
+<ul>
+<li><code>HAL_ESMC_Command()</code>：用 <code>ESMC_CommandTypeDef</code> 描述本次操作的<strong>指令码、指令线数（单/双/四）、是否带地址、地址位数、数据方向（读/写）、数据线数、数据长度、CS 引脚</strong>等。</li>
+<li>随后的 <code>HAL_ESMC_Transmit / Receive</code>：按上面的描述真正搬数据。</li>
+</ul>
+<p>这种“描述符 + 传输”模型非常灵活，一套 API 即可适配各种 QSPI 器件。</p>
+<h3 id="2-单线-vs-四线">2. 单线 vs 四线
+</h3><ul>
+<li><strong>指令阶段</strong>：几乎所有 Flash 都用单线发指令码（<code>INSTRUCTION_SINGLE_LINE</code>），成本低、兼容好。</li>
+<li><strong>数据阶段</strong>：开启 QE 后可用 <code>ESMC_TRANSFER_FORMAT_QUAD</code> 四线读写，速度翻多倍。</li>
+<li>读数据用 <code>P25Q64_1I4O_FAST_READ_CMD</code>（指令单线、数据四线快读），写用 <code>P25Q64_QUAD_INPUT_PAGE_PROG_CMD</code>。</li>
+</ul>
+<h3 id="3-写使能与-busy-轮询">3. 写使能与 BUSY 轮询
+</h3><p>QSPI Flash 有写保护：任何擦/写前必须先发 <strong>Write Enable</strong>（06h）指令；操作期间状态寄存器 <code>BUSY</code> 位为 1，必须轮询等到清零（<code>while (GetFlashStatus &amp; 0x01)</code>）才能下一步。这是所有 SPI NOR Flash 的通用约定。</p>
+<h3 id="4-qe-位与页编程">4. QE 位与页编程
+</h3><ul>
+<li><strong>QE（Quad Enable）</strong>：状态寄存器 1 的 bit1，置 1 后 IO2/IO3 才用于四线传输；首次使用需写状态寄存器开启。</li>
+<li><strong>页编程</strong>：P25Q64 每页 256 字节，一次最多写一页；跨页要分多次，且每次写前地址所在扇区需已擦除。</li>
+</ul>
+<h2 id="实验现象">实验现象
+</h2><ul>
+<li>程序完成“擦除→写→读→校验”后 <strong>绿灯常亮</strong>；</li>
+<li>任一环节失败则卡在 <code>APP_ErrorHandler</code>（绿灯不亮或熄灭），可结合调试定位。</li>
+</ul>
+<h2 id="常见问题">常见问题
+</h2><ol>
+<li>
+<p><strong>绿灯不亮 / 校验失败？</strong></p>
+<ul>
+<li>确认板载 Flash 型号确为 P25Q64（指令宏 <code>P25Q64_*</code> 匹配）；不同型号指令/页大小不同。</li>
+<li>确认 CS/CLK/IO0~IO3 接线与 ESMC 引脚映射一致。</li>
+<li>QE 位未成功开启会导致四线读写失败——检查 <code>APP_SetFlashStatus</code> 流程。</li>
+</ul>
+</li>
+<li>
+<p><strong>写不进去？</strong></p>
+<ul>
+<li>写前必须 <code>WriteEnable</code> 且等待上一次 BUSY 清零；目标区必须已擦除（全 0xFF）。</li>
+</ul>
+</li>
+<li>
+<p><strong>想用 DMA/中断？</strong></p>
+<ul>
+<li>同目录有 <code>ESMC_ReadWrite_DMA</code>、<code>ESMC_ReadWriteQuad_IT</code>，大批量数据用 DMA 更高效。</li>
+</ul>
+</li>
+</ol>
+<h2 id="小结">小结
+</h2><ul>
+<li>ESMC 通过“<strong>命令描述符 + 传输</strong>”统一驱动 QSPI/Octo 串行存储器。</li>
+<li>QSPI Flash 写流程固定：<strong>WriteEnable → 等 BUSY → 擦除/编程 → 等 BUSY → 校验</strong>。</li>
+<li>开 QE 后用四线模式大幅提速；指令通常仍单线发送。</li>
+</ul>
+<h2 id="拓展应用">拓展应用
+</h2><ul>
+<li>存放字库/图片/UI 资源，MCU 内部 Flash 只放代码。</li>
+<li>做“外部数据记录仪”（日志、采样缓存）。</li>
+<li>配合 XIP（片上执行）把代码放到外置 Flash 运行，扩展程序空间。</li>
+<li>DMA 方式搬运大块音频/视频资源到 LCD/Codec。</li>
+</ul>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/esmc_readwrite_polling/">ESMC_ReadWrite_Polling</a>
+        
+            <a href="/tags/esmc/">Esmc</a>
+        
+            <a href="/tags/qspi/">Qspi</a>
+        
+            <a href="/tags/v1.4.5/">V1.4.5</a>
+        
+            <a href="/tags/py32f403/">PY32F403</a>
+        
+    </section>
+
+
+    <section class="article-lastmod">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <span>
+            最后更新于 Sep 08, 2026 16:03 &#43;0800
+        </span>
+    </section></footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/puya-esmc-esmc_memorymapping/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA ESMC — ESMC_MemoryMapping</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/puya-esmc-esmc_readwritequad_it/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA ESMC — ESMC_ReadWriteQuad_IT</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/puya-esmc-esmc_readwrite_dma/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA ESMC — ESMC_ReadWrite_DMA</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/puya-esmc-esmc_readwrite_dtr_polling/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA ESMC — ESMC_ReadWrite_DTR_Polling</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/puya-esmc-esmc_readwrite_twoflash_polling/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA ESMC — ESMC_ReadWrite_TwoFlash_Polling</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="ClingYang/ClingYang.github.io"
+        issue-term="pathname"
+        
+        label="💬comment"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2026 CLing
+    </section>
+    
+    <section class="powerby">
+        
+            世界是你们 <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<style>
+    #TableOfContents > ul, ol {
+        ul, ol {
+            display: none;
+        }
+        .open {
+            display: block;
+        }
+    }
+</style>
+
+<script>
+    function initTocHide() {
+        
+        let toc = document.querySelector(".widget--toc");
+        if (!toc) {
+            return;
+        }
+        
+        window.addEventListener('scroll', function() {
+            
+            let currentLi = document.querySelector(".active-class");
+            if (!currentLi) {
+                return
+            }
+            
+            let elementsByClassName = document.querySelectorAll(".open");
+            if (elementsByClassName.length > 0) {
+                elementsByClassName.forEach((ul) => {
+                    ul.classList.remove("open")
+                })
+            }
+            
+            if (currentLi.children.length > 1) {
+                currentLi.children[1].classList.add("open")
+            }
+            
+            let ul = currentLi.parentElement;
+            do {
+                ul.classList.add("open");
+                ul = ul.parentElement.parentElement
+            } while (ul !== undefined && (ul.localName === 'ul' || ul.localName === 'ol'))
+        });
+    }
+    initTocHide()
+</script>
+
+    </body>
+</html>

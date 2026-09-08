@@ -1,0 +1,1493 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="GD32 GD32F30x_Firmware_Library V3.0.3 USART printf 重定向 示例教学">
+<title>GD32 USART — printf 重定向</title>
+
+<link rel='canonical' href='https://clingyang.github.io/p/gd32-usart-printf-%E9%87%8D%E5%AE%9A%E5%90%91/'>
+
+<link rel="stylesheet" href="/scss/style.min.e14f3ba93baae65b2aef2339f32b6f25d7a0184785ebf4f6bd7d3376ae5dc2d4.css"><meta property='og:title' content="GD32 USART — printf 重定向">
+<meta property='og:description' content="GD32 GD32F30x_Firmware_Library V3.0.3 USART printf 重定向 示例教学">
+<meta property='og:url' content='https://clingyang.github.io/p/gd32-usart-printf-%E9%87%8D%E5%AE%9A%E5%90%91/'>
+<meta property='og:site_name' content='CLing'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Printf' /><meta property='article:tag' content='usart' /><meta property='article:tag' content='V3.0.3' /><meta property='article:published_time' content='2026-09-08T14:52:21&#43;08:00'/><meta property='article:modified_time' content='2026-09-08T16:03:27&#43;08:00'/>
+<meta name="twitter:title" content="GD32 USART — printf 重定向">
+<meta name="twitter:description" content="GD32 GD32F30x_Firmware_Library V3.0.3 USART printf 重定向 示例教学">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                            height="290" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🏀</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">CLing</a></h1>
+            <h2 class="site-description">你好 欢迎来到我的博客</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>档案</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E6%8A%80%E6%9C%AF%E9%93%BE%E6%8E%A5/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>技术链接</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/excel/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+                
+                <span>Excel教程</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#功能简介">功能简介</a></li>
+    <li><a href="#硬件准备">硬件准备</a>
+      <ol>
+        <li><a href="#接线新手最容易错的地方">接线（新手最容易错的地方）</a></li>
+        <li><a href="#串口助手设置">串口助手设置</a></li>
+      </ol>
+    </li>
+    <li><a href="#完整代码">完整代码</a>
+      <ol>
+        <li><a href="#第一部分mainc">第一部分：main.c</a></li>
+        <li><a href="#第二部分真正的魔法-fputc-重写">第二部分：真正的&quot;魔法&quot;—— fputc 重写</a></li>
+      </ol>
+    </li>
+    <li><a href="#代码分段讲解">代码分段讲解</a>
+      <ol>
+        <li><a href="#第-1-段printf-重定向的原理本篇最重要的部分">第 1 段：printf 重定向的原理（本篇最重要的部分）</a></li>
+        <li><a href="#第-2-段为什么-tx-用-af_pprx-用-in_floating">第 2 段：为什么 TX 用 AF_PP，RX 用 IN_FLOATING</a></li>
+        <li><a href="#第-3-段usart_deinit-为什么要先调用">第 3 段：usart_deinit() 为什么要先调用</a></li>
+        <li><a href="#第-4-段发送接收总使能三个开关的关系">第 4 段：发送/接收/总使能，三个开关的关系</a></li>
+        <li><a href="#第-5-段n-和-r-到底该写哪个">第 5 段：<code>\n</code> 和 <code>\r</code> 到底该写哪个</a></li>
+        <li><a href="#第-6-段fputc-里-whiletbe-的位置很讲究">第 6 段：fputc 里 <code>while(TBE)</code> 的位置很讲究</a></li>
+      </ol>
+    </li>
+    <li><a href="#实验现象">实验现象</a>
+      <ol>
+        <li><a href="#想看到持续输出改成这样">想看到持续输出？改成这样</a></li>
+      </ol>
+    </li>
+    <li><a href="#常见问题">常见问题</a>
+      <ol>
+        <li><a href="#q1串口助手一个字都收不到">Q1：串口助手一个字都收不到</a></li>
+        <li><a href="#q2收到的全是乱码锟斤拷ÿÿ-这类">Q2：收到的全是乱码（<code>锟斤拷</code>、<code>ÿÿ</code>、<code>�</code> 这类）</a></li>
+        <li><a href="#q3程序卡死在-printf-那一行">Q3：程序卡死在 printf 那一行</a></li>
+        <li><a href="#q4printff-314-打不出小数">Q4：<code>printf(&#34;%f&#34;, 3.14)</code> 打不出小数</a></li>
+        <li><a href="#q5为什么有的教程写-fputc有的写-_write-或-__io_putchar">Q5：为什么有的教程写 <code>fputc</code>，有的写 <code>_write</code> 或 <code>__io_putchar</code>？</a></li>
+        <li><a href="#q6printf-太慢影响程序实时性怎么办">Q6：printf 太慢，影响程序实时性怎么办</a></li>
+      </ol>
+    </li>
+    <li><a href="#小结">小结</a></li>
+    <li><a href="#拓展应用">拓展应用</a>
+      <ol>
+        <li><a href="#入门级现在就能做">入门级（现在就能做）</a></li>
+        <li><a href="#进阶级配合中断接收">进阶级（配合中断接收）</a></li>
+        <li><a href="#数据分析级">数据分析级</a></li>
+        <li><a href="#工业实战级">工业实战级</a></li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/gd32/" >
+                GD32
+            </a>
+        
+            <a href="/categories/usart/" >
+                USART
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/gd32-usart-printf-%E9%87%8D%E5%AE%9A%E5%90%91/">GD32 USART — printf 重定向</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            GD32 GD32F30x_Firmware_Library V3.0.3 USART printf 重定向 示例教学
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2026-09-08</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 7 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="usart--printf-重定向">USART — printf 重定向
+</h1><blockquote>
+<p><strong>固件库</strong>: GD32F30x_Firmware_Library V3.0.3
+<strong>芯片</strong>: GD32F307 (GD32307C-EVAL-V1.1 开发板)
+<strong>源文件</strong>: <code>GD32F30x_Firmware_Library_V3.0.3/Examples/USART/Printf/main.c</code></p>
+</blockquote>
+<hr>
+<h2 id="功能简介">功能简介
+</h2><p>这个例程要解决一个非常朴素但极其重要的问题：<strong>让 MCU &ldquo;说话&rdquo;</strong>。</p>
+<p>在电脑上写 C 程序，一句 <code>printf(&quot;hello&quot;)</code> 就能在黑窗口看到字。但在 MCU 上，<code>printf</code> 默认不知道该把字符送到哪里去 —— 芯片上既没有屏幕也没有控制台。</p>
+<p>本例程做的事就是<strong>把 <code>printf</code> 的出口&quot;接&quot;到串口 USART0 上</strong>。接好之后，你在代码里写的每一句 <code>printf</code>，都会通过 PA9 引脚以 115200 波特率发出去，被电脑上的串口助手接收并显示。</p>
+<p><strong>这项技能的价值有多大？</strong> 打个比方：不会 printf 之前，调试程序就像闭着眼睛在黑屋里找东西，只能靠&quot;灯亮不亮&quot;猜；学会 printf 之后，屋里的灯打开了，你能直接看到每个变量的值、程序走到了哪一行、中断进了几次。</p>
+<p>程序运行后只做一件事：打印一句 <code>a usart transmit test example!</code>，然后进入死循环。看起来平淡无奇，但<strong>重点全在&quot;怎么接通&quot;的那几行配置上</strong>。</p>
+<hr>
+<h2 id="硬件准备">硬件准备
+</h2><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">器材</th>
+					<th style="text-align: left">说明</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left">GD32307C-EVAL-V1.1 开发板</td>
+					<td style="text-align: left">或任意 GD32F30x 系列板子</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">USB 转串口模块</td>
+					<td style="text-align: left">CH340、CP2102、FT232 任选，几块钱一个</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">杜邦线 3 根</td>
+					<td style="text-align: left">接 TX / RX / GND</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">电脑串口助手</td>
+					<td style="text-align: left">SSCOM、XCOM、Putty、VOFA+ 均可</td>
+			</tr>
+	</tbody>
+</table></div>
+<h3 id="接线新手最容易错的地方">接线（新手最容易错的地方）
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">    GD32 开发板                    USB 转串口模块
+</span></span><span class="line"><span class="cl">  ┌──────────────┐               ┌──────────────┐
+</span></span><span class="line"><span class="cl">  │  PA9  (TX) ──┼───────────────┼──→ RX        │
+</span></span><span class="line"><span class="cl">  │  PA10 (RX) ──┼───────────────┼──← TX        │
+</span></span><span class="line"><span class="cl">  │  GND       ──┼───────────────┼─── GND       │
+</span></span><span class="line"><span class="cl">  └──────────────┘               └──────┬───────┘
+</span></span><span class="line"><span class="cl">                                        │ USB
+</span></span><span class="line"><span class="cl">                                     ┌──▼──┐
+</span></span><span class="line"><span class="cl">                                     │ 电脑 │
+</span></span><span class="line"><span class="cl">                                     └─────┘
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>必须记住的两条规则：</strong></p>
+<ol>
+<li><strong>TX 接 RX，RX 接 TX（交叉接）</strong>。想想两个人打电话，你的嘴要对着对方的耳朵。TX 接 TX 是两个人都在说话，谁也听不见。</li>
+<li><strong>GND 必须接！</strong> 串口靠&quot;电压高低&quot;传数据，而&quot;高&quot;和&quot;低&quot;是相对于地的。不共地就没有共同的电压参考，通信必然失败或极不稳定。</li>
+</ol>
+<blockquote>
+<p><strong>偷懒技巧</strong>：GD32307C-EVAL 板子上有一个自带的 USB 转串口芯片，把跳线帽按丝印插好就能直接用板上的 USB 口通信，不用外接模块。查一下你板子的原理图看有没有这个便利。</p>
+</blockquote>
+<h3 id="串口助手设置">串口助手设置
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">参数</th>
+					<th style="text-align: left">值</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left">波特率</td>
+					<td style="text-align: left"><strong>115200</strong></td>
+			</tr>
+			<tr>
+					<td style="text-align: left">数据位</td>
+					<td style="text-align: left">8</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">停止位</td>
+					<td style="text-align: left">1</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">校验位</td>
+					<td style="text-align: left">None</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">流控</td>
+					<td style="text-align: left">无</td>
+			</tr>
+	</tbody>
+</table></div>
+<hr>
+<h2 id="完整代码">完整代码
+</h2><h3 id="第一部分mainc">第一部分：main.c
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;gd32f30x.h&#34;          /* 芯片总头文件 */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;gd32f307c_eval.h&#34;    /* 开发板 BSP */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;             /* printf 的声明就在这里 */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/*!
+</span></span></span><span class="line"><span class="cl"><span class="cm">    \brief      主函数
+</span></span></span><span class="line"><span class="cl"><span class="cm">    \param[in]  无
+</span></span></span><span class="line"><span class="cl"><span class="cm">    \param[out] 无
+</span></span></span><span class="line"><span class="cl"><span class="cm">    \retval     无
+</span></span></span><span class="line"><span class="cl"><span class="cm">*/</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* ===== 第 1 步：打开 GPIOA 的时钟 =====
+</span></span></span><span class="line"><span class="cl"><span class="cm">       USART0 的 TX/RX 默认在 PA9/PA10 上，所以要开 GPIOA */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">rcu_periph_clock_enable</span><span class="p">(</span><span class="n">RCU_GPIOA</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* ===== 第 2 步：打开 USART0 的时钟 =====
+</span></span></span><span class="line"><span class="cl"><span class="cm">       GPIO 时钟和外设时钟是两套独立的开关，必须都打开 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">rcu_periph_clock_enable</span><span class="p">(</span><span class="n">RCU_USART0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* ===== 第 3 步：把 PA9 配成&#34;复用推挽输出&#34;，交给 USART0 当 TX 用 =====
+</span></span></span><span class="line"><span class="cl"><span class="cm">       注意是 AF_PP 而不是 OUT_PP！
+</span></span></span><span class="line"><span class="cl"><span class="cm">       AF = Alternate Function，意思是&#34;这根脚不听我的，听外设的&#34; */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gpio_init</span><span class="p">(</span><span class="n">GPIOA</span><span class="p">,</span> <span class="n">GPIO_MODE_AF_PP</span><span class="p">,</span> <span class="n">GPIO_OSPEED_50MHZ</span><span class="p">,</span> <span class="n">GPIO_PIN_9</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* ===== 第 4 步：把 PA10 配成&#34;浮空输入&#34;，交给 USART0 当 RX 用 =====
+</span></span></span><span class="line"><span class="cl"><span class="cm">       接收脚是被动听电平，所以配输入模式 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gpio_init</span><span class="p">(</span><span class="n">GPIOA</span><span class="p">,</span> <span class="n">GPIO_MODE_IN_FLOATING</span><span class="p">,</span> <span class="n">GPIO_OSPEED_50MHZ</span><span class="p">,</span> <span class="n">GPIO_PIN_10</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* ===== 第 5 步：配置 USART0 参数 ===== */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">usart_deinit</span><span class="p">(</span><span class="n">USART0</span><span class="p">);</span>                                     <span class="cm">/* 先复位到默认状态（8-N-1） */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">usart_baudrate_set</span><span class="p">(</span><span class="n">USART0</span><span class="p">,</span> <span class="mi">115200U</span><span class="p">);</span>                      <span class="cm">/* 波特率 115200 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">usart_receive_config</span><span class="p">(</span><span class="n">USART0</span><span class="p">,</span> <span class="n">USART_RECEIVE_ENABLE</span><span class="p">);</span>       <span class="cm">/* 使能接收器 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">usart_transmit_config</span><span class="p">(</span><span class="n">USART0</span><span class="p">,</span> <span class="n">USART_TRANSMIT_ENABLE</span><span class="p">);</span>     <span class="cm">/* 使能发送器 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">usart_enable</span><span class="p">(</span><span class="n">USART0</span><span class="p">);</span>                                     <span class="cm">/* 总开关：使能 USART0 */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* ===== 第 6 步：直接用 printf 打印 =====
+</span></span></span><span class="line"><span class="cl"><span class="cm">       \n 换行，\r 回车。串口助手里要两个都有才会正确换行到行首 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\n\r</span><span class="s">a usart transmit test example!</span><span class="se">\n\r</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 打印完就在这里死循环，什么也不做 */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="第二部分真正的魔法-fputc-重写">第二部分：真正的&quot;魔法&quot;—— fputc 重写
+</h3><p><strong>上面的 main.c 里其实少了最关键的一块拼图。</strong> <code>printf</code> 凭什么就知道要往 USART0 送数据？</p>
+<p>秘密在 <code>gd32f307c_eval.c</code> 文件的末尾，官方 BSP 里已经帮你写好了这一段：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cm">/* 重定向 C 库函数 printf 到串口，重定向后可使用 printf 函数 */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">fputc</span><span class="p">(</span><span class="kt">int</span> <span class="n">ch</span><span class="p">,</span> <span class="n">FILE</span> <span class="o">*</span><span class="n">f</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 把这一个字符塞进 USART0 的发送数据寄存器 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">usart_data_transmit</span><span class="p">(</span><span class="n">EVAL_COM0</span><span class="p">,</span> <span class="p">(</span><span class="kt">uint8_t</span><span class="p">)</span><span class="n">ch</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 死等：一直查询 TBE 标志，直到发送缓冲区空出来
+</span></span></span><span class="line"><span class="cl"><span class="cm">       说明这个字符已经被硬件接走了，可以返回处理下一个字符 */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span><span class="p">(</span><span class="n">RESET</span> <span class="o">==</span> <span class="nf">usart_flag_get</span><span class="p">(</span><span class="n">EVAL_COM0</span><span class="p">,</span> <span class="n">USART_FLAG_TBE</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">ch</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>就这 3 行，是整个例程的灵魂所在。</strong> 下面详细解释它的原理。</p>
+<hr>
+<h2 id="代码分段讲解">代码分段讲解
+</h2><h3 id="第-1-段printf-重定向的原理本篇最重要的部分">第 1 段：printf 重定向的原理（本篇最重要的部分）
+</h3><p>C 标准库的 <code>printf</code> 内部并不是一个整体，它是分层的：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">你的代码:  printf(&#34;value = %d\r\n&#34;, 100);
+</span></span><span class="line"><span class="cl">              │
+</span></span><span class="line"><span class="cl">              ▼
+</span></span><span class="line"><span class="cl">       ┌──────────────────────────────┐
+</span></span><span class="line"><span class="cl">       │  printf 格式化引擎（库里已实现） │
+</span></span><span class="line"><span class="cl">       │  负责解析 %d %s %f，          │
+</span></span><span class="line"><span class="cl">       │  把参数转成字符串               │
+</span></span><span class="line"><span class="cl">       │  → &#34;value = 100\r\n&#34;         │
+</span></span><span class="line"><span class="cl">       └──────────────┬───────────────┘
+</span></span><span class="line"><span class="cl">                      │ 逐个字符调用
+</span></span><span class="line"><span class="cl">                      ▼
+</span></span><span class="line"><span class="cl">       ┌──────────────────────────────┐
+</span></span><span class="line"><span class="cl">       │  fputc(int ch, FILE *f)      │  ← 这是&#34;底层出口&#34;
+</span></span><span class="line"><span class="cl">       │  库里只留了个空壳（弱定义），      │     我们要自己实现！
+</span></span><span class="line"><span class="cl">       │  需要用户告诉它&#34;送到哪儿去&#34;       │
+</span></span><span class="line"><span class="cl">       └──────────────┬───────────────┘
+</span></span><span class="line"><span class="cl">                      │ 我们的实现
+</span></span><span class="line"><span class="cl">                      ▼
+</span></span><span class="line"><span class="cl">       ┌──────────────────────────────┐
+</span></span><span class="line"><span class="cl">       │  usart_data_transmit()       │
+</span></span><span class="line"><span class="cl">       │  → PA9 引脚 → 串口线 → 电脑    │
+</span></span><span class="line"><span class="cl">       └──────────────────────────────┘
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>核心理解</strong>：<code>printf</code> 负责&quot;把复杂的格式化字符串变成一串普通字符&quot;，<code>fputc</code> 负责&quot;把一个字符送出去&quot;。前者标准库已经写好了（那部分逻辑跟硬件无关），后者必须由我们提供（因为只有我们知道板子上用哪个串口）。</p>
+<p>这个设计叫<strong>重定向（Retargeting）</strong>，是 C 标准库为嵌入式预留的钩子。</p>
+<h3 id="第-2-段为什么-tx-用-af_pprx-用-in_floating">第 2 段：为什么 TX 用 AF_PP，RX 用 IN_FLOATING
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">gpio_init</span><span class="p">(</span><span class="n">GPIOA</span><span class="p">,</span> <span class="n">GPIO_MODE_AF_PP</span><span class="p">,</span>       <span class="n">GPIO_OSPEED_50MHZ</span><span class="p">,</span> <span class="n">GPIO_PIN_9</span><span class="p">);</span>   <span class="cm">/* TX */</span>
+</span></span><span class="line"><span class="cl"><span class="nf">gpio_init</span><span class="p">(</span><span class="n">GPIOA</span><span class="p">,</span> <span class="n">GPIO_MODE_IN_FLOATING</span><span class="p">,</span> <span class="n">GPIO_OSPEED_50MHZ</span><span class="p">,</span> <span class="n">GPIO_PIN_10</span><span class="p">);</span>  <span class="cm">/* RX */</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这是新手第二大坑（第一大是忘开时钟）。</p>
+<p><strong>PA9 (TX) 为什么必须是 <code>GPIO_MODE_AF_PP</code>？</strong></p>
+<p>如果配成普通的 <code>GPIO_MODE_OUT_PP</code>，那这根引脚的电平就由<strong>你的程序</strong>通过 <code>gpio_bit_set()</code> 控制。但我们希望它由 <strong>USART0 外设硬件</strong>自动按波特率翻转 —— 每秒 11 万多次，程序哪来得及一位一位地写？</p>
+<p><code>AF_PP</code> 就是告诉 GPIO 控制器：&quot;<strong>这根脚的控制权我交出去了，谁申请谁用</strong>&quot;。USART0 使能后自动接管 PA9，按 115200 的时序精确输出每一位。</p>
+<blockquote>
+<p>记住这条：<strong>任何要交给外设自动驱动的输出引脚，都必须配 AF 模式。</strong> 做 PWM 输出、SPI 时钟、I2C 都是同理。</p>
+</blockquote>
+<p><strong>PA10 (RX) 为什么是输入模式？</strong></p>
+<p>接收是&quot;听&quot;，引脚被动感知外部电平变化，所以是输入。<code>IN_FLOATING</code>（浮空）适用于对方（USB 转串口模块）已经在主动驱动这根线的场合。</p>
+<p>用 <code>GPIO_MODE_IPU</code>（上拉输入）也可以，而且更保险 —— 万一线断了或对方掉电，上拉能保证引脚是稳定的高电平（串口空闲态是高），不会因为浮空乱跳而产生假的起始位。实际项目<strong>推荐用 <code>GPIO_MODE_IPU</code></strong>。</p>
+<h3 id="第-3-段usart_deinit-为什么要先调用">第 3 段：usart_deinit() 为什么要先调用
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">usart_deinit</span><span class="p">(</span><span class="n">USART0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">usart_baudrate_set</span><span class="p">(</span><span class="n">USART0</span><span class="p">,</span> <span class="mi">115200U</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>usart_deinit()</code> 是&quot;把 USART0 的所有寄存器恢复到芯片复位后的初始值&quot;。</p>
+<p><strong>为什么要这一步？</strong> 两个原因：</p>
+<ol>
+<li><strong>保证起点干净</strong>。如果程序之前用过 USART0（比如 Bootloader 用过、或者你反复初始化），寄存器里可能残留旧配置。deinit 相当于&quot;格式化&quot;。</li>
+<li><strong>拿到已知的默认值</strong>。复位后 USART 的默认配置正好是 <strong>8 位数据、无校验、1 位停止位</strong>，也就是最常用的 8-N-1。所以官方例程里连 <code>usart_word_length_set()</code>、<code>usart_parity_config()</code>、<code>usart_stop_bit_set()</code> 都不用写了 —— deinit 之后它们已经是我们想要的值。</li>
+</ol>
+<p>如果你需要非标准配置（比如 9 位数据 + 偶校验），就要在 deinit 之后显式设置：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">usart_deinit</span><span class="p">(</span><span class="n">USART0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">usart_baudrate_set</span><span class="p">(</span><span class="n">USART0</span><span class="p">,</span> <span class="mi">115200U</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">usart_word_length_set</span><span class="p">(</span><span class="n">USART0</span><span class="p">,</span> <span class="n">USART_WL_9BIT</span><span class="p">);</span>      <span class="cm">/* 9 位数据 */</span>
+</span></span><span class="line"><span class="cl"><span class="nf">usart_parity_config</span><span class="p">(</span><span class="n">USART0</span><span class="p">,</span> <span class="n">USART_PM_EVEN</span><span class="p">);</span>        <span class="cm">/* 偶校验 */</span>
+</span></span><span class="line"><span class="cl"><span class="nf">usart_stop_bit_set</span><span class="p">(</span><span class="n">USART0</span><span class="p">,</span> <span class="n">USART_STB_1BIT</span><span class="p">);</span>        <span class="cm">/* 1 位停止 */</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="第-4-段发送接收总使能三个开关的关系">第 4 段：发送/接收/总使能，三个开关的关系
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">usart_receive_config</span><span class="p">(</span><span class="n">USART0</span><span class="p">,</span>  <span class="n">USART_RECEIVE_ENABLE</span><span class="p">);</span>    <span class="cm">/* 接收器开关 */</span>
+</span></span><span class="line"><span class="cl"><span class="nf">usart_transmit_config</span><span class="p">(</span><span class="n">USART0</span><span class="p">,</span> <span class="n">USART_TRANSMIT_ENABLE</span><span class="p">);</span>   <span class="cm">/* 发送器开关 */</span>
+</span></span><span class="line"><span class="cl"><span class="nf">usart_enable</span><span class="p">(</span><span class="n">USART0</span><span class="p">);</span>                                   <span class="cm">/* 外设总开关 */</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>可以理解成一个带三个开关的收音机：</p>
+<ul>
+<li><code>usart_transmit_config</code> → &ldquo;喇叭&quot;开关（REN 位）</li>
+<li><code>usart_receive_config</code> → &ldquo;麦克风&quot;开关（TEN 位）</li>
+<li><code>usart_enable</code> → 整机&quot;电源&quot;开关（UEN 位）</li>
+</ul>
+<p><strong>电源不开，喇叭和麦克风开了也没用</strong>。所以 <code>usart_enable()</code> 必须调用，而且习惯上放在最后。</p>
+<p>如果你的项目只需要打印（不接收），可以只开发送省点功耗：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">usart_transmit_config</span><span class="p">(</span><span class="n">USART0</span><span class="p">,</span> <span class="n">USART_TRANSMIT_ENABLE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">usart_enable</span><span class="p">(</span><span class="n">USART0</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="第-5-段n-和-r-到底该写哪个">第 5 段：<code>\n</code> 和 <code>\r</code> 到底该写哪个
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\n\r</span><span class="s">a usart transmit test example!</span><span class="se">\n\r</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这是个历史遗留的坑：</p>
+<div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">转义符</th>
+					<th style="text-align: left">名字</th>
+					<th style="text-align: left">ASCII</th>
+					<th style="text-align: left">作用（源自打字机）</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left"><code>\n</code></td>
+					<td style="text-align: left">LF (Line Feed)</td>
+					<td style="text-align: left">0x0A</td>
+					<td style="text-align: left">换行：纸往上滚一行，但打字头<strong>横向位置不变</strong></td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><code>\r</code></td>
+					<td style="text-align: left">CR (Carriage Return)</td>
+					<td style="text-align: left">0x0D</td>
+					<td style="text-align: left">回车：打字头<strong>回到行首</strong>，但不换行</td>
+			</tr>
+	</tbody>
+</table></div>
+<p>所以：</p>
+<ul>
+<li>只发 <code>\n</code> → 有些串口助手里会看到&quot;阶梯状&quot;输出（每行开头越来越靠右）</li>
+<li>只发 <code>\r</code> → 后面的字会把前面的字覆盖掉，永远显示在第一行</li>
+<li><strong>发 <code>\r\n</code> 两个</strong> → 才是标准的&quot;回到行首 + 换到下一行&rdquo;</li>
+</ul>
+<blockquote>
+<p><strong>实际写法建议统一用 <code>&quot;\r\n&quot;</code></strong>（先回车再换行，符合 Windows/串口通用惯例）。本例程写成 <code>&quot;\n\r&quot;</code> 顺序反了，虽然大部分串口助手都能正确处理，但不是标准写法。</p>
+</blockquote>
+<h3 id="第-6-段fputc-里-whiletbe-的位置很讲究">第 6 段：fputc 里 <code>while(TBE)</code> 的位置很讲究
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">fputc</span><span class="p">(</span><span class="kt">int</span> <span class="n">ch</span><span class="p">,</span> <span class="n">FILE</span> <span class="o">*</span><span class="n">f</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">usart_data_transmit</span><span class="p">(</span><span class="n">EVAL_COM0</span><span class="p">,</span> <span class="p">(</span><span class="kt">uint8_t</span><span class="p">)</span><span class="n">ch</span><span class="p">);</span>                  <span class="cm">/* 先塞数据 */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span><span class="p">(</span><span class="n">RESET</span> <span class="o">==</span> <span class="nf">usart_flag_get</span><span class="p">(</span><span class="n">EVAL_COM0</span><span class="p">,</span> <span class="n">USART_FLAG_TBE</span><span class="p">));</span>    <span class="cm">/* 后等标志 */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">ch</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>注意顺序是&quot;先发后等&rdquo;，不是&quot;先等后发&quot;。</strong> 为什么这样也能工作？</p>
+<p>USART 内部有两级寄存器：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">    你写入 ──→ [发送数据寄存器 TDATA] ──→ [移位寄存器] ──→ TX 引脚
+</span></span><span class="line"><span class="cl">                        ↑                      ↑
+</span></span><span class="line"><span class="cl">                   TBE 标志监控这里      TC 标志监控这里
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>复位后 TDATA 是空的，TBE 本来就是 1，所以第一次直接写入没问题。</li>
+<li>写入后硬件立即把数据挪到移位寄存器，TBE 重新置 1。</li>
+<li>我们 <code>while</code> 等的就是这个&quot;挪走了&quot;的信号，等到之后就可以放心返回，让 <code>printf</code> 送下一个字符。</li>
+</ul>
+<p><strong>这种写法的效率其实相当不错</strong>：CPU 等待的只是&quot;从 TDATA 挪到移位寄存器&quot;这一小段时间，而不是等整个字节 8.68μs × 10 位全部发完。移位寄存器在慢慢发的同时，CPU 已经可以准备下一个字符了 —— 相当于一个 1 字节深的流水线。</p>
+<blockquote>
+<p><strong>注意 <code>USART_FLAG_TBE</code> 和 <code>USART_FLAG_TC</code> 的区别</strong>。如果你做 RS485 通信，发完要立刻把收发芯片切回接收方向，这时必须等 <code>TC</code>（Transmission Complete，最后一位真的离开引脚了），用 TBE 会把最后一个字节截断。这是 RS485 项目的经典 bug。</p>
+</blockquote>
+<hr>
+<h2 id="实验现象">实验现象
+</h2><ol>
+<li>按上面的接线图接好 3 根线。</li>
+<li>编译下载程序。</li>
+<li>电脑上打开串口助手，选对 COM 口，波特率设 <strong>115200</strong>，点击&quot;打开串口&quot;。</li>
+<li>按开发板上的<strong>复位键</strong>。</li>
+</ol>
+<p>串口助手窗口会立刻显示：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">a usart transmit test example!
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>注意</strong>：这句话只在复位/上电时打印<strong>一次</strong>。如果你打开串口助手之前板子已经跑起来了，是看不到的 —— 按一下复位键就有了。</p>
+<h3 id="想看到持续输出改成这样">想看到持续输出？改成这样
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;systick.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint32_t</span> <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">systick_config</span><span class="p">();</span>                   <span class="cm">/* 别忘了配 SysTick，delay_1ms 才能用 */</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* ...... 上面那些 USART 配置照抄 ...... */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">while</span><span class="p">(</span><span class="mi">1</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;usart printf counter: %d</span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">counter</span><span class="o">++</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">delay_1ms</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span>                <span class="cm">/* 每秒打印一次 */</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>串口助手会每秒多一行：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">usart printf counter: 0
+</span></span><span class="line"><span class="cl">usart printf counter: 1
+</span></span><span class="line"><span class="cl">usart printf counter: 2
+</span></span><span class="line"><span class="cl">...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>看到数字持续增长，说明程序在正常跑 —— 这也是一种最简单的&quot;程序心跳&quot;监控手段。</p>
+<hr>
+<h2 id="常见问题">常见问题
+</h2><h3 id="q1串口助手一个字都收不到">Q1：串口助手一个字都收不到
+</h3><p>按顺序排查：</p>
+<ol>
+<li><strong>COM 口选错了</strong>。打开设备管理器 → 端口(COM 和 LPT)，确认 CH340 是 COM 几。多个串口设备时很容易选错。</li>
+<li><strong>TX/RX 没交叉</strong>。把两根线互换试试，这是最常见的问题。</li>
+<li><strong>忘了共地</strong>。GND 必须接，不接可能偶尔收到几个乱码字符。</li>
+<li><strong>打开串口助手后没复位</strong>。程序只打印一次，错过就没了。</li>
+<li><strong>驱动没装好</strong>。CH340 在某些 Windows 上需要手动装驱动，设备管理器里有黄色感叹号就是这个问题。</li>
+<li><strong><code>fputc</code> 没有被编译进去</strong>。检查工程里有没有把 <code>gd32f307c_eval.c</code> 加进编译列表。如果没有，<code>printf</code> 会链接到库里的空实现，什么都不输出。</li>
+</ol>
+<h3 id="q2收到的全是乱码锟斤拷ÿÿ-这类">Q2：收到的全是乱码（<code>锟斤拷</code>、<code>ÿÿ</code>、<code>�</code> 这类）
+</h3><p><strong>几乎 100% 是波特率不匹配</strong>。</p>
+<ol>
+<li><strong>串口助手波特率改成 115200</strong>，逐一试试 9600 / 38400 / 115200，如果某个波特率下能看到部分正常字符，说明主频有偏差。</li>
+<li><strong>实际主频和 <code>SystemCoreClock</code> 不一致</strong>。波特率是由外设时钟分频得到的，如果外部晶振起振失败，芯片自动跑内部 8MHz RC，实际波特率就全错了。加一句验证：</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">printf</span><span class="p">(</span><span class="s">&#34;SystemCoreClock = %d</span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">SystemCoreClock</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>如果这句本身就是乱码，那说明确实是时钟问题。改用调试器看 <code>SystemCoreClock</code> 变量的值，GD32F307 应该是 120000000。</p>
+<ol start="3">
+<li><strong>晶振频率宏配错了</strong>。检查 <code>gd32f30x.h</code> 里的 <code>HXTAL_VALUE</code> 是否和板子上实际的晶振一致（EVAL 板常见 8MHz 或 25MHz）。晶振是 8MHz 但宏写 25MHz，波特率会差 3 倍多。</li>
+</ol>
+<h3 id="q3程序卡死在-printf-那一行">Q3：程序卡死在 printf 那一行
+</h3><p>用调试器单步，如果卡在 <code>fputc</code> 的 <code>while(TBE)</code> 循环里出不来，说明 USART 硬件没真正工作：</p>
+<ol>
+<li><strong>忘了 <code>usart_enable(USART0)</code></strong>。总开关没开，TBE 永远不会置位。</li>
+<li><strong>忘了 <code>rcu_periph_clock_enable(RCU_USART0)</code></strong>。外设时钟没开，寄存器写不进去。</li>
+<li><strong>用了 EVAL_COM0 但它不是 USART0</strong>。检查 <code>gd32f307c_eval.h</code> 里 <code>EVAL_COM0</code> 的定义，跟你 main 里配置的串口要一致。这是&quot;配了 USART0 但 fputc 往 USART1 写&quot;的经典错配。</li>
+</ol>
+<h3 id="q4printff-314-打不出小数">Q4：<code>printf(&quot;%f&quot;, 3.14)</code> 打不出小数
+</h3><p>浮点打印需要额外的库支持，两种解决办法：</p>
+<ol>
+<li><strong>Keil MDK</strong>：勾选 <code>Options for Target → Target → Use MicroLIB</code>。MicroLIB 是精简版 C 库，体积小且默认支持基本浮点格式化。</li>
+<li><strong>不用浮点 printf</strong>（推荐，省 Flash 也省时间）：</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">float</span> <span class="n">temp</span> <span class="o">=</span> <span class="mf">25.63f</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="cm">/* 手动拆成整数部分和小数部分 */</span>
+</span></span><span class="line"><span class="cl"><span class="nf">printf</span><span class="p">(</span><span class="s">&#34;temp = %d.%02d</span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">temp</span><span class="p">,</span> <span class="p">(</span><span class="kt">int</span><span class="p">)(</span><span class="n">temp</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span> <span class="o">%</span> <span class="mi">100</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="cm">/* 输出：temp = 25.63 */</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>嵌入式里浮点 printf 会额外链接几 KB 代码，而且执行慢，能避免就避免。</p>
+<h3 id="q5为什么有的教程写-fputc有的写-_write-或-__io_putchar">Q5：为什么有的教程写 <code>fputc</code>，有的写 <code>_write</code> 或 <code>__io_putchar</code>？
+</h3><p>这取决于你用的工具链的 C 库实现：</p>
+<div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">工具链 / C 库</th>
+					<th style="text-align: left">需要重写的函数</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left">Keil MDK + ARMCC / MicroLIB</td>
+					<td style="text-align: left"><code>int fputc(int ch, FILE *f)</code></td>
+			</tr>
+			<tr>
+					<td style="text-align: left">GCC + newlib (标准)</td>
+					<td style="text-align: left"><code>int _write(int fd, char *ptr, int len)</code></td>
+			</tr>
+			<tr>
+					<td style="text-align: left">GCC + newlib-nano</td>
+					<td style="text-align: left"><code>int __io_putchar(int ch)</code>（配合 <code>#define PUTCHAR_PROTOTYPE</code>）</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">IAR</td>
+					<td style="text-align: left"><code>size_t __write(int handle, const unsigned char *buf, size_t size)</code></td>
+			</tr>
+	</tbody>
+</table></div>
+<p>GCC 下的通用写法：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">_write</span><span class="p">(</span><span class="kt">int</span> <span class="n">fd</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">ptr</span><span class="p">,</span> <span class="kt">int</span> <span class="n">len</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">i</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span><span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">len</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">usart_data_transmit</span><span class="p">(</span><span class="n">USART0</span><span class="p">,</span> <span class="p">(</span><span class="kt">uint8_t</span><span class="p">)</span><span class="n">ptr</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">while</span><span class="p">(</span><span class="n">RESET</span> <span class="o">==</span> <span class="nf">usart_flag_get</span><span class="p">(</span><span class="n">USART0</span><span class="p">,</span> <span class="n">USART_FLAG_TBE</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">len</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="q6printf-太慢影响程序实时性怎么办">Q6：printf 太慢，影响程序实时性怎么办
+</h3><p><code>printf</code> 是<strong>阻塞式</strong>的，一句 50 个字符的打印在 115200 下要占用 CPU 约 4.3ms。在中断服务函数或高实时性循环里频繁 printf 会严重拖慢系统。</p>
+<p>三个优化方向：</p>
+<ol>
+<li><strong>提高波特率</strong>。改成 921600 能快 8 倍，现代 USB 转串口芯片都支持。代码只改一个数字。</li>
+<li><strong>改用 DMA 发送</strong>。把要打印的内容先写入缓冲区，然后让 DMA 后台慢慢发，CPU 立刻返回。参考本模块的 <code>DMA_transmitter&amp;receiver</code> 示例。</li>
+<li><strong>正式版本关掉打印</strong>。用宏开关一键屏蔽所有调试输出：</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#define DEBUG_ENABLE   1
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#if DEBUG_ENABLE
+</span></span></span><span class="line"><span class="cl">    <span class="cp">#define DBG_LOG(fmt, ...)   printf(&#34;[%s:%d] &#34; fmt &#34;\r\n&#34;, \
+</span></span></span><span class="line"><span class="cl"><span class="cp">                                       __func__, __LINE__, ##__VA_ARGS__)
+</span></span></span><span class="line"><span class="cl"><span class="cp">#else
+</span></span></span><span class="line"><span class="cl">    <span class="cp">#define DBG_LOG(fmt, ...)   ((void)0)     </span><span class="cm">/* 发布版本编译后完全消失，零开销 */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#endif
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 使用 */</span>
+</span></span><span class="line"><span class="cl"><span class="nf">DBG_LOG</span><span class="p">(</span><span class="s">&#34;adc value = %d&#34;</span><span class="p">,</span> <span class="n">adc_val</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="cm">/* 输出：[main:42] adc value = 2048 */</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这个 <code>DBG_LOG</code> 宏自动带上函数名和行号，是实际项目里非常好用的调试工具，强烈建议抄进你自己的工程模板。</p>
+<hr>
+<h2 id="小结">小结
+</h2><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">知识点</th>
+					<th style="text-align: left">要记住的核心</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left">printf 重定向原理</td>
+					<td style="text-align: left">库负责格式化，你负责实现 <code>fputc</code> 把单个字符送出去</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">TX 引脚模式</td>
+					<td style="text-align: left">必须 <code>GPIO_MODE_AF_PP</code>，交给外设驱动</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">RX 引脚模式</td>
+					<td style="text-align: left"><code>GPIO_MODE_IN_FLOATING</code> 或更保险的 <code>GPIO_MODE_IPU</code></td>
+			</tr>
+			<tr>
+					<td style="text-align: left">两套时钟</td>
+					<td style="text-align: left">GPIO 时钟 + USART 时钟，都要开</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">deinit 的意义</td>
+					<td style="text-align: left">复位到干净状态，且默认就是 8-N-1</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">三个使能开关</td>
+					<td style="text-align: left">发送器、接收器、外设总开关，缺一不可</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><code>\r\n</code></td>
+					<td style="text-align: left">回车 + 换行都要发，顺序推荐 <code>\r\n</code></td>
+			</tr>
+			<tr>
+					<td style="text-align: left">TBE vs TC</td>
+					<td style="text-align: left">TBE 是缓冲区空，TC 是真正发完；RS485 切方向必须用 TC</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">乱码 = 波特率</td>
+					<td style="text-align: left">看到乱码第一反应查波特率和主频配置</td>
+			</tr>
+	</tbody>
+</table></div>
+<p><strong>USART0 配置五步曲</strong>（背下来，以后写串口不用查手册）：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">rcu_periph_clock_enable</span><span class="p">(</span><span class="n">RCU_GPIOA</span><span class="p">);</span>                    <span class="cm">/* 1. GPIO 时钟 */</span>
+</span></span><span class="line"><span class="cl"><span class="nf">rcu_periph_clock_enable</span><span class="p">(</span><span class="n">RCU_USART0</span><span class="p">);</span>                   <span class="cm">/* 2. USART 时钟 */</span>
+</span></span><span class="line"><span class="cl"><span class="nf">gpio_init</span><span class="p">(</span><span class="n">GPIOA</span><span class="p">,</span> <span class="n">GPIO_MODE_AF_PP</span><span class="p">,</span> <span class="p">...,</span> <span class="n">GPIO_PIN_9</span><span class="p">);</span>    <span class="cm">/* 3. TX 复用推挽 */</span>
+</span></span><span class="line"><span class="cl"><span class="nf">gpio_init</span><span class="p">(</span><span class="n">GPIOA</span><span class="p">,</span> <span class="n">GPIO_MODE_IPU</span><span class="p">,</span>   <span class="p">...,</span> <span class="n">GPIO_PIN_10</span><span class="p">);</span>   <span class="cm">/* 4. RX 上拉输入 */</span>
+</span></span><span class="line"><span class="cl"><span class="nf">usart_deinit</span><span class="p">(</span><span class="n">USART0</span><span class="p">);</span>                                  <span class="cm">/* 5. 参数 + 使能 */</span>
+</span></span><span class="line"><span class="cl"><span class="nf">usart_baudrate_set</span><span class="p">(</span><span class="n">USART0</span><span class="p">,</span> <span class="mi">115200U</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">usart_transmit_config</span><span class="p">(</span><span class="n">USART0</span><span class="p">,</span> <span class="n">USART_TRANSMIT_ENABLE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">usart_receive_config</span><span class="p">(</span><span class="n">USART0</span><span class="p">,</span> <span class="n">USART_RECEIVE_ENABLE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">usart_enable</span><span class="p">(</span><span class="n">USART0</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="拓展应用">拓展应用
+</h2><p><code>printf</code> 通了之后，你的能力会发生质变。下面这些项目都建立在串口之上：</p>
+<h3 id="入门级现在就能做">入门级（现在就能做）
+</h3><ul>
+<li><strong>串口监控台</strong>：把 ADC 采样值、按键状态、定时器计数值全部实时打印出来，做一个&quot;MCU 状态仪表盘&quot;。这是排查任何 bug 的第一手段。</li>
+<li><strong>参数打印式调试法</strong>：在每个函数入口打印 <code>printf(&quot;enter %s\r\n&quot;, __func__)</code>，程序跑飞时看最后打印的是哪个函数，立刻定位问题范围。</li>
+<li><strong>开机自检报告</strong>：上电依次检测 Flash、外部 RAM、EEPROM、传感器，把每一项的 OK/FAIL 打印成一份漂亮的启动日志。产品级设备都有这个。</li>
+</ul>
+<h3 id="进阶级配合中断接收">进阶级（配合中断接收）
+</h3><ul>
+<li><strong>串口命令行（Shell）</strong>：接收电脑发来的命令字符串，解析后执行。比如输入 <code>led on</code> 就点灯，<code>adc read</code> 就返回采样值，<code>help</code> 列出所有命令。这是嵌入式项目里最实用的一个功能，让你不用重新编译就能测试各个模块。</li>
+<li><strong>上位机通信协议</strong>：设计自己的数据帧（如 <code>帧头 0xAA + 长度 + 命令 + 数据 + CRC16 + 帧尾</code>），配合 C# / Python / Qt 写的上位机软件做双向通信。这是绝大多数电子产品的标准架构。</li>
+<li><strong>串口 Bootloader（IAP）</strong>：通过串口接收新的固件 bin 文件，写入 Flash 后跳转执行，实现&quot;不用拆机、不用下载器就能升级程序&quot;。结合本站的 FMC 擦写示例就能做出来。</li>
+<li><strong>AT 指令驱动模块</strong>：用串口驱动 ESP8266 WiFi 模块、SIM800 4G 模块、HC-05 蓝牙模块。发 <code>AT+CWJAP=&quot;ssid&quot;,&quot;pwd&quot;</code> 就能联网，是 IoT 项目的必经之路。</li>
+</ul>
+<h3 id="数据分析级">数据分析级
+</h3><ul>
+<li><strong>VOFA+ / SerialPlot 实时波形显示</strong>：用固定格式打印数据（如 <code>printf(&quot;%f,%f\r\n&quot;, a, b)</code>），上位机自动画成实时曲线。调 PID 参数时看着曲线整理超调和振荡，比盲调效率高 10 倍。</li>
+<li><strong>数据记录仪</strong>：把传感器数据按 CSV 格式打印（<code>printf(&quot;%d,%d,%d\r\n&quot;, t, temp, humi)</code>），串口助手保存成文件后直接用 Excel 打开画图分析。</li>
+<li><strong>GPS 数据解析</strong>：GPS 模块通过串口不断吐出 NMEA 格式语句（<code>$GPGGA,...</code>），解析后就能得到经纬度、海拔、卫星数，做定位记录仪、车载追踪器。</li>
+</ul>
+<h3 id="工业实战级">工业实战级
+</h3><ul>
+<li><strong>Modbus RTU 从站</strong>：在串口上实现 Modbus 协议，你的板子立刻能被任何工业组态软件（如组态王、WinCC）识别和读写。这是工控行业的通用语言。</li>
+<li><strong>RS485 多机总线</strong>：加一颗 MAX485 芯片把 TTL 电平转成差分信号，通信距离从 1 米延长到 1200 米，还能挂 32 个节点组成总线网络。注意发送完必须等 <code>TC</code> 标志再切换方向。</li>
+<li><strong>产品出厂测试治具</strong>：通过串口下发测试指令，自动完成各项功能检测并输出报告，一台治具测几千台产品。</li>
+</ul>
+<p><strong>下一步该学什么</strong>：<code>Transmitter&amp;receiver_interrupt</code>（学会中断接收，让 MCU 能&quot;听&quot;）→ <code>IDLE_receive_interrupt</code>（处理不定长数据帧，这是实际项目最常用的接收方案）→ <code>DMA_transmitter&amp;receiver</code>（高效大数据传输）。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/printf/">Printf</a>
+        
+            <a href="/tags/usart/">Usart</a>
+        
+            <a href="/tags/v3.0.3/">V3.0.3</a>
+        
+    </section>
+
+
+    <section class="article-lastmod">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <span>
+            最后更新于 Sep 08, 2026 16:03 &#43;0800
+        </span>
+    </section></footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/gd32-usart-dma-%E4%B8%AD%E6%96%AD%E6%94%B6%E5%8F%91/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">GD32 USART — DMA 中断收发</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/gd32-usart-dma-%E6%94%B6%E5%8F%91/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">GD32 USART — DMA 收发</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/gd32-usart-%E4%B8%AD%E6%96%AD%E6%94%B6%E5%8F%91/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">GD32 USART — 中断收发</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/gd32-usart-%E5%8D%8A%E5%8F%8C%E5%B7%A5%E6%94%B6%E5%8F%91/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">GD32 USART — 半双工收发</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/gd32-usart-%E5%90%8C%E6%AD%A5%E6%A8%A1%E5%BC%8F/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">GD32 USART — 同步模式</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="ClingYang/ClingYang.github.io"
+        issue-term="pathname"
+        
+        label="💬comment"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2026 CLing
+    </section>
+    
+    <section class="powerby">
+        
+            世界是你们 <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<style>
+    #TableOfContents > ul, ol {
+        ul, ol {
+            display: none;
+        }
+        .open {
+            display: block;
+        }
+    }
+</style>
+
+<script>
+    function initTocHide() {
+        
+        let toc = document.querySelector(".widget--toc");
+        if (!toc) {
+            return;
+        }
+        
+        window.addEventListener('scroll', function() {
+            
+            let currentLi = document.querySelector(".active-class");
+            if (!currentLi) {
+                return
+            }
+            
+            let elementsByClassName = document.querySelectorAll(".open");
+            if (elementsByClassName.length > 0) {
+                elementsByClassName.forEach((ul) => {
+                    ul.classList.remove("open")
+                })
+            }
+            
+            if (currentLi.children.length > 1) {
+                currentLi.children[1].classList.add("open")
+            }
+            
+            let ul = currentLi.parentElement;
+            do {
+                ul.classList.add("open");
+                ul = ul.parentElement.parentElement
+            } while (ul !== undefined && (ul.localName === 'ul' || ul.localName === 'ol'))
+        });
+    }
+    initTocHide()
+</script>
+
+    </body>
+</html>

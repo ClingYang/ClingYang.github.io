@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="GD32 GD32F30x_Firmware_Library V3.0.3 I2C I2C EEPROM 读写 示例教学">
+<title>GD32 I2C — I2C EEPROM 读写</title>
+
+<link rel='canonical' href='https://clingyang.github.io/p/gd32-i2c-i2c-eeprom-%E8%AF%BB%E5%86%99/'>
+
+<link rel="stylesheet" href="/scss/style.min.e14f3ba93baae65b2aef2339f32b6f25d7a0184785ebf4f6bd7d3376ae5dc2d4.css"><meta property='og:title' content="GD32 I2C — I2C EEPROM 读写">
+<meta property='og:description' content="GD32 GD32F30x_Firmware_Library V3.0.3 I2C I2C EEPROM 读写 示例教学">
+<meta property='og:url' content='https://clingyang.github.io/p/gd32-i2c-i2c-eeprom-%E8%AF%BB%E5%86%99/'>
+<meta property='og:site_name' content='CLing'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='I2C_EEPROM' /><meta property='article:tag' content='i2c' /><meta property='article:tag' content='V3.0.3' /><meta property='article:published_time' content='2026-09-08T14:52:21&#43;08:00'/><meta property='article:modified_time' content='2026-09-08T16:03:27&#43;08:00'/>
+<meta name="twitter:title" content="GD32 I2C — I2C EEPROM 读写">
+<meta name="twitter:description" content="GD32 GD32F30x_Firmware_Library V3.0.3 I2C I2C EEPROM 读写 示例教学">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                            height="290" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🏀</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">CLing</a></h1>
+            <h2 class="site-description">你好 欢迎来到我的博客</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>档案</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E6%8A%80%E6%9C%AF%E9%93%BE%E6%8E%A5/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>技术链接</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/excel/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+                
+                <span>Excel教程</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#功能简介">功能简介</a></li>
+    <li><a href="#硬件准备">硬件准备</a>
+      <ol>
+        <li><a href="#1-开发板--eeprom-模块">1. 开发板 + EEPROM 模块</a></li>
+        <li><a href="#2-接线i2c0pb6pb7">2. 接线（I2C0：PB6/PB7）</a></li>
+        <li><a href="#3-串口强烈建议">3. 串口（强烈建议）</a></li>
+      </ol>
+    </li>
+    <li><a href="#完整代码带中文注释">完整代码（带中文注释）</a>
+      <ol>
+        <li><a href="#1-mainc--主流程">1) main.c —— 主流程</a></li>
+        <li><a href="#2-i2ch--关键宏定义先记住这些">2) i2c.h —— 关键宏定义（先记住这些）</a></li>
+        <li><a href="#3-i2cc--gpio-与-i2c-外设配置">3) i2c.c —— GPIO 与 I2C 外设配置</a></li>
+        <li><a href="#4-at24cxxc--最核心的状态机写一字节">4) at24cxx.c —— 最核心的&quot;状态机写一字节&rdquo;</a></li>
+        <li><a href="#5-at24cxxc--自测函数-i2c_24c02_test">5) at24cxx.c —— 自测函数 i2c_24c02_test()</a></li>
+      </ol>
+    </li>
+    <li><a href="#代码分段讲解">代码分段讲解</a>
+      <ol>
+        <li><a href="#1-i2c-引脚为什么是复用开漏">1. I2C 引脚为什么是&quot;复用开漏&rdquo;？</a></li>
+        <li><a href="#2-速率地址应答三件套">2. 速率、地址、应答三件套</a></li>
+        <li><a href="#3-状态机每一步都在等-ack--防卡死">3. 状态机：每一步都在&quot;等 ACK + 防卡死&quot;</a></li>
+        <li><a href="#4-页写与等待就绪">4. 页写与&quot;等待就绪&quot;</a></li>
+        <li><a href="#5-读回来的数据怎么验证">5. 读回来的数据怎么验证？</a></li>
+      </ol>
+    </li>
+    <li><a href="#实验现象">实验现象</a></li>
+    <li><a href="#常见问题">常见问题</a></li>
+    <li><a href="#小结">小结</a></li>
+    <li><a href="#拓展应用">拓展应用</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/gd32/" >
+                GD32
+            </a>
+        
+            <a href="/categories/i2c/" >
+                I2C
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/gd32-i2c-i2c-eeprom-%E8%AF%BB%E5%86%99/">GD32 I2C — I2C EEPROM 读写</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            GD32 GD32F30x_Firmware_Library V3.0.3 I2C I2C EEPROM 读写 示例教学
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2026-09-08</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 7 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="i2c--i2c-eeprom-读写">I2C — I2C EEPROM 读写
+</h1><blockquote>
+<p><strong>固件库</strong>: GD32F30x_Firmware_Library V3.0.3<br>
+<strong>芯片</strong>: GD32F30x（以 GD32F307 评估板为例）<br>
+<strong>源文件</strong>: <code>GD32F30x_Firmware_Library_V3.0.3/Examples/I2C/I2C_EEPROM/main.c</code><br>
+<strong>配套文件</strong>: <code>i2c.c</code> / <code>i2c.h</code>（底层驱动）、<code>at24cxx.c</code> / <code>at24cxx.h</code>（EEPROM 读写逻辑）<br>
+<strong>评估板 EEPROM</strong>: AT24C02（I2C 接口，2Kbit = 256 字节）</p>
+</blockquote>
+<hr>
+<h2 id="功能简介">功能简介
+</h2><p>本示例演示用 <strong>I2C 硬件外设</strong> 读写一颗 <strong>AT24C02 EEPROM</strong>（电可擦可编程只读存储器）。EEPROM 最大的特点是<strong>掉电不丢数据</strong>，常用来存设备配置、校准参数、运行计数等。</p>
+<p>整个流程一句话概括：</p>
+<ol>
+<li>准备好 256 字节的测试数据 <code>i2c_buffer_write[i] = i</code>（即 0x00~0xFF）。</li>
+<li>通过 I2C 把这批数据<strong>写入</strong> AT24C02（从地址 0 开始）。</li>
+<li>再从 AT24C02 <strong>读回</strong>同样 256 字节到 <code>i2c_buffer_read[]</code>。</li>
+<li>逐字节比较写入和读回是否一致，全部一致则测试通过（<code>I2C_OK</code>）。</li>
+<li>测试通过 → LED2~LED5 循环流水闪烁；失败 → 4 颗 LED 全亮，表示读写出错。</li>
+</ol>
+<p>本例的亮点（也是难点）是：<strong>I2C 收发全部用&quot;状态机 + 超时&quot;实现</strong>，每一步都等从机 ACK、带超时保护和总线复位，非常贴近真实工程的健壮写法。</p>
+<hr>
+<h2 id="硬件准备">硬件准备
+</h2><h3 id="1-开发板--eeprom-模块">1. 开发板 + EEPROM 模块
+</h3><ul>
+<li>GD32F30x 评估板（例程按 GD32F307C EVAL 编写，LED2~LED5 由 <code>gd_eval_led_init</code> 初始化）。</li>
+<li>AT24C02 模块（或板载 EEPROM）。本例 I2C 地址宏 <code>I2CX_SLAVE_ADDRESS7 = 0xA0</code>。</li>
+</ul>
+<h3 id="2-接线i2c0pb6pb7">2. 接线（I2C0：PB6/PB7）
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>信号</th>
+					<th>MCU 引脚</th>
+					<th>接 EEPROM</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>SCL</td>
+					<td>PB6</td>
+					<td>EEPROM SCL</td>
+			</tr>
+			<tr>
+					<td>SDA</td>
+					<td>PB7</td>
+					<td>EEPROM SDA</td>
+			</tr>
+	</tbody>
+</table></div>
+<blockquote>
+<p><strong>关键</strong>：I2C 的两根线必须接<strong>上拉电阻</strong>（通常 4.7kΩ 到 3.3V）。大多数 EEPROM 模块板载了上拉，直接连即可；若自己搭电路，别忘了加上拉，否则总线拉不高、通信必失败。</p>
+</blockquote>
+<h3 id="3-串口强烈建议">3. 串口（强烈建议）
+</h3><p>例程用 <code>printf</code> 打印调试信息（&ldquo;AT24C02 writing&hellip;&quot;、&ldquo;test passed!&quot;、出错字节等）。把 PA9/PA10 接到 USB 转串口，波特率 115200（评估板 <code>gd_eval_com_init</code> 默认）即可在串口助手查看全过程。</p>
+<hr>
+<h2 id="完整代码带中文注释">完整代码（带中文注释）
+</h2><p>由于本例代码分散在 <code>main.c</code>、<code>i2c.c</code>、<code>at24cxx.c</code> 三个文件，下面按&quot;从顶到底&quot;的顺序摘出<strong>最核心、最该读懂</strong>的部分，并配上中文注释。完整工程文件请直接查看源码目录。</p>
+<h3 id="1-mainc--主流程">1) main.c —— 主流程
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;gd32f30x.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;gd32f307c_eval.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;systick.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;i2c.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;at24cxx.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">led_turn_on</span><span class="p">(</span><span class="kt">uint8_t</span> <span class="n">led_number</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">led_config</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">led_config</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gd_eval_led_init</span><span class="p">(</span><span class="n">LED2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gd_eval_led_init</span><span class="p">(</span><span class="n">LED3</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gd_eval_led_init</span><span class="p">(</span><span class="n">LED4</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gd_eval_led_init</span><span class="p">(</span><span class="n">LED5</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gd_eval_led_off</span><span class="p">(</span><span class="n">LED2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gd_eval_led_off</span><span class="p">(</span><span class="n">LED3</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gd_eval_led_off</span><span class="p">(</span><span class="n">LED4</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gd_eval_led_off</span><span class="p">(</span><span class="n">LED5</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 系统滴答定时器（提供 delay_1ms 时基） */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">systick_config</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* LED 初始化 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">led_config</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 串口初始化（用于 printf 打印） */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gd_eval_com_init</span><span class="p">(</span><span class="n">EVAL_COM0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;I2C-24C02 configured....</span><span class="se">\n\r</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* GPIO 配置：把 PB6/PB7 设成 I2C 复用开漏 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gpio_config</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* I2C 外设配置：速率 100K、自身 7 位地址、使能、开启 ACK */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">i2c_config</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 初始化 EEPROM 驱动（记录器件地址 0xA0） */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">i2c_eeprom_init</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\r\n</span><span class="s">The I2C is hardware interface &#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\r\n</span><span class="s">The speed is %d&#34;</span><span class="p">,</span> <span class="n">I2C_SPEED</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 执行读写自测 */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span><span class="p">(</span><span class="n">I2C_OK</span> <span class="o">==</span> <span class="nf">i2c_24c02_test</span><span class="p">())</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="cm">/* 测试通过：4 颗 LED 循环流水，每 500ms 切换 */</span>
+</span></span><span class="line"><span class="cl">        <span class="k">while</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nf">gd_eval_led_off</span><span class="p">(</span><span class="n">LED2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="nf">gd_eval_led_off</span><span class="p">(</span><span class="n">LED3</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="nf">gd_eval_led_off</span><span class="p">(</span><span class="n">LED4</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="nf">gd_eval_led_off</span><span class="p">(</span><span class="n">LED5</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="nf">led_turn_on</span><span class="p">(</span><span class="n">count</span> <span class="o">%</span> <span class="mi">4</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">count</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span><span class="p">(</span><span class="n">count</span> <span class="o">&gt;=</span> <span class="mi">4</span><span class="p">)</span> <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="nf">delay_1ms</span><span class="p">(</span><span class="mi">500</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 测试失败：4 颗 LED 全亮，停在这里 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gd_eval_led_on</span><span class="p">(</span><span class="n">LED2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gd_eval_led_on</span><span class="p">(</span><span class="n">LED3</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gd_eval_led_on</span><span class="p">(</span><span class="n">LED4</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gd_eval_led_on</span><span class="p">(</span><span class="n">LED5</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="2-i2ch--关键宏定义先记住这些">2) i2c.h —— 关键宏定义（先记住这些）
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#define I2C_SPEED               100000      </span><span class="cm">/* 标准模式 100Kbps */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define I2CX_SLAVE_ADDRESS7     0xA0        </span><span class="cm">/* AT24C02 的 8 位地址写法（含读写位） */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define I2C_PAGE_SIZE           8           </span><span class="cm">/* AT24C02 每页 8 字节（页写上限） */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#define I2CX                    I2C0
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define RCU_GPIO_I2C            RCU_GPIOB
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define RCU_I2C                 RCU_I2C0
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define I2C_SCL_PORT            GPIOB
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define I2C_SDA_PORT            GPIOB
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define I2C_SCL_PIN             GPIO_PIN_6  </span><span class="cm">/* PB6 = SCL */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define I2C_SDA_PIN             GPIO_PIN_7  </span><span class="cm">/* PB7 = SDA */</span><span class="cp">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="3-i2cc--gpio-与-i2c-外设配置">3) i2c.c —— GPIO 与 I2C 外设配置
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">gpio_config</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">rcu_periph_clock_enable</span><span class="p">(</span><span class="n">RCU_GPIO_I2C</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* I2C 引脚必须是 复用开漏(AF_OD) + 外部上拉 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gpio_init</span><span class="p">(</span><span class="n">I2C_SCL_PORT</span><span class="p">,</span> <span class="n">GPIO_MODE_AF_OD</span><span class="p">,</span> <span class="n">GPIO_OSPEED_50MHZ</span><span class="p">,</span> <span class="n">I2C_SCL_PIN</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gpio_init</span><span class="p">(</span><span class="n">I2C_SDA_PORT</span><span class="p">,</span> <span class="n">GPIO_MODE_AF_OD</span><span class="p">,</span> <span class="n">GPIO_OSPEED_50MHZ</span><span class="p">,</span> <span class="n">I2C_SDA_PIN</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">i2c_config</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">rcu_periph_clock_enable</span><span class="p">(</span><span class="n">RCU_I2C</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 配置速率：100000 bps，占空比 2（快速模式才讲究，标准模式随意） */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">i2c_clock_config</span><span class="p">(</span><span class="n">I2CX</span><span class="p">,</span> <span class="n">I2C_SPEED</span><span class="p">,</span> <span class="n">I2C_DTCY_2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 配置 I2C 为主机模式、7 位地址格式、自身地址 0xA0 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">i2c_mode_addr_config</span><span class="p">(</span><span class="n">I2CX</span><span class="p">,</span> <span class="n">I2C_I2CMODE_ENABLE</span><span class="p">,</span> <span class="n">I2C_ADDFORMAT_7BITS</span><span class="p">,</span> <span class="n">I2CX_SLAVE_ADDRESS7</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">i2c_enable</span><span class="p">(</span><span class="n">I2CX</span><span class="p">);</span>                 <span class="cm">/* 使能 I2C 外设 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">i2c_ack_config</span><span class="p">(</span><span class="n">I2CX</span><span class="p">,</span> <span class="n">I2C_ACK_ENABLE</span><span class="p">);</span>  <span class="cm">/* 开启自动应答（读多字节时必须） */</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="4-at24cxxc--最核心的状态机写一字节">4) at24cxx.c —— 最核心的&quot;状态机写一字节&rdquo;
+</h3><p>下面这个函数 <code>eeprom_byte_write_timeout()</code> 把 I2C 写一字节的完整协议展示得最清楚。注意它是一个 <code>switch</code> 状态机，<code>timeout</code> 防止卡死：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="nf">eeprom_byte_write_timeout</span><span class="p">(</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="n">p_buffer</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="n">write_address</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint8_t</span>  <span class="n">state</span> <span class="o">=</span> <span class="n">I2C_START</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint16_t</span> <span class="n">timeout</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint8_t</span>  <span class="n">i2c_timeout_flag</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">i2c_ack_config</span><span class="p">(</span><span class="n">I2CX</span><span class="p">,</span> <span class="n">I2C_ACK_ENABLE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">while</span><span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">i2c_timeout_flag</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">switch</span><span class="p">(</span><span class="n">state</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">case</span> <span class="nl">I2C_START</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="cm">/* ① 等总线空闲（不忙）才发 START */</span>
+</span></span><span class="line"><span class="cl">            <span class="k">while</span><span class="p">(</span><span class="nf">i2c_flag_get</span><span class="p">(</span><span class="n">I2CX</span><span class="p">,</span> <span class="n">I2C_FLAG_I2CBSY</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">timeout</span> <span class="o">&lt;</span> <span class="n">I2C_TIME_OUT</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">timeout</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span><span class="p">(</span><span class="n">timeout</span> <span class="o">&lt;</span> <span class="n">I2C_TIME_OUT</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="nf">i2c_start_on_bus</span><span class="p">(</span><span class="n">I2CX</span><span class="p">);</span>      <span class="cm">/* 产生 START 条件 */</span>
+</span></span><span class="line"><span class="cl">                <span class="n">timeout</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="n">state</span> <span class="o">=</span> <span class="n">I2C_SEND_ADDRESS</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">timeout</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="n">state</span> <span class="o">=</span> <span class="n">I2C_START</span><span class="p">;</span>           <span class="cm">/* 超时：重来 */</span>
+</span></span><span class="line"><span class="cl">                <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;i2c bus is busy in WRITE BYTE!</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">case</span> <span class="nl">I2C_SEND_ADDRESS</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="cm">/* ② 等 START 已发出（SBSEND） */</span>
+</span></span><span class="line"><span class="cl">            <span class="k">while</span><span class="p">((</span><span class="o">!</span> <span class="nf">i2c_flag_get</span><span class="p">(</span><span class="n">I2CX</span><span class="p">,</span> <span class="n">I2C_FLAG_SBSEND</span><span class="p">))</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">timeout</span> <span class="o">&lt;</span> <span class="n">I2C_TIME_OUT</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">timeout</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span><span class="p">(</span><span class="n">timeout</span> <span class="o">&lt;</span> <span class="n">I2C_TIME_OUT</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="cm">/* 发送从机地址 + 写方向（库会自动拼读写位） */</span>
+</span></span><span class="line"><span class="cl">                <span class="nf">i2c_master_addressing</span><span class="p">(</span><span class="n">I2CX</span><span class="p">,</span> <span class="n">eeprom_address</span><span class="p">,</span> <span class="n">I2C_TRANSMITTER</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="n">timeout</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="n">state</span> <span class="o">=</span> <span class="n">I2C_CLEAR_ADDRESS_FLAG</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">timeout</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="n">state</span> <span class="o">=</span> <span class="n">I2C_START</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">case</span> <span class="nl">I2C_CLEAR_ADDRESS_FLAG</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="cm">/* ③ 等从机回应地址 ACK（ADDSEND），然后必须清除该标志 */</span>
+</span></span><span class="line"><span class="cl">            <span class="k">while</span><span class="p">((</span><span class="o">!</span> <span class="nf">i2c_flag_get</span><span class="p">(</span><span class="n">I2CX</span><span class="p">,</span> <span class="n">I2C_FLAG_ADDSEND</span><span class="p">))</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">timeout</span> <span class="o">&lt;</span> <span class="n">I2C_TIME_OUT</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">timeout</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span><span class="p">(</span><span class="n">timeout</span> <span class="o">&lt;</span> <span class="n">I2C_TIME_OUT</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="nf">i2c_flag_clear</span><span class="p">(</span><span class="n">I2CX</span><span class="p">,</span> <span class="n">I2C_FLAG_ADDSEND</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="n">timeout</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="n">state</span> <span class="o">=</span> <span class="n">I2C_TRANSMIT_DATA</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">timeout</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="n">state</span> <span class="o">=</span> <span class="n">I2C_START</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">case</span> <span class="nl">I2C_TRANSMIT_DATA</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="cm">/* ④ 等发送缓冲空（TBE），先发 EEPROM 内部地址（写哪个存储单元） */</span>
+</span></span><span class="line"><span class="cl">            <span class="k">while</span><span class="p">((</span><span class="o">!</span> <span class="nf">i2c_flag_get</span><span class="p">(</span><span class="n">I2CX</span><span class="p">,</span> <span class="n">I2C_FLAG_TBE</span><span class="p">))</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">timeout</span> <span class="o">&lt;</span> <span class="n">I2C_TIME_OUT</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">timeout</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span><span class="p">(</span><span class="n">timeout</span> <span class="o">&lt;</span> <span class="n">I2C_TIME_OUT</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="nf">i2c_data_transmit</span><span class="p">(</span><span class="n">I2CX</span><span class="p">,</span> <span class="n">write_address</span><span class="p">);</span>  <span class="cm">/* EEPROM 内地址 */</span>
+</span></span><span class="line"><span class="cl">                <span class="n">timeout</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="cm">/* 等字节传完（BTC），再发真正的数据字节 */</span>
+</span></span><span class="line"><span class="cl">            <span class="k">while</span><span class="p">((</span><span class="o">!</span><span class="nf">i2c_flag_get</span><span class="p">(</span><span class="n">I2CX</span><span class="p">,</span> <span class="n">I2C_FLAG_BTC</span><span class="p">))</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">timeout</span> <span class="o">&lt;</span> <span class="n">I2C_TIME_OUT</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">timeout</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span><span class="p">(</span><span class="n">timeout</span> <span class="o">&lt;</span> <span class="n">I2C_TIME_OUT</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="nf">i2c_data_transmit</span><span class="p">(</span><span class="n">I2CX</span><span class="p">,</span> <span class="o">*</span><span class="n">p_buffer</span><span class="p">);</span>      <span class="cm">/* 实际要写的数据 */</span>
+</span></span><span class="line"><span class="cl">                <span class="n">timeout</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="cm">/* 再等 BTC，准备结束 */</span>
+</span></span><span class="line"><span class="cl">            <span class="k">while</span><span class="p">((</span><span class="o">!</span><span class="nf">i2c_flag_get</span><span class="p">(</span><span class="n">I2CX</span><span class="p">,</span> <span class="n">I2C_FLAG_BTC</span><span class="p">))</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">timeout</span> <span class="o">&lt;</span> <span class="n">I2C_TIME_OUT</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">timeout</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span><span class="p">(</span><span class="n">timeout</span> <span class="o">&lt;</span> <span class="n">I2C_TIME_OUT</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">state</span> <span class="o">=</span> <span class="n">I2C_STOP</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="n">timeout</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">case</span> <span class="nl">I2C_STOP</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="cm">/* ⑤ 发 STOP 条件，结束本次通信 */</span>
+</span></span><span class="line"><span class="cl">            <span class="nf">i2c_stop_on_bus</span><span class="p">(</span><span class="n">I2CX</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">while</span><span class="p">((</span><span class="nf">I2C_CTL0</span><span class="p">(</span><span class="n">I2CX</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">I2C_CTL0_STOP</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">timeout</span> <span class="o">&lt;</span> <span class="n">I2C_TIME_OUT</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">timeout</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span><span class="p">(</span><span class="n">timeout</span> <span class="o">&lt;</span> <span class="n">I2C_TIME_OUT</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">timeout</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="n">state</span> <span class="o">=</span> <span class="n">I2C_END</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="n">i2c_timeout_flag</span> <span class="o">=</span> <span class="n">I2C_OK</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">default</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">            <span class="n">state</span> <span class="o">=</span> <span class="n">I2C_START</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">i2c_timeout_flag</span> <span class="o">=</span> <span class="n">I2C_OK</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">timeout</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">I2C_END</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="5-at24cxxc--自测函数-i2c_24c02_test">5) at24cxx.c —— 自测函数 i2c_24c02_test()
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="nf">i2c_24c02_test</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint16_t</span> <span class="n">i</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint8_t</span> <span class="n">i2c_buffer_write</span><span class="p">[</span><span class="n">BUFFER_SIZE</span><span class="p">];</span>   <span class="cm">/* BUFFER_SIZE = 256 */</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint8_t</span> <span class="n">i2c_buffer_read</span><span class="p">[</span><span class="n">BUFFER_SIZE</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\r\n</span><span class="s">AT24C02 writing...</span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 准备测试数据：0,1,2,...,255 */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span><span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">BUFFER_SIZE</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">i2c_buffer_write</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 整片写入（内部做了分页写） */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">eeprom_buffer_write_timeout</span><span class="p">(</span><span class="n">i2c_buffer_write</span><span class="p">,</span> <span class="n">EEP_FIRST_PAGE</span><span class="p">,</span> <span class="n">BUFFER_SIZE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;AT24C02 reading...</span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 整片读回 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">eeprom_buffer_read_timeout</span><span class="p">(</span><span class="n">i2c_buffer_read</span><span class="p">,</span> <span class="n">EEP_FIRST_PAGE</span><span class="p">,</span> <span class="n">BUFFER_SIZE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 逐字节比对 */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span><span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">BUFFER_SIZE</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span><span class="p">(</span><span class="n">i2c_buffer_read</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="n">i2c_buffer_write</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;Err:data read and write aren&#39;t matching.</span><span class="se">\n\r</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="n">I2C_FAIL</span><span class="p">;</span>     <span class="cm">/* 任一字节不一致 → 失败 */</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;I2C-AT24C02 test passed!</span><span class="se">\n\r</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">I2C_OK</span><span class="p">;</span>               <span class="cm">/* 全部一致 → 成功 */</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p>其余 <code>eeprom_page_write_timeout()</code>（页写）、<code>eeprom_buffer_write_timeout()</code>（跨页拆分）、<code>eeprom_buffer_read_timeout()</code>（含&quot;复合格式&quot;读：先写地址再发重复 START 切到读方向）、<code>eeprom_wait_standby_state_timeout()</code>（等 EEPROM 写完就绪）都是在这套状态机骨架上的扩展。它们的核心套路一致：<strong>START → 地址 → 等 ACK → 数据 → STOP</strong>，只是数据段多循环几次、或读之前多发一次&quot;重复起始（Repeated START）&quot;。</p>
+</blockquote>
+<hr>
+<h2 id="代码分段讲解">代码分段讲解
+</h2><h3 id="1-i2c-引脚为什么是复用开漏">1. I2C 引脚为什么是&quot;复用开漏&rdquo;？
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">gpio_init</span><span class="p">(</span><span class="n">I2C_SCL_PORT</span><span class="p">,</span> <span class="n">GPIO_MODE_AF_OD</span><span class="p">,</span> <span class="n">GPIO_OSPEED_50MHZ</span><span class="p">,</span> <span class="n">I2C_SCL_PIN</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">gpio_init</span><span class="p">(</span><span class="n">I2C_SDA_PORT</span><span class="p">,</span> <span class="n">GPIO_MODE_AF_OD</span><span class="p">,</span> <span class="n">GPIO_OSPEED_50MHZ</span><span class="p">,</span> <span class="n">I2C_SDA_PIN</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>I2C 总线是**线与（wired-AND）**结构：任何设备都能把线拉低，但只能靠上拉电阻拉高。如果用推挽输出，两个设备一个拉高一个拉低就会&quot;短路&quot;打架。开漏输出恰好满足&quot;谁想拉低谁拉，否则释放由电阻拉高&quot;，配合外部上拉电阻，这就是 I2C 能多主多从、还能仲裁的硬件基础。<strong>漏了上拉电阻 = 通信必失败</strong>，这是 I2C 头号新手坑。</p>
+<h3 id="2-速率地址应答三件套">2. 速率、地址、应答三件套
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">i2c_clock_config</span><span class="p">(</span><span class="n">I2CX</span><span class="p">,</span> <span class="n">I2C_SPEED</span><span class="p">,</span> <span class="n">I2C_DTCY_2</span><span class="p">);</span>          <span class="c1">// 速率 100K
+</span></span></span><span class="line"><span class="cl"><span class="nf">i2c_mode_addr_config</span><span class="p">(</span><span class="n">I2CX</span><span class="p">,</span> <span class="p">...,</span> <span class="n">I2C_ADDFORMAT_7BITS</span><span class="p">,</span> <span class="mh">0xA0</span><span class="p">);</span>  <span class="c1">// 7 位地址
+</span></span></span><span class="line"><span class="cl"><span class="nf">i2c_ack_config</span><span class="p">(</span><span class="n">I2CX</span><span class="p">,</span> <span class="n">I2C_ACK_ENABLE</span><span class="p">);</span>                   <span class="c1">// 开启自动应答
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><code>I2C_SPEED = 100000</code>：标准模式。想提速改 400000（快速模式）；EEPROM 通常都支持。</li>
+<li><code>0xA0</code>：AT24C02 的 8 位地址俗写（含读写位）。<code>i2c_master_addressing()</code> 会按 7 位地址格式自动处理，所以这里传 <code>0xA0</code> 没问题。</li>
+<li><strong>ACK 必须开启</strong>：读多字节时，主机每收一个字节都要回 ACK 告诉从机&quot;继续发&quot;，最后一个字节才回 NACK 表示&quot;到此为止&quot;。</li>
+</ul>
+<h3 id="3-状态机每一步都在等-ack--防卡死">3. 状态机：每一步都在&quot;等 ACK + 防卡死&quot;
+</h3><p>观察 <code>eeprom_byte_write_timeout()</code>，整段逻辑被拆成 5 个状态：<code>I2C_START → I2C_SEND_ADDRESS → I2C_CLEAR_ADDRESS_FLAG → I2C_TRANSMIT_DATA → I2C_STOP</code>。每个状态里都是 <code>while(标志未到 &amp;&amp; timeout &lt; I2C_TIME_OUT)</code> 这种<strong>带超时的等待</strong>：</p>
+<ul>
+<li>等 <code>I2C_FLAG_I2CBSY</code> 为 0 → 总线空闲才能发 START。</li>
+<li>等 <code>I2C_FLAG_SBSEND</code> → START 已发出。</li>
+<li>等 <code>I2C_FLAG_ADDSEND</code> → 从机回了地址 ACK；<strong>必须 <code>i2c_flag_clear()</code> 清掉它</strong>，不清会卡死。</li>
+<li>等 <code>I2C_FLAG_TBE</code> / <code>BTC</code> → 数据发出去、且收到从机对数据的 ACK。</li>
+</ul>
+<p>超时就 <code>state = I2C_START</code> 重来，必要时 <code>i2c_bus_reset()</code> 把总线&quot;抖&quot;回正常。这种写法比&quot;裸等标志&quot;健壮得多，是真实工程里 I2C 的标配。</p>
+<blockquote>
+<p><strong>为什么要&quot;先发 EEPROM 内地址、再发数据&quot;？</strong> AT24C02 这类 EEPROM 在收到器件地址后，还要再收一个&quot;你想写哪个存储单元&quot;的字地址（0x00~0xFF），之后才是真正的数据。所以一帧里主机连续发：器件地址(写) → 字地址 → 数据。读操作更复杂：先以&quot;写方向&quot;发器件地址+字地址告诉它&quot;我要读的位置&quot;，再发一次<strong>重复 START</strong>以&quot;读方向&quot;访问，然后开始收数据。</p>
+</blockquote>
+<h3 id="4-页写与等待就绪">4. 页写与&quot;等待就绪&quot;
+</h3><p>AT24C02 内部按&quot;页&quot;组织，<strong>每页 8 字节</strong>（<code>I2C_PAGE_SIZE</code>）。一次 I2C 写操作最多连续写一页，跨页必须拆成多次（每次都要重新 START+地址）。<code>eeprom_buffer_write_timeout()</code> 就是做这个&quot;按 8 字节分页、跨页拆分&quot;的活。</p>
+<p>而且<strong>EEPROM 写慢</strong>——发完 STOP 后它要花几毫秒把数据固化到存储阵列，这段时间里它不响应任何访问。所以每次写完后都要 <code>eeprom_wait_standby_state_timeout()</code>：不断发 START+地址，直到从机回 ACK 表示&quot;我忙完了、可以再聊了&quot;。如果你写完立刻读，读到的会是旧数据或 NACK。</p>
+<h3 id="5-读回来的数据怎么验证">5. 读回来的数据怎么验证？
+</h3><p><code>i2c_24c02_test()</code> 用 <code>i2c_buffer_write[i]=i</code> 造了 0~255 的递增序列，写进去再读回来逐字节比。全对返回 <code>I2C_OK</code>，main 里就让 LED 流水；有错立刻 <code>I2C_FAIL</code>、LED 全亮。<strong>串口还会把出错的具体字节打印出来</strong>，方便排查。</p>
+<hr>
+<h2 id="实验现象">实验现象
+</h2><ol>
+<li><strong>串口输出</strong>（115200 波特）：
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">I2C-24C02 configured....
+</span></span><span class="line"><span class="cl">The I2C is hardware interface
+</span></span><span class="line"><span class="cl">The speed is 100000
+</span></span><span class="line"><span class="cl">AT24C02 writing...
+</span></span><span class="line"><span class="cl">AT24C02 reading...
+</span></span><span class="line"><span class="cl">I2C-AT24C02 test passed!
+</span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+<li><strong>LED 行为</strong>：
+<ul>
+<li>测试通过 → LED2、LED3、LED4、LED5 以 500ms 间隔<strong>循环流水闪烁</strong>。</li>
+<li>测试失败（读写不一致）→ 4 颗 LED <strong>全部常亮</strong>，程序停在末尾死循环。</li>
+</ul>
+</li>
+<li>若把接线拔掉或地址写错，串口会打出 <code>i2c bus is busy ...</code> / 各种 timeout 信息，最终触发失败分支。</li>
+</ol>
+<hr>
+<h2 id="常见问题">常见问题
+</h2><p><strong>Q1：串口没任何输出 / 一直打 &ldquo;i2c bus is busy&rdquo;？</strong><br>
+99% 是<strong>物理接线或上拉</strong>问题。检查：① PB6/PB7 是否真正接到了 EEPROM 的 SCL/SDA；② 总线上是否接了上拉电阻（4.7kΩ 到 3.3V）；③ EEPROM 供电是否正常。总线拉不高，I2C 永远判&quot;忙&quot;。</p>
+<p><strong>Q2：为什么 I2C 地址写成 0xA0 而不是 0x50？</strong><br>
+<code>0xA0</code> 是 8 位写法（7 位地址 <code>0x50</code> 左移 1 位 = <code>0xA0</code>，最低位是读写方向位）。AT24C02 的数据手册里器件地址常直接给成 <code>0xA0</code>（写）/ <code>0xA1</code>（读）这种&quot;含读写位&quot;的写法。GD32 库函数 <code>i2c_master_addressing()</code> 会按你给的格式自动拼方向位，传 <code>0xA0</code> 即可，不必自己再移位。</p>
+<p><strong>Q3：为什么写完要等那么久才能读？</strong><br>
+EEPROM 内部是&quot;浮栅&quot;工艺，写/擦要毫秒级时间。写完后它处于&quot;忙&quot;状态，期间不响应 I2C 访问。例程里的 <code>eeprom_wait_standby_state_timeout()</code> 就是反复探测它&quot;忙完没有&quot;。如果你自己写代码，记得<strong>写后延时 5~10ms 或轮询 ACK</strong> 再读。</p>
+<p><strong>Q4：可以一次写超过 8 字节吗？</strong><br>
+不能在一次 I2C 连续写里超过一页（AT24C02 是 8 字节/页）。超过会从页首&quot;回卷&quot;覆盖。例程的 <code>eeprom_buffer_write_timeout()</code> 已替你按 8 字节分页、跨页拆分处理，所以传 256 字节也没问题。</p>
+<p><strong>Q5：为什么代码里那么多 timeout 和 i2c_bus_reset？</strong><br>
+因为 I2C 是带应答的协议，从机没接好 / 总线被拉死时若&quot;裸等标志&quot;会永久卡住。带超时 + 总线复位是工业级写法，保证&quot;卡了能恢复&quot;。初学可先忽略 timeout 细节，重点理解状态机的 5 步顺序。</p>
+<p><strong>Q6：我想换成 AT24C04 / AT24C128 等更大容量怎么办？</strong><br>
+主要改两点：① 器件地址（大容量页结构不同，字地址可能是 2 字节）；② <code>I2C_PAGE_SIZE</code>（页大小随型号变，如 AT24C64 是 32 字节）。地址格式（7 位/10 位）和页写逻辑要对照对应手册调整。</p>
+<hr>
+<h2 id="小结">小结
+</h2><p>本示例把 I2C 最核心的&quot;主机写从机&quot;协议完整走了一遍，记住这条主线：</p>
+<ol>
+<li><strong>开时钟 + 配 GPIO（AF_OD + 上拉）</strong>：SCL/PB6、SDA/PB7，千万别忘上拉电阻。</li>
+<li><strong>配 I2C 外设</strong>：速率、7 位地址、使能、开启 ACK。</li>
+<li><strong>通信五步状态机</strong>：<code>START → 发地址(等 ACK) → 发字地址 → 发数据 → STOP</code>，每步都等标志 + 防超时。</li>
+<li><strong>EEPROM 特有两件事</strong>：按页写（≤8 字节/页，跨页拆分）、写后等&quot;就绪&quot;再读。</li>
+<li><strong>验证</strong>：写进去什么、读回来什么，逐字节比对，用 LED / 串口给出结果。</li>
+</ol>
+<p>I2C 比 SPI &ldquo;省线但啰嗦&rdquo;，吃透了 EEPROM 这一例，你基本就掌握了所有 I2C 从器件的读写套路。</p>
+<hr>
+<h2 id="拓展应用">拓展应用
+</h2><p>掌握了 I2C EEPROM 读写后，可以延伸至大量 I2C 从设备：</p>
+<ul>
+<li><strong>存配置参数</strong>：把设备的校准值、用户设置写入 EEPROM，掉电不丢，上电读取恢复。</li>
+<li><strong>其它 I2C 传感器</strong>：如温湿度 SHT30、气压 BMP280、IMU MPU6050、光照 BH1750——它们的读写同样是&quot;START → 地址 → 寄存器地址 → 数据/读回&quot;这套协议，只是寄存器定义不同。</li>
+<li><strong>RTC 时钟芯片</strong>（PCF8563 / DS3231）：I2C 读时间、设闹钟。</li>
+<li><strong>I/O 扩展芯片</strong>（PCF8574 / MCP23017）：用 I2C 扩展 GPIO 口，省 MCU 引脚。</li>
+<li><strong>OLED 显示屏</strong>（SSD1306 的 I2C 版本）：用 I2C 刷小屏。</li>
+<li><strong>升级为 DMA / 中断</strong>：数据量大时改用同目录 <code>I2C_EEPROM_dma</code> / <code>I2C_EEPROM_interrput</code>，把轮询等待换成 DMA 或中断，释放 CPU。</li>
+<li><strong>多从机挂载</strong>：同一组 PB6/PB7 上可并挂多个 I2C 器件（EEPROM + 传感器 + RTC），靠各自不同地址区分，体现 I2C &ldquo;两根线挂一片设备&quot;的优势。</li>
+</ul>
+<blockquote>
+<p>想看更简洁的纯主机收发骨架，可阅读同目录的 <code>Master_transmitter</code> / <code>Master_receiver</code> 例程。</p>
+</blockquote>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/i2c_eeprom/">I2C_EEPROM</a>
+        
+            <a href="/tags/i2c/">I2C</a>
+        
+            <a href="/tags/v3.0.3/">V3.0.3</a>
+        
+    </section>
+
+
+    <section class="article-lastmod">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <span>
+            最后更新于 Sep 08, 2026 16:03 &#43;0800
+        </span>
+    </section></footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/gd32-i2c-i2c-eeprom-dma/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">GD32 I2C — I2C EEPROM DMA</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/gd32-i2c-i2c-eeprom-%E4%B8%AD%E6%96%AD/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">GD32 I2C — I2C EEPROM 中断</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/gd32-i2c-i2c-fast-mode-%E9%80%9A%E4%BF%A1/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">GD32 I2C — I2C Fast-mode&#43; 通信</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/gd32-i2c-i2c-%E4%B8%BB%E5%8F%91%E4%BB%8E%E6%94%B6/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">GD32 I2C — I2C 主发从收</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/gd32-i2c-i2c-%E4%B8%BB%E5%8F%91%E4%BB%8E%E6%94%B6-dma/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">GD32 I2C — I2C 主发从收 DMA</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="ClingYang/ClingYang.github.io"
+        issue-term="pathname"
+        
+        label="💬comment"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2026 CLing
+    </section>
+    
+    <section class="powerby">
+        
+            世界是你们 <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<style>
+    #TableOfContents > ul, ol {
+        ul, ol {
+            display: none;
+        }
+        .open {
+            display: block;
+        }
+    }
+</style>
+
+<script>
+    function initTocHide() {
+        
+        let toc = document.querySelector(".widget--toc");
+        if (!toc) {
+            return;
+        }
+        
+        window.addEventListener('scroll', function() {
+            
+            let currentLi = document.querySelector(".active-class");
+            if (!currentLi) {
+                return
+            }
+            
+            let elementsByClassName = document.querySelectorAll(".open");
+            if (elementsByClassName.length > 0) {
+                elementsByClassName.forEach((ul) => {
+                    ul.classList.remove("open")
+                })
+            }
+            
+            if (currentLi.children.length > 1) {
+                currentLi.children[1].classList.add("open")
+            }
+            
+            let ul = currentLi.parentElement;
+            do {
+                ul.classList.add("open");
+                ul = ul.parentElement.parentElement
+            } while (ul !== undefined && (ul.localName === 'ul' || ul.localName === 'ol'))
+        });
+    }
+    initTocHide()
+</script>
+
+    </body>
+</html>

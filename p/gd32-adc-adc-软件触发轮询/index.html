@@ -1,0 +1,1985 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="GD32 GD32F30x_Firmware_Library V3.0.3 ADC ADC 软件触发轮询 示例教学">
+<title>GD32 ADC — ADC 软件触发轮询</title>
+
+<link rel='canonical' href='https://clingyang.github.io/p/gd32-adc-adc-%E8%BD%AF%E4%BB%B6%E8%A7%A6%E5%8F%91%E8%BD%AE%E8%AF%A2/'>
+
+<link rel="stylesheet" href="/scss/style.min.e14f3ba93baae65b2aef2339f32b6f25d7a0184785ebf4f6bd7d3376ae5dc2d4.css"><meta property='og:title' content="GD32 ADC — ADC 软件触发轮询">
+<meta property='og:description' content="GD32 GD32F30x_Firmware_Library V3.0.3 ADC ADC 软件触发轮询 示例教学">
+<meta property='og:url' content='https://clingyang.github.io/p/gd32-adc-adc-%E8%BD%AF%E4%BB%B6%E8%A7%A6%E5%8F%91%E8%BD%AE%E8%AF%A2/'>
+<meta property='og:site_name' content='CLing'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='ADC0_software_trigger_routine_channel_polling' /><meta property='article:tag' content='adc' /><meta property='article:tag' content='V3.0.3' /><meta property='article:published_time' content='2026-09-08T14:52:21&#43;08:00'/><meta property='article:modified_time' content='2026-09-08T16:03:27&#43;08:00'/>
+<meta name="twitter:title" content="GD32 ADC — ADC 软件触发轮询">
+<meta name="twitter:description" content="GD32 GD32F30x_Firmware_Library V3.0.3 ADC ADC 软件触发轮询 示例教学">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                            height="290" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🏀</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">CLing</a></h1>
+            <h2 class="site-description">你好 欢迎来到我的博客</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>档案</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E6%8A%80%E6%9C%AF%E9%93%BE%E6%8E%A5/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>技术链接</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/excel/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+                
+                <span>Excel教程</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#功能简介">功能简介</a></li>
+    <li><a href="#硬件准备">硬件准备</a>
+      <ol>
+        <li><a href="#使用的引脚">使用的引脚</a></li>
+        <li><a href="#电位器接线">电位器接线</a></li>
+      </ol>
+    </li>
+    <li><a href="#完整代码">完整代码</a></li>
+    <li><a href="#代码分段讲解">代码分段讲解</a>
+      <ol>
+        <li><a href="#第-1-段__io-到底是干什么的">第 1 段：<code>__IO</code> 到底是干什么的</a></li>
+        <li><a href="#第-2-段gpio_mode_ain-和其他模式的本质区别">第 2 段：GPIO_MODE_AIN 和其他模式的本质区别</a></li>
+        <li><a href="#第-3-段为什么软件触发要开外部触发">第 3 段：为什么&quot;软件触发&quot;要开&quot;外部触发&quot;</a></li>
+        <li><a href="#第-4-段序列长度为什么设成-1">第 4 段：序列长度为什么设成 1</a></li>
+        <li><a href="#第-5-段一次完整采样的四步">第 5 段：一次完整采样的四步</a></li>
+        <li><a href="#第-6-段主循环里数据是怎么流动的">第 6 段：主循环里数据是怎么流动的</a></li>
+      </ol>
+    </li>
+    <li><a href="#实验现象">实验现象</a>
+      <ol>
+        <li><a href="#用-keil-的-watch-窗口看">用 Keil 的 Watch 窗口看</a></li>
+        <li><a href="#更直观的办法加串口打印">更直观的办法：加串口打印</a></li>
+      </ol>
+    </li>
+    <li><a href="#常见问题">常见问题</a>
+      <ol>
+        <li><a href="#q1程序卡死在-whileadc_flag_getadc0-adc_flag_eoc">Q1：程序卡死在 <code>while(!adc_flag_get(ADC0, ADC_FLAG_EOC));</code></a></li>
+        <li><a href="#q2读数一直是-0-或一直是-4095">Q2：读数一直是 0 或一直是 4095</a></li>
+        <li><a href="#q3读数不停跳动跳几十个数">Q3：读数不停跳动，跳几十个数</a></li>
+        <li><a href="#q4想读芯片内部温度怎么办">Q4：想读芯片内部温度怎么办</a></li>
+        <li><a href="#q54-个通道能不能一次全采完不要一个个来">Q5：4 个通道能不能一次全采完，不要一个个来？</a></li>
+        <li><a href="#q6怎么提高精度到-12-位以上">Q6：怎么提高精度到 12 位以上？</a></li>
+      </ol>
+    </li>
+    <li><a href="#小结">小结</a></li>
+    <li><a href="#拓展应用">拓展应用</a>
+      <ol>
+        <li><a href="#入门级一个电位器就能玩">入门级（一个电位器就能玩）</a></li>
+        <li><a href="#进阶级配合传感器和算法">进阶级（配合传感器和算法）</a></li>
+        <li><a href="#信号处理级">信号处理级</a></li>
+        <li><a href="#工业与安全级">工业与安全级</a></li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/gd32/" >
+                GD32
+            </a>
+        
+            <a href="/categories/adc/" >
+                ADC
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/gd32-adc-adc-%E8%BD%AF%E4%BB%B6%E8%A7%A6%E5%8F%91%E8%BD%AE%E8%AF%A2/">GD32 ADC — ADC 软件触发轮询</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            GD32 GD32F30x_Firmware_Library V3.0.3 ADC ADC 软件触发轮询 示例教学
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2026-09-08</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 11 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="adc--adc-软件触发轮询">ADC — ADC 软件触发轮询
+</h1><blockquote>
+<p><strong>固件库</strong>: GD32F30x_Firmware_Library V3.0.3
+<strong>芯片</strong>: GD32F307 (GD32307C-EVAL-V1.1 开发板)
+<strong>源文件</strong>: <code>GD32F30x_Firmware_Library_V3.0.3/Examples/ADC/ADC0_software_trigger_routine_channel_polling/main.c</code></p>
+</blockquote>
+<hr>
+<h2 id="功能简介">功能简介
+</h2><p>这是 ADC 的入门第一课，也是<strong>最容易看懂的一种 ADC 用法</strong>。</p>
+<p>程序用 ADC0 依次采集 4 路模拟电压（PA1、PA2、PA3、PA4），把结果存到 <code>adc_value[4]</code> 数组里，然后不停地重复。</p>
+<p>标题里三个关键词，拆开看：</p>
+<div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">关键词</th>
+					<th style="text-align: left">含义</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left"><strong>软件触发</strong></td>
+					<td style="text-align: left">转换不是由定时器或外部信号启动的，而是我们在程序里调用一个函数手动&quot;发令&quot;</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>常规通道</strong></td>
+					<td style="text-align: left">用的是常规组（Routine），相对于优先级更高的注入组（Inserted）</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>轮询</strong></td>
+					<td style="text-align: left">发令之后，CPU 在 <code>while</code> 里死等标志位，等到了就读数据（不用中断、不用 DMA）</td>
+			</tr>
+	</tbody>
+</table></div>
+<p><strong>为什么先学这个？</strong> 因为它把 ADC 的完整流程一步不省地摊开在你眼前：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">配时钟 → 配引脚 → 配 ADC → 校准 → 选通道 → 发令 → 等完成 → 读数
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>后面所有更高级的用法（DMA 自动搬运、定时器触发、双 ADC 并行），都只是把上面某几步换成硬件自动完成而已。<strong>先把手动流程走通，再去理解自动化才不会一头雾水。</strong></p>
+<hr>
+<h2 id="硬件准备">硬件准备
+</h2><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">器材</th>
+					<th style="text-align: left">说明</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left">GD32307C-EVAL-V1.1 开发板</td>
+					<td style="text-align: left">或任意 GD32F30x 板子</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">电位器（可调电阻）1~4 个</td>
+					<td style="text-align: left">10kΩ 卧式电位器，几毛钱一个</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">杜邦线</td>
+					<td style="text-align: left">接线用</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">调试器（GD-Link / J-Link）</td>
+					<td style="text-align: left">需要用 Watch 窗口看变量</td>
+			</tr>
+	</tbody>
+</table></div>
+<h3 id="使用的引脚">使用的引脚
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">ADC 通道</th>
+					<th style="text-align: left">引脚</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left"><code>ADC_CHANNEL_1</code></td>
+					<td style="text-align: left">PA1</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><code>ADC_CHANNEL_2</code></td>
+					<td style="text-align: left">PA2</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><code>ADC_CHANNEL_3</code></td>
+					<td style="text-align: left">PA3</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><code>ADC_CHANNEL_4</code></td>
+					<td style="text-align: left">PA4</td>
+			</tr>
+	</tbody>
+</table></div>
+<blockquote>
+<p><strong>通道号和引脚号的对应关系</strong>：GD32F30x 上 ADC 通道 0<del>7 对应 PA0</del>PA7，通道 8<del>9 对应 PB0</del>PB1，通道 10<del>15 对应 PC0</del>PC5。所以 <code>ADC_CHANNEL_1</code> = PA1，规律很好记。</p>
+</blockquote>
+<h3 id="电位器接线">电位器接线
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">        3.3V
+</span></span><span class="line"><span class="cl">         │
+</span></span><span class="line"><span class="cl">        ┌┴┐
+</span></span><span class="line"><span class="cl">        │ │  ← 电位器（10kΩ）
+</span></span><span class="line"><span class="cl">        │ ├──────→ PA1（中间的滑动端接 ADC 引脚）
+</span></span><span class="line"><span class="cl">        │ │
+</span></span><span class="line"><span class="cl">        └┬┘
+</span></span><span class="line"><span class="cl">         │
+</span></span><span class="line"><span class="cl">        GND
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>旋转旋钮，中间抽头的电压就在 0V ~ 3.3V 之间连续变化，ADC 读数在 0 ~ 4095 之间跟着变。<strong>这是验证 ADC 是否正常工作的最直观办法。</strong></p>
+<p>如果暂时没有电位器，也可以：</p>
+<ul>
+<li><strong>直接把引脚接 GND</strong> → 读数应该接近 0</li>
+<li><strong>直接把引脚接 3.3V</strong> → 读数应该接近 4095</li>
+<li><strong>什么都不接</strong>（悬空）→ 读数会乱跳，这是正常现象（悬空引脚电压不确定）</li>
+</ul>
+<hr>
+<h2 id="完整代码">完整代码
+</h2><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span><span class="lnt">113
+</span><span class="lnt">114
+</span><span class="lnt">115
+</span><span class="lnt">116
+</span><span class="lnt">117
+</span><span class="lnt">118
+</span><span class="lnt">119
+</span><span class="lnt">120
+</span><span class="lnt">121
+</span><span class="lnt">122
+</span><span class="lnt">123
+</span><span class="lnt">124
+</span><span class="lnt">125
+</span><span class="lnt">126
+</span><span class="lnt">127
+</span><span class="lnt">128
+</span><span class="lnt">129
+</span><span class="lnt">130
+</span><span class="lnt">131
+</span><span class="lnt">132
+</span><span class="lnt">133
+</span><span class="lnt">134
+</span><span class="lnt">135
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;gd32f30x.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;systick.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;gd32f307c_eval.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 存放 4 个通道的采样结果
+</span></span></span><span class="line"><span class="cl"><span class="cm">   __IO 是 volatile 的宏，告诉编译器&#34;这个变量可能被意外修改，
+</span></span></span><span class="line"><span class="cl"><span class="cm">   不要做优化&#34;。这样调试器的 Watch 窗口才能看到实时变化 */</span>
+</span></span><span class="line"><span class="cl"><span class="n">__IO</span> <span class="kt">uint16_t</span> <span class="n">adc_value</span><span class="p">[</span><span class="mi">4</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">rcu_config</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">gpio_config</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">adc_config</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="kt">uint16_t</span> <span class="nf">adc_channel_sample</span><span class="p">(</span><span class="kt">uint8_t</span> <span class="n">channel</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/*!
+</span></span></span><span class="line"><span class="cl"><span class="cm">    \brief      主函数
+</span></span></span><span class="line"><span class="cl"><span class="cm">    \param[in]  无
+</span></span></span><span class="line"><span class="cl"><span class="cm">    \param[out] 无
+</span></span></span><span class="line"><span class="cl"><span class="cm">    \retval     无
+</span></span></span><span class="line"><span class="cl"><span class="cm">*/</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 1. 时钟配置：开 GPIOA、ADC0 时钟，并给 ADC 分频 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">rcu_config</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 2. SysTick 配置，为了后面 delay_1ms 能用 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">systick_config</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 3. GPIO 配置：把 4 个引脚配成模拟输入 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gpio_config</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 4. ADC 配置：模式、对齐、触发源、使能、校准 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">adc_config</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">while</span><span class="p">(</span><span class="mi">1</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">        <span class="cm">/* 依次采集 4 个通道，每采完一个立刻存进数组
+</span></span></span><span class="line"><span class="cl"><span class="cm">           注意：必须一个一个来，因为常规组只有一个数据寄存器 */</span>
+</span></span><span class="line"><span class="cl">        <span class="n">adc_value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nf">adc_channel_sample</span><span class="p">(</span><span class="n">ADC_CHANNEL_1</span><span class="p">);</span>   <span class="cm">/* PA1 */</span>
+</span></span><span class="line"><span class="cl">        <span class="n">adc_value</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nf">adc_channel_sample</span><span class="p">(</span><span class="n">ADC_CHANNEL_2</span><span class="p">);</span>   <span class="cm">/* PA2 */</span>
+</span></span><span class="line"><span class="cl">        <span class="n">adc_value</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nf">adc_channel_sample</span><span class="p">(</span><span class="n">ADC_CHANNEL_3</span><span class="p">);</span>   <span class="cm">/* PA3 */</span>
+</span></span><span class="line"><span class="cl">        <span class="n">adc_value</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="nf">adc_channel_sample</span><span class="p">(</span><span class="n">ADC_CHANNEL_4</span><span class="p">);</span>   <span class="cm">/* PA4 */</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/*!
+</span></span></span><span class="line"><span class="cl"><span class="cm">    \brief      配置各个系统时钟
+</span></span></span><span class="line"><span class="cl"><span class="cm">    \param[in]  无
+</span></span></span><span class="line"><span class="cl"><span class="cm">    \param[out] 无
+</span></span></span><span class="line"><span class="cl"><span class="cm">    \retval     无
+</span></span></span><span class="line"><span class="cl"><span class="cm">*/</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">rcu_config</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 开 GPIOA 时钟 —— PA1~PA4 属于 GPIOA */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">rcu_periph_clock_enable</span><span class="p">(</span><span class="n">RCU_GPIOA</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 开 ADC0 外设时钟 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">rcu_periph_clock_enable</span><span class="p">(</span><span class="n">RCU_ADC0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 配置 ADC 时钟分频：APB2(120MHz) / 6 = 20MHz
+</span></span></span><span class="line"><span class="cl"><span class="cm">       ADC 时钟不能太高，手册推荐不超过 14MHz */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">rcu_adc_clock_config</span><span class="p">(</span><span class="n">RCU_CKADC_CKAPB2_DIV6</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/*!
+</span></span></span><span class="line"><span class="cl"><span class="cm">    \brief      配置 GPIO
+</span></span></span><span class="line"><span class="cl"><span class="cm">    \param[in]  无
+</span></span></span><span class="line"><span class="cl"><span class="cm">    \param[out] 无
+</span></span></span><span class="line"><span class="cl"><span class="cm">    \retval     无
+</span></span></span><span class="line"><span class="cl"><span class="cm">*/</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">gpio_config</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 把 PA1~PA4 全部配成 AIN（Analog IN，模拟输入）模式
+</span></span></span><span class="line"><span class="cl"><span class="cm">       这个模式会断开引脚上的数字输入电路和上下拉电阻，
+</span></span></span><span class="line"><span class="cl"><span class="cm">       让引脚&#34;纯净&#34;地把电压送给 ADC */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gpio_init</span><span class="p">(</span><span class="n">GPIOA</span><span class="p">,</span> <span class="n">GPIO_MODE_AIN</span><span class="p">,</span> <span class="n">GPIO_OSPEED_10MHZ</span><span class="p">,</span> <span class="n">GPIO_PIN_1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gpio_init</span><span class="p">(</span><span class="n">GPIOA</span><span class="p">,</span> <span class="n">GPIO_MODE_AIN</span><span class="p">,</span> <span class="n">GPIO_OSPEED_10MHZ</span><span class="p">,</span> <span class="n">GPIO_PIN_2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gpio_init</span><span class="p">(</span><span class="n">GPIOA</span><span class="p">,</span> <span class="n">GPIO_MODE_AIN</span><span class="p">,</span> <span class="n">GPIO_OSPEED_10MHZ</span><span class="p">,</span> <span class="n">GPIO_PIN_3</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gpio_init</span><span class="p">(</span><span class="n">GPIOA</span><span class="p">,</span> <span class="n">GPIO_MODE_AIN</span><span class="p">,</span> <span class="n">GPIO_OSPEED_10MHZ</span><span class="p">,</span> <span class="n">GPIO_PIN_4</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/*!
+</span></span></span><span class="line"><span class="cl"><span class="cm">    \brief      配置 ADC 外设
+</span></span></span><span class="line"><span class="cl"><span class="cm">    \param[in]  无
+</span></span></span><span class="line"><span class="cl"><span class="cm">    \param[out] 无
+</span></span></span><span class="line"><span class="cl"><span class="cm">    \retval     无
+</span></span></span><span class="line"><span class="cl"><span class="cm">*/</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">adc_config</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 独立模式：ADC0 自己单独工作，不和 ADC1 联动 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">adc_mode_config</span><span class="p">(</span><span class="n">ADC_MODE_FREE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 数据右对齐：12 位结果放在 16 位寄存器的低 12 位
+</span></span></span><span class="line"><span class="cl"><span class="cm">       读出来直接就是 0~4095，不用移位 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">adc_data_alignment_config</span><span class="p">(</span><span class="n">ADC0</span><span class="p">,</span> <span class="n">ADC_DATAALIGN_RIGHT</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 常规组序列长度设为 1：一次只转换 1 个通道
+</span></span></span><span class="line"><span class="cl"><span class="cm">       因为常规组只有一个数据寄存器，转多个会互相覆盖 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">adc_channel_length_config</span><span class="p">(</span><span class="n">ADC0</span><span class="p">,</span> <span class="n">ADC_ROUTINE_CHANNEL</span><span class="p">,</span> <span class="mi">1U</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 外部触发源设为 NONE：不使用定时器/引脚触发 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">adc_external_trigger_source_config</span><span class="p">(</span><span class="n">ADC0</span><span class="p">,</span> <span class="n">ADC_ROUTINE_CHANNEL</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                                       <span class="n">ADC0_1_2_EXTTRIG_ROUTINE_NONE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 使能外部触发通路 —— 这句必须有！
+</span></span></span><span class="line"><span class="cl"><span class="cm">       软件触发在硬件上也走&#34;外部触发&#34;这条路，
+</span></span></span><span class="line"><span class="cl"><span class="cm">       只是触发源选成了 NONE（即 SWRCST 软件触发） */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">adc_external_trigger_config</span><span class="p">(</span><span class="n">ADC0</span><span class="p">,</span> <span class="n">ADC_ROUTINE_CHANNEL</span><span class="p">,</span> <span class="n">ENABLE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 使能 ADC0 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">adc_enable</span><span class="p">(</span><span class="n">ADC0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 等 ADC 上电稳定（手册要求 tSTAB，至少 1μs，这里给 1ms 足够宽裕） */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">delay_1ms</span><span class="p">(</span><span class="mi">1U</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 启动校准，消除内部电容工艺偏差
+</span></span></span><span class="line"><span class="cl"><span class="cm">       注意顺序：必须在 adc_enable 之后 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">adc_calibration_enable</span><span class="p">(</span><span class="n">ADC0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/*!
+</span></span></span><span class="line"><span class="cl"><span class="cm">    \brief      采集指定通道的一次数据
+</span></span></span><span class="line"><span class="cl"><span class="cm">    \param[in]  channel: 要采集的 ADC 通道号
+</span></span></span><span class="line"><span class="cl"><span class="cm">    \param[out] 无
+</span></span></span><span class="line"><span class="cl"><span class="cm">    \retval     该通道的 12 位转换结果（0~4095）
+</span></span></span><span class="line"><span class="cl"><span class="cm">*/</span>
+</span></span><span class="line"><span class="cl"><span class="kt">uint16_t</span> <span class="nf">adc_channel_sample</span><span class="p">(</span><span class="kt">uint8_t</span> <span class="n">channel</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 把要采的通道放到常规组序列的第 0 个位置，采样时间 7.5 个周期 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">adc_routine_channel_config</span><span class="p">(</span><span class="n">ADC0</span><span class="p">,</span> <span class="mi">0U</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">ADC_SAMPLETIME_7POINT5</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 发令：软件触发，启动这一次转换 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">adc_software_trigger_enable</span><span class="p">(</span><span class="n">ADC0</span><span class="p">,</span> <span class="n">ADC_ROUTINE_CHANNEL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 死等 EOC（End Of Conversion）标志置位，表示转换完成 */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span><span class="p">(</span><span class="o">!</span><span class="nf">adc_flag_get</span><span class="p">(</span><span class="n">ADC0</span><span class="p">,</span> <span class="n">ADC_FLAG_EOC</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 手动清除 EOC 标志，为下一次转换做准备 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">adc_flag_clear</span><span class="p">(</span><span class="n">ADC0</span><span class="p">,</span> <span class="n">ADC_FLAG_EOC</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 读取常规组数据寄存器，返回结果 */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="p">(</span><span class="nf">adc_routine_data_read</span><span class="p">(</span><span class="n">ADC0</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="代码分段讲解">代码分段讲解
+</h2><h3 id="第-1-段__io-到底是干什么的">第 1 段：<code>__IO</code> 到底是干什么的
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">__IO</span> <span class="kt">uint16_t</span> <span class="n">adc_value</span><span class="p">[</span><span class="mi">4</span><span class="p">];</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>__IO</code> 在 GD32 头文件里定义为 <code>volatile</code>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#define __IO    volatile
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>为什么必须加 volatile？</strong></p>
+<p>编译器很&quot;聪明&quot;，它会做优化。看到 <code>adc_value</code> 这个数组被赋值之后<strong>从来没有被读取过</strong>，优化器会认为&quot;这些赋值是没用的死代码&quot;，直接删掉！结果就是你在调试器 Watch 窗口里看到的永远是 0。</p>
+<p>加上 <code>volatile</code> 之后，等于告诉编译器：<strong>&ldquo;这个变量的值可能会被程序之外的东西（调试器、中断、硬件）读写，你老老实实每次都真的去内存里存取，不许优化。&rdquo;</strong></p>
+<blockquote>
+<p><strong>实战规则</strong>：以下三种变量必须加 <code>volatile</code>：</p>
+<ol>
+<li>会被中断服务函数修改，同时又在主循环里读的全局变量</li>
+<li>映射到硬件寄存器的指针</li>
+<li>只用于调试观察的变量（本例的情况）</li>
+</ol>
+<p>忘加 volatile 导致的 bug 极其难查 —— 因为 Debug 版本（不优化）跑得好好的，一开 <code>-O2</code> 优化就出问题。</p>
+</blockquote>
+<h3 id="第-2-段gpio_mode_ain-和其他模式的本质区别">第 2 段：GPIO_MODE_AIN 和其他模式的本质区别
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">gpio_init</span><span class="p">(</span><span class="n">GPIOA</span><span class="p">,</span> <span class="n">GPIO_MODE_AIN</span><span class="p">,</span> <span class="n">GPIO_OSPEED_10MHZ</span><span class="p">,</span> <span class="n">GPIO_PIN_1</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>AIN</code> = <strong>Analog IN</strong>，模拟输入模式。它跟数字输入模式（<code>IN_FLOATING</code> / <code>IPU</code> / <code>IPD</code>）在硬件上完全是两回事：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">数字输入模式（IN_FLOATING）:
+</span></span><span class="line"><span class="cl">  引脚 ──┬── [施密特触发器] ── 数字输入寄存器（读 0 或 1）
+</span></span><span class="line"><span class="cl">         └── [上下拉电阻网络]         ← 这些电路会影响模拟电压！
+</span></span><span class="line"><span class="cl">         └── [ESD 保护]
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">模拟输入模式（AIN）:
+</span></span><span class="line"><span class="cl">  引脚 ──┬── [直连] ─────────── ADC 采样开关 ── 采样电容
+</span></span><span class="line"><span class="cl">         └── 施密特触发器已关断，上下拉已断开
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>关键点：<code>AIN</code> 模式会关掉施密特触发器和上下拉电阻</strong>。这两个东西对数字信号无害，但对模拟测量是灾难：</p>
+<ul>
+<li>施密特触发器一直在耗电（漏电流），会拉偏被测电压</li>
+<li>上下拉电阻（约 40kΩ）会和你的信号源形成分压，读数直接错</li>
+</ul>
+<blockquote>
+<p><strong>新手常见错误</strong>：配成 <code>GPIO_MODE_IN_FLOATING</code> 也能读到数，但读数会有偏差（尤其信号源内阻大时）。所以<strong>ADC 引脚必须配 AIN</strong>，没有例外。</p>
+</blockquote>
+<p>至于 <code>GPIO_OSPEED_10MHZ</code> 这个参数在 AIN 模式下是无意义的（引脚根本不输出），填什么都行，官方填 10MHz 只是习惯。</p>
+<h3 id="第-3-段为什么软件触发要开外部触发">第 3 段：为什么&quot;软件触发&quot;要开&quot;外部触发&quot;
+</h3><p>这是本例最容易让人困惑的一处：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">adc_external_trigger_source_config</span><span class="p">(</span><span class="n">ADC0</span><span class="p">,</span> <span class="n">ADC_ROUTINE_CHANNEL</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                                   <span class="n">ADC0_1_2_EXTTRIG_ROUTINE_NONE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">adc_external_trigger_config</span><span class="p">(</span><span class="n">ADC0</span><span class="p">,</span> <span class="n">ADC_ROUTINE_CHANNEL</span><span class="p">,</span> <span class="n">ENABLE</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>明明是软件触发，为什么要配&quot;外部触发源&quot;还要 <code>ENABLE</code>？</p>
+<p><strong>原因在硬件设计上</strong>：GD32 的 ADC 内部只有一条&quot;触发输入&quot;通道。这条通道可以被连接到：</p>
+<div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">触发源选项</th>
+					<th style="text-align: left">实际含义</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left"><code>ADC0_1_2_EXTTRIG_ROUTINE_T0_CH0</code></td>
+					<td style="text-align: left">定时器 0 通道 0 事件</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><code>ADC0_1_2_EXTTRIG_ROUTINE_T2_TRGO</code></td>
+					<td style="text-align: left">定时器 2 的 TRGO 事件</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><code>ADC0_1_2_EXTTRIG_ROUTINE_EXTI_11</code></td>
+					<td style="text-align: left">外部中断线 11</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong><code>ADC0_1_2_EXTTRIG_ROUTINE_NONE</code></strong></td>
+					<td style="text-align: left"><strong>不接任何硬件源，改由软件位 SWRCST 触发</strong></td>
+			</tr>
+	</tbody>
+</table></div>
+<p>所以逻辑是这样的：</p>
+<ol>
+<li><code>adc_external_trigger_source_config(..., NONE)</code> —— 把多路选择器拨到&quot;软件&quot;档</li>
+<li><code>adc_external_trigger_config(..., ENABLE)</code> —— 打开触发通道的<strong>总闸</strong>（ETERC 位）</li>
+</ol>
+<p><strong>如果第 2 句不写，总闸关着，无论你怎么调 <code>adc_software_trigger_enable()</code> 都不会启动转换。</strong> 程序会永远卡死在 <code>while(!adc_flag_get(ADC0, ADC_FLAG_EOC));</code> 这一行。</p>
+<blockquote>
+<p>这是新手实际会踩的坑。如果你自己精简代码把这句删了，就会遇到&quot;程序卡死、ADC 不动&quot;的现象。</p>
+</blockquote>
+<h3 id="第-4-段序列长度为什么设成-1">第 4 段：序列长度为什么设成 1
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">adc_channel_length_config</span><span class="p">(</span><span class="n">ADC0</span><span class="p">,</span> <span class="n">ADC_ROUTINE_CHANNEL</span><span class="p">,</span> <span class="mi">1U</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>&ldquo;序列&rdquo;（Sequence）是 ADC 常规组的一个重要概念。你可以配置一个最多 16 长的转换序列，比如：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">序列位置 0 → 通道 3
+</span></span><span class="line"><span class="cl">序列位置 1 → 通道 7
+</span></span><span class="line"><span class="cl">序列位置 2 → 通道 1
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>配好之后触发一次，ADC 会按序列顺序把这 3 个通道都转一遍。</p>
+<p><strong>但问题来了</strong>：常规组只有<strong>一个</strong> <code>ADC_RDATA</code> 数据寄存器。转完通道 3 结果放进去，接着转通道 7，结果又覆盖进去…… 最后你只能读到最后一个通道的值，前面全丢了。</p>
+<p>所以只有两条路：</p>
+<div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">方案</th>
+					<th style="text-align: left">做法</th>
+					<th style="text-align: left">优缺点</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left"><strong>本例的方案</strong></td>
+					<td style="text-align: left">序列长度设 1，每次只转一个通道，转完立刻读走，然后改通道再转</td>
+					<td style="text-align: left">简单直观，CPU 全程参与</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>DMA 方案</strong></td>
+					<td style="text-align: left">序列长度设 4，开启扫描模式 + DMA，DMA 在每次 EOC 时自动把结果搬到数组</td>
+					<td style="text-align: left">CPU 零参与，效率高，但配置复杂</td>
+			</tr>
+	</tbody>
+</table></div>
+<p>本例用第一种，所以序列长度必须是 1，而且 <code>adc_routine_channel_config()</code> 的第二个参数（序列位置）永远填 0。</p>
+<blockquote>
+<p>实际项目里多通道采集<strong>几乎都用 DMA 方案</strong>（参考 <code>ADC0_routine_channel_with_DMA</code> 示例）。但先理解本例的手动版本，你才知道 DMA 到底帮你省掉了什么。</p>
+</blockquote>
+<h3 id="第-5-段一次完整采样的四步">第 5 段：一次完整采样的四步
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">uint16_t</span> <span class="nf">adc_channel_sample</span><span class="p">(</span><span class="kt">uint8_t</span> <span class="n">channel</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">adc_routine_channel_config</span><span class="p">(</span><span class="n">ADC0</span><span class="p">,</span> <span class="mi">0U</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">ADC_SAMPLETIME_7POINT5</span><span class="p">);</span>  <span class="cm">/* ① 选通道 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">adc_software_trigger_enable</span><span class="p">(</span><span class="n">ADC0</span><span class="p">,</span> <span class="n">ADC_ROUTINE_CHANNEL</span><span class="p">);</span>                 <span class="cm">/* ② 发令 */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span><span class="p">(</span><span class="o">!</span><span class="nf">adc_flag_get</span><span class="p">(</span><span class="n">ADC0</span><span class="p">,</span> <span class="n">ADC_FLAG_EOC</span><span class="p">));</span>                               <span class="cm">/* ③ 等完成 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">adc_flag_clear</span><span class="p">(</span><span class="n">ADC0</span><span class="p">,</span> <span class="n">ADC_FLAG_EOC</span><span class="p">);</span>                                     <span class="cm">/* ④ 清标志 */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="p">(</span><span class="nf">adc_routine_data_read</span><span class="p">(</span><span class="n">ADC0</span><span class="p">));</span>                                   <span class="cm">/* ⑤ 读数据 */</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>① 选通道</strong> —— <code>adc_routine_channel_config(ADC0, 0U, channel, ADC_SAMPLETIME_7POINT5)</code></p>
+<p>四个参数：ADC 编号、序列位置（这里固定 0）、通道号、采样时间。</p>
+<p>每次调用都重新设置一次，所以同一个函数可以采任意通道 —— 这就是函数复用的巧妙之处。</p>
+<p><strong>② 发令</strong> —— <code>adc_software_trigger_enable()</code></p>
+<p>内部就是往控制寄存器的 SWRCST 位写 1。硬件看到这一位就开始干活：先接通对应引脚的采样开关给电容充电（持续 7.5 个 ADC 周期），然后断开开关做 12 次逐次逼近比较，最后把结果写进 <code>ADC_RDATA</code>。</p>
+<p><strong>③ 等完成</strong> —— <code>while(!adc_flag_get(ADC0, ADC_FLAG_EOC))</code></p>
+<p>EOC = <strong>End Of Conversion</strong>。硬件转换完成会自动把这一位置 1。</p>
+<p>在 20MHz ADC 时钟、7.5 采样时间下，这个等待时间是：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">(7.5 + 12.5) / 20MHz = 1 μs
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>也就是说 CPU 大约白等 1 微秒，采 4 个通道总共 4 微秒。对于点灯级应用完全可以接受。</p>
+<p><strong>④ 清标志</strong></p>
+<p>有个容易忽略的细节：<strong>读 <code>ADC_RDATA</code> 寄存器本身也会自动清除 EOC 标志</strong>。所以理论上第④步是多余的。但显式写出来更清晰、更保险（万一你改代码把 <code>read</code> 挪走了呢），是好的编程习惯。</p>
+<p><strong>⑤ 读数据</strong> —— <code>adc_routine_data_read(ADC0)</code></p>
+<p>返回的就是 0~4095 的原始码值。</p>
+<h3 id="第-6-段主循环里数据是怎么流动的">第 6 段：主循环里数据是怎么流动的
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">while</span><span class="p">(</span><span class="mi">1</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">    <span class="n">adc_value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nf">adc_channel_sample</span><span class="p">(</span><span class="n">ADC_CHANNEL_1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">adc_value</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nf">adc_channel_sample</span><span class="p">(</span><span class="n">ADC_CHANNEL_2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">adc_value</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nf">adc_channel_sample</span><span class="p">(</span><span class="n">ADC_CHANNEL_3</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">adc_value</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="nf">adc_channel_sample</span><span class="p">(</span><span class="n">ADC_CHANNEL_4</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>时序图（每格约 1μs）：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">时间 →
+</span></span><span class="line"><span class="cl">│ 采PA1 │ 采PA2 │ 采PA3 │ 采PA4 │ 采PA1 │ 采PA2 │ ...
+</span></span><span class="line"><span class="cl">   ↓       ↓       ↓       ↓
+</span></span><span class="line"><span class="cl"> [0]     [1]     [2]     [3]
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>注意这个循环转得极快</strong>：4 次采样加上函数调用开销，一轮大约 5~10 微秒，也就是每秒刷新 10 万次以上。</p>
+<p>这对于测量慢变化的物理量（温度、电位器位置）是巨大的浪费，而且会让读数因为噪声而抖动。实际项目应该加延时并做滤波：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">while</span><span class="p">(</span><span class="mi">1</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">    <span class="n">adc_value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nf">adc_channel_sample</span><span class="p">(</span><span class="n">ADC_CHANNEL_1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* ...其他通道... */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">delay_1ms</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span>       <span class="cm">/* 每 100ms 采一轮就够了 */</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="实验现象">实验现象
+</h2><p>本例程<strong>没有任何 LED 或串口输出</strong>，必须用调试器观察。</p>
+<h3 id="用-keil-的-watch-窗口看">用 Keil 的 Watch 窗口看
+</h3><ol>
+<li>编译下载后，点击 <code>Debug → Start/Stop Debug Session</code>（或按 Ctrl+F5）。</li>
+<li>点击 <code>Run</code>（F5）让程序跑起来。</li>
+<li>打开 <code>View → Watch Windows → Watch 1</code>。</li>
+<li>在 Watch 窗口里输入 <code>adc_value</code>，回车。</li>
+<li>展开数组，就能看到 4 个通道的实时值。</li>
+<li>转动接在 PA1 上的电位器，<code>adc_value[0]</code> 的数值会跟着变化。</li>
+</ol>
+<p>预期看到的数值：</p>
+<div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">电位器位置</th>
+					<th style="text-align: left"><code>adc_value[0]</code></th>
+					<th style="text-align: left">对应电压</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left">旋到底（接 GND）</td>
+					<td style="text-align: left">0 ~ 20</td>
+					<td style="text-align: left">约 0V</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">中间</td>
+					<td style="text-align: left">约 2048</td>
+					<td style="text-align: left">约 1.65V</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">旋到顶（接 3.3V）</td>
+					<td style="text-align: left">4070 ~ 4095</td>
+					<td style="text-align: left">约 3.3V</td>
+			</tr>
+	</tbody>
+</table></div>
+<blockquote>
+<p><strong>Keil 小技巧</strong>：勾选 <code>View → Periodic Window Update</code>，Watch 窗口才会在程序运行时持续刷新。不勾的话只有暂停时才更新数值，看起来像&quot;数据不变&quot;。</p>
+</blockquote>
+<h3 id="更直观的办法加串口打印">更直观的办法：加串口打印
+</h3><p>强烈建议自己改一版加上 <code>printf</code>，看起来爽多了：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;gd32f307c_eval.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">rcu_config</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">systick_config</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gpio_config</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">adc_config</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gd_eval_com_init</span><span class="p">(</span><span class="n">EVAL_COM0</span><span class="p">);</span>         <span class="cm">/* 初始化调试串口 */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">while</span><span class="p">(</span><span class="mi">1</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">        <span class="n">adc_value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nf">adc_channel_sample</span><span class="p">(</span><span class="n">ADC_CHANNEL_1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">adc_value</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nf">adc_channel_sample</span><span class="p">(</span><span class="n">ADC_CHANNEL_2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">adc_value</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nf">adc_channel_sample</span><span class="p">(</span><span class="n">ADC_CHANNEL_3</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">adc_value</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="nf">adc_channel_sample</span><span class="p">(</span><span class="n">ADC_CHANNEL_4</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="cm">/* 同时打印原始码值和换算后的电压（mV，避免用浮点） */</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;CH1=%4d(%4dmV)  CH2=%4d  CH3=%4d  CH4=%4d</span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">               <span class="n">adc_value</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">adc_value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3300</span> <span class="o">/</span> <span class="mi">4095</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">               <span class="n">adc_value</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">adc_value</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">adc_value</span><span class="p">[</span><span class="mi">3</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="nf">delay_1ms</span><span class="p">(</span><span class="mi">500</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>串口助手输出：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">CH1=2047(1649mV)  CH2=   3  CH3=1024  CH4=4090
+</span></span><span class="line"><span class="cl">CH1=2531(2039mV)  CH2=   4  CH3=1023  CH4=4091
+</span></span><span class="line"><span class="cl">CH1=3102(2499mV)  CH2=   3  CH3=1025  CH4=4090
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>注意 <code>adc_value[0] * 3300 / 4095</code> 这个写法：<strong>先乘后除，全程整数运算</strong>，避免了浮点数的开销。这是嵌入式里换算电压的标准技巧。</p>
+<blockquote>
+<p><strong>小心溢出</strong>：<code>adc_value</code> 是 <code>uint16_t</code>，最大 4095，乘 3300 得到 13513500，超出了 <code>uint16_t</code> 范围。但因为 C 语言的整数提升规则，表达式会自动按 <code>int</code>（32 位）计算，所以这里是安全的。如果乘的系数更大（比如 33000），就要显式转成 <code>uint32_t</code>。</p>
+</blockquote>
+<hr>
+<h2 id="常见问题">常见问题
+</h2><h3 id="q1程序卡死在-whileadc_flag_getadc0-adc_flag_eoc">Q1：程序卡死在 <code>while(!adc_flag_get(ADC0, ADC_FLAG_EOC));</code>
+</h3><p>这是本例最高频的问题。EOC 永远不置位，说明转换根本没启动。按顺序检查：</p>
+<ol>
+<li>
+<p><strong>少了 <code>adc_external_trigger_config(ADC0, ADC_ROUTINE_CHANNEL, ENABLE);</code></strong>
+前面详细讲过，这是触发通道的总闸。少了它软件触发无效。<strong>这是最常见的原因。</strong></p>
+</li>
+<li>
+<p><strong>忘了 <code>rcu_periph_clock_enable(RCU_ADC0);</code></strong>
+外设时钟没开，所有 ADC 寄存器写进去都是无效的。</p>
+</li>
+<li>
+<p><strong>忘了 <code>adc_enable(ADC0);</code></strong>
+ADC 没使能，硬件处于关断状态。</p>
+</li>
+<li>
+<p><strong>忘了 <code>rcu_adc_clock_config()</code></strong>
+ADC 时钟源没配。虽然有默认值，但显式配置是好习惯。</p>
+</li>
+<li>
+<p><strong>改用了注入组的宏但 flag 还查常规组的</strong>
+如果你把 <code>ADC_ROUTINE_CHANNEL</code> 改成了 <code>ADC_INSERTED_CHANNEL</code>，那 flag 也要改成 <code>ADC_FLAG_EOIC</code>。</p>
+</li>
+</ol>
+<h3 id="q2读数一直是-0-或一直是-4095">Q2：读数一直是 0 或一直是 4095
+</h3><p><strong>读数恒为 0：</strong></p>
+<ul>
+<li>引脚没接信号，或者接到了 GND</li>
+<li>引脚模式配错（没配成 <code>GPIO_MODE_AIN</code>）</li>
+<li>通道号和引脚对不上（比如想采 PA1 但填了 <code>ADC_CHANNEL_0</code>）</li>
+<li>GPIOA 时钟没开</li>
+</ul>
+<p><strong>读数恒为 4095：</strong></p>
+<ul>
+<li>输入电压超过了 <code>VREF+</code>（通常等于 VDDA = 3.3V）。<strong>注意 ADC 引脚绝对不能超过 VDD + 0.3V，否则会烧片！</strong></li>
+<li>引脚接错，接到了 3.3V</li>
+</ul>
+<h3 id="q3读数不停跳动跳几十个数">Q3：读数不停跳动，跳几十个数
+</h3><p>这是 ADC 最典型的&quot;精度&quot;问题，几乎人人会遇到。按性价比从高到低排：</p>
+<p><strong>① 加大采样时间</strong>（改一行，立竿见影）</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">adc_routine_channel_config</span><span class="p">(</span><span class="n">ADC0</span><span class="p">,</span> <span class="mi">0U</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">ADC_SAMPLETIME_239POINT5</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>信号源内阻大时（热敏电阻、高阻分压），采样电容充不满，读数就会偏低且不稳。加大采样时间是第一选择。</p>
+<p><strong>② 降低 ADC 时钟</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">rcu_adc_clock_config</span><span class="p">(</span><span class="n">RCU_CKADC_CKAPB2_DIV12</span><span class="p">);</span>   <span class="cm">/* 120/12 = 10MHz，符合 ≤14MHz 要求 */</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>原代码用 DIV6 得到 20MHz，已经超出手册推荐值。降到 10MHz 精度会明显改善。</p>
+<p><strong>③ 软件滤波</strong>（最有效的手段）</p>
+<p>最简单的<strong>多次平均</strong>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">uint16_t</span> <span class="nf">adc_average_sample</span><span class="p">(</span><span class="kt">uint8_t</span> <span class="n">channel</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="n">times</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint32_t</span> <span class="n">sum</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint8_t</span> <span class="n">i</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span><span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">times</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">        <span class="n">sum</span> <span class="o">+=</span> <span class="nf">adc_channel_sample</span><span class="p">(</span><span class="n">channel</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="p">(</span><span class="kt">uint16_t</span><span class="p">)(</span><span class="n">sum</span> <span class="o">/</span> <span class="n">times</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 使用：采 16 次取平均 */</span>
+</span></span><span class="line"><span class="cl"><span class="n">adc_value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nf">adc_average_sample</span><span class="p">(</span><span class="n">ADC_CHANNEL_1</span><span class="p">,</span> <span class="mi">16</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>更抗突发干扰的<strong>去极值平均</strong>（掐头去尾法）：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">uint16_t</span> <span class="nf">adc_filter_sample</span><span class="p">(</span><span class="kt">uint8_t</span> <span class="n">channel</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint16_t</span> <span class="n">buf</span><span class="p">[</span><span class="mi">10</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint16_t</span> <span class="n">max</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">min</span> <span class="o">=</span> <span class="mh">0xFFFF</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint32_t</span> <span class="n">sum</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint8_t</span> <span class="n">i</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 连续采 10 次 */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span><span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">        <span class="n">buf</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nf">adc_channel_sample</span><span class="p">(</span><span class="n">channel</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">sum</span> <span class="o">+=</span> <span class="n">buf</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span><span class="p">(</span><span class="n">buf</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">max</span><span class="p">)</span> <span class="n">max</span> <span class="o">=</span> <span class="n">buf</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>      <span class="cm">/* 记录最大值 */</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span><span class="p">(</span><span class="n">buf</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">min</span><span class="p">)</span> <span class="n">min</span> <span class="o">=</span> <span class="n">buf</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>      <span class="cm">/* 记录最小值 */</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 去掉一个最高分、去掉一个最低分，剩下 8 个取平均 */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="p">(</span><span class="kt">uint16_t</span><span class="p">)((</span><span class="n">sum</span> <span class="o">-</span> <span class="n">max</span> <span class="o">-</span> <span class="n">min</span><span class="p">)</span> <span class="o">/</span> <span class="mi">8</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这个算法能有效滤掉偶发的尖峰干扰，是工程上非常实用的一招。</p>
+<p><strong>④ 硬件滤波</strong></p>
+<p>在 ADC 引脚和 GND 之间并一个 <strong>100nF 陶瓷电容</strong>。这是最便宜也最有效的措施，几乎所有正规产品的 ADC 输入都会加这个电容。</p>
+<p><strong>⑤ 检查 VREF 和布线</strong></p>
+<ul>
+<li><code>VREF+</code> 引脚要接干净的 3.3V，加 100nF + 1μF 去耦电容</li>
+<li>模拟地（VSSA）和数字地要在一点汇合（单点接地）</li>
+<li>ADC 信号线远离时钟线、PWM 输出线、开关电源</li>
+</ul>
+<h3 id="q4想读芯片内部温度怎么办">Q4：想读芯片内部温度怎么办
+</h3><p>内部温度传感器接在 <code>ADC_CHANNEL_16</code> 上，需要额外使能：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cm">/* 使能内部温度传感器和 VREFINT 通道 */</span>
+</span></span><span class="line"><span class="cl"><span class="nf">adc_tempsensor_vrefint_enable</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 采集温度通道，采样时间必须给足（手册要求 ≥17.1μs） */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">uint16_t</span> <span class="n">temp_raw</span> <span class="o">=</span> <span class="nf">adc_channel_sample_with_time</span><span class="p">(</span><span class="n">ADC_CHANNEL_16</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                                                 <span class="n">ADC_SAMPLETIME_239POINT5</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 换算成摄氏度
+</span></span></span><span class="line"><span class="cl"><span class="cm">   GD32F30x 手册给的公式：
+</span></span></span><span class="line"><span class="cl"><span class="cm">   T(°C) = (V25 - Vsense) / Avg_Slope + 25
+</span></span></span><span class="line"><span class="cl"><span class="cm">   其中 V25 = 1.43V（25°C 时的电压），Avg_Slope = 4.3mV/°C */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">float</span> <span class="n">v_sense</span> <span class="o">=</span> <span class="n">temp_raw</span> <span class="o">*</span> <span class="mf">3.3f</span> <span class="o">/</span> <span class="mf">4095.0f</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">float</span> <span class="n">temperature</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.43f</span> <span class="o">-</span> <span class="n">v_sense</span><span class="p">)</span> <span class="o">/</span> <span class="mf">0.0043f</span> <span class="o">+</span> <span class="mf">25.0f</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="nf">printf</span><span class="p">(</span><span class="s">&#34;chip temp = %d.%d C</span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">temperature</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">       <span class="p">(</span><span class="kt">int</span><span class="p">)(</span><span class="n">temperature</span> <span class="o">*</span> <span class="mi">10</span><span class="p">)</span> <span class="o">%</span> <span class="mi">10</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p><strong>别指望它测环境温度</strong>。这个传感器测的是<strong>芯片内部结温</strong>，会比环境温度高 5~15°C（取决于芯片负载），而且不同芯片个体差异能到 ±10°C。它的正确用途是<strong>监测芯片是否过热</strong>，或者做温度变化的<strong>相对</strong>判断，不能当温度计用。</p>
+</blockquote>
+<h3 id="q54-个通道能不能一次全采完不要一个个来">Q5：4 个通道能不能一次全采完，不要一个个来？
+</h3><p>可以，这就是<strong>扫描模式 + DMA</strong> 的方案。核心改动：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">adc_config_dma_version</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">dma_parameter_struct</span> <span class="n">dma_init_struct</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">rcu_periph_clock_enable</span><span class="p">(</span><span class="n">RCU_DMA0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* --- ADC 部分：序列长度改成 4，开扫描模式和连续模式 --- */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">adc_mode_config</span><span class="p">(</span><span class="n">ADC_MODE_FREE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">adc_data_alignment_config</span><span class="p">(</span><span class="n">ADC0</span><span class="p">,</span> <span class="n">ADC_DATAALIGN_RIGHT</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">adc_channel_length_config</span><span class="p">(</span><span class="n">ADC0</span><span class="p">,</span> <span class="n">ADC_ROUTINE_CHANNEL</span><span class="p">,</span> <span class="mi">4U</span><span class="p">);</span>      <span class="cm">/* 4 个通道 */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 把 4 个通道依次排进序列的 0/1/2/3 位置 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">adc_routine_channel_config</span><span class="p">(</span><span class="n">ADC0</span><span class="p">,</span> <span class="mi">0U</span><span class="p">,</span> <span class="n">ADC_CHANNEL_1</span><span class="p">,</span> <span class="n">ADC_SAMPLETIME_55POINT5</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">adc_routine_channel_config</span><span class="p">(</span><span class="n">ADC0</span><span class="p">,</span> <span class="mi">1U</span><span class="p">,</span> <span class="n">ADC_CHANNEL_2</span><span class="p">,</span> <span class="n">ADC_SAMPLETIME_55POINT5</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">adc_routine_channel_config</span><span class="p">(</span><span class="n">ADC0</span><span class="p">,</span> <span class="mi">2U</span><span class="p">,</span> <span class="n">ADC_CHANNEL_3</span><span class="p">,</span> <span class="n">ADC_SAMPLETIME_55POINT5</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">adc_routine_channel_config</span><span class="p">(</span><span class="n">ADC0</span><span class="p">,</span> <span class="mi">3U</span><span class="p">,</span> <span class="n">ADC_CHANNEL_4</span><span class="p">,</span> <span class="n">ADC_SAMPLETIME_55POINT5</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">adc_special_function_config</span><span class="p">(</span><span class="n">ADC0</span><span class="p">,</span> <span class="n">ADC_SCAN_MODE</span><span class="p">,</span> <span class="n">ENABLE</span><span class="p">);</span>        <span class="cm">/* 扫描模式 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">adc_special_function_config</span><span class="p">(</span><span class="n">ADC0</span><span class="p">,</span> <span class="n">ADC_CONTINUOUS_MODE</span><span class="p">,</span> <span class="n">ENABLE</span><span class="p">);</span>  <span class="cm">/* 连续转换 */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* --- DMA 部分：外设(ADC_RDATA) → 内存(adc_value 数组) --- */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">dma_deinit</span><span class="p">(</span><span class="n">DMA0</span><span class="p">,</span> <span class="n">DMA_CH0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">dma_init_struct</span><span class="p">.</span><span class="n">direction</span>    <span class="o">=</span> <span class="n">DMA_PERIPHERAL_TO_MEMORY</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">dma_init_struct</span><span class="p">.</span><span class="n">periph_addr</span>  <span class="o">=</span> <span class="p">(</span><span class="kt">uint32_t</span><span class="p">)(</span><span class="o">&amp;</span><span class="nf">ADC_RDATA</span><span class="p">(</span><span class="n">ADC0</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="n">dma_init_struct</span><span class="p">.</span><span class="n">periph_inc</span>   <span class="o">=</span> <span class="n">DMA_PERIPH_INCREASE_DISABLE</span><span class="p">;</span>   <span class="cm">/* 外设地址不变 */</span>
+</span></span><span class="line"><span class="cl">    <span class="n">dma_init_struct</span><span class="p">.</span><span class="n">periph_width</span> <span class="o">=</span> <span class="n">DMA_PERIPHERAL_WIDTH_16BIT</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">dma_init_struct</span><span class="p">.</span><span class="n">memory_addr</span>  <span class="o">=</span> <span class="p">(</span><span class="kt">uint32_t</span><span class="p">)</span><span class="n">adc_value</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">dma_init_struct</span><span class="p">.</span><span class="n">memory_inc</span>   <span class="o">=</span> <span class="n">DMA_MEMORY_INCREASE_ENABLE</span><span class="p">;</span>    <span class="cm">/* 内存地址自增 */</span>
+</span></span><span class="line"><span class="cl">    <span class="n">dma_init_struct</span><span class="p">.</span><span class="n">memory_width</span> <span class="o">=</span> <span class="n">DMA_MEMORY_WIDTH_16BIT</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">dma_init_struct</span><span class="p">.</span><span class="n">number</span>       <span class="o">=</span> <span class="mi">4U</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">dma_init_struct</span><span class="p">.</span><span class="n">priority</span>     <span class="o">=</span> <span class="n">DMA_PRIORITY_HIGH</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">dma_init</span><span class="p">(</span><span class="n">DMA0</span><span class="p">,</span> <span class="n">DMA_CH0</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">dma_init_struct</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">dma_circulation_enable</span><span class="p">(</span><span class="n">DMA0</span><span class="p">,</span> <span class="n">DMA_CH0</span><span class="p">);</span>      <span class="cm">/* 循环模式：搬完 4 个自动回到开头 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">dma_channel_enable</span><span class="p">(</span><span class="n">DMA0</span><span class="p">,</span> <span class="n">DMA_CH0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">adc_dma_mode_enable</span><span class="p">(</span><span class="n">ADC0</span><span class="p">);</span>                  <span class="cm">/* ADC 每次 EOC 自动请求 DMA */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">adc_enable</span><span class="p">(</span><span class="n">ADC0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">delay_1ms</span><span class="p">(</span><span class="mi">1U</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">adc_calibration_enable</span><span class="p">(</span><span class="n">ADC0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">adc_software_trigger_enable</span><span class="p">(</span><span class="n">ADC0</span><span class="p">,</span> <span class="n">ADC_ROUTINE_CHANNEL</span><span class="p">);</span>   <span class="cm">/* 只需触发一次！ */</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 主循环变成这样 —— 什么都不用做，随时读数组就有最新值 */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* ... 初始化 ... */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">adc_config_dma_version</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span><span class="p">(</span><span class="mi">1</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;%d %d %d %d</span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">adc_value</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">adc_value</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+</span></span><span class="line"><span class="cl">                                  <span class="n">adc_value</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">adc_value</span><span class="p">[</span><span class="mi">3</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">delay_1ms</span><span class="p">(</span><span class="mi">500</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>这就是实际项目的标准写法</strong>：配置一次，之后 ADC + DMA 在后台自动持续采集刷新数组，CPU 完全解放。详细讲解见本模块的 <code>ADC0_routine_channel_with_DMA</code> 示例。</p>
+<h3 id="q6怎么提高精度到-12-位以上">Q6：怎么提高精度到 12 位以上？
+</h3><p>用<strong>过采样</strong>。原理是采样 N 次求和后右移，利用噪声的随机性提高有效位数：</p>
+<ul>
+<li>采 4 次求和右移 1 位 → 等效 13 位</li>
+<li>采 16 次求和右移 2 位 → 等效 14 位</li>
+<li>采 64 次求和右移 3 位 → 等效 15 位</li>
+<li>采 256 次求和右移 4 位 → 等效 16 位</li>
+</ul>
+<p>GD32F30x 部分型号有<strong>硬件过采样器</strong>，配置一次就自动完成，见 <code>ADC1_oversample_shift</code> 示例。没有硬件支持的型号可以软件实现：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cm">/* 软件 16 倍过采样，等效 14 位精度 */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">uint16_t</span> <span class="nf">adc_oversample_14bit</span><span class="p">(</span><span class="kt">uint8_t</span> <span class="n">channel</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint32_t</span> <span class="n">sum</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint8_t</span> <span class="n">i</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span><span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">16</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">        <span class="n">sum</span> <span class="o">+=</span> <span class="nf">adc_channel_sample</span><span class="p">(</span><span class="n">channel</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="p">(</span><span class="kt">uint16_t</span><span class="p">)(</span><span class="n">sum</span> <span class="o">&gt;&gt;</span> <span class="mi">2</span><span class="p">);</span>      <span class="cm">/* 求和后右移 2 位，得到 0~16383 */</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p><strong>过采样有效的前提是噪声是随机白噪声</strong>。如果是 50Hz 工频串扰这种周期性干扰，过采样帮助有限，得靠屏蔽和硬件滤波。</p>
+</blockquote>
+<hr>
+<h2 id="小结">小结
+</h2><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">知识点</th>
+					<th style="text-align: left">要记住的核心</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left">ADC 引脚模式</td>
+					<td style="text-align: left">必须 <code>GPIO_MODE_AIN</code>，不是 <code>IN_FLOATING</code></td>
+			</tr>
+			<tr>
+					<td style="text-align: left">ADC 时钟</td>
+					<td style="text-align: left">必须用 <code>rcu_adc_clock_config()</code> 分频，推荐 ≤14MHz</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">三套时钟</td>
+					<td style="text-align: left">GPIO 时钟 + ADC 外设时钟 + ADC 时钟分频，都要配</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">软件触发也要开 ETERC</td>
+					<td style="text-align: left"><code>adc_external_trigger_config(..., ENABLE)</code> 少不了</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">使能后必须延时再校准</td>
+					<td style="text-align: left"><code>adc_enable()</code> → <code>delay</code> → <code>adc_calibration_enable()</code>，顺序不能错</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">常规组只有一个数据寄存器</td>
+					<td style="text-align: left">多通道要么一个个手动读，要么用 DMA</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><code>volatile</code></td>
+					<td style="text-align: left">只用于调试观察的变量必须加，否则会被优化掉</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">电压换算</td>
+					<td style="text-align: left"><code>mV = code * 3300 / 4095</code>，先乘后除全整数运算</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">读数跳动</td>
+					<td style="text-align: left">加大采样时间 → 降低 ADC 时钟 → 软件滤波 → 加 100nF 电容</td>
+			</tr>
+	</tbody>
+</table></div>
+<p><strong>ADC 采样七步曲</strong>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="mf">1.</span> <span class="nf">rcu_periph_clock_enable</span><span class="p">(</span><span class="n">RCU_GPIOA</span><span class="p">);</span>          <span class="cm">/* GPIO 时钟 */</span>
+</span></span><span class="line"><span class="cl"><span class="mf">2.</span> <span class="nf">rcu_periph_clock_enable</span><span class="p">(</span><span class="n">RCU_ADC0</span><span class="p">);</span>           <span class="cm">/* ADC 时钟 */</span>
+</span></span><span class="line"><span class="cl"><span class="mf">3.</span> <span class="nf">rcu_adc_clock_config</span><span class="p">(</span><span class="n">RCU_CKADC_CKAPB2_DIV6</span><span class="p">);</span> <span class="cm">/* ADC 分频 */</span>
+</span></span><span class="line"><span class="cl"><span class="mf">4.</span> <span class="nf">gpio_init</span><span class="p">(...,</span> <span class="n">GPIO_MODE_AIN</span><span class="p">,</span> <span class="p">...);</span>          <span class="cm">/* 引脚模拟输入 */</span>
+</span></span><span class="line"><span class="cl"><span class="mf">5.</span> <span class="n">adc_mode_config</span> <span class="o">/</span> <span class="n">data_alignment</span> <span class="o">/</span> <span class="n">channel_length</span> <span class="o">/</span> <span class="n">trigger</span>  <span class="cm">/* 参数 */</span>
+</span></span><span class="line"><span class="cl"><span class="mf">6.</span> <span class="nf">adc_enable</span><span class="p">()</span> <span class="err">→</span> <span class="nf">delay_1ms</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="err">→</span> <span class="nf">adc_calibration_enable</span><span class="p">()</span>       <span class="cm">/* 使能校准 */</span>
+</span></span><span class="line"><span class="cl"><span class="mf">7.</span> <span class="n">channel_config</span> <span class="err">→</span> <span class="n">software_trigger</span> <span class="err">→</span> <span class="n">wait</span> <span class="n">EOC</span> <span class="err">→</span> <span class="n">data_read</span>     <span class="cm">/* 采样 */</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="拓展应用">拓展应用
+</h2><p>学会 ADC，你就能读取现实世界的<strong>连续量</strong>了。可做的项目一下子多起来：</p>
+<h3 id="入门级一个电位器就能玩">入门级（一个电位器就能玩）
+</h3><ul>
+<li><strong>数字电压表</strong>：把 ADC 读数换算成电压，通过串口或 OLED 显示。加个电阻分压网络（比如 10:1）就能测 0~33V，做一个万用表的电压档。</li>
+<li><strong>旋钮调光灯</strong>：电位器读数映射到 PWM 占空比，转旋钮就能无级调节 LED 亮度。这是 ADC + TIMER 的第一个综合应用。</li>
+<li><strong>光照检测夜灯</strong>：光敏电阻（LDR）和固定电阻串联分压，ADC 读电压判断明暗，天黑自动开灯。</li>
+<li><strong>电池电量指示</strong>：分压后测锂电池电压，映射成 4 格电量图标。注意锂电池 4.2V 超过 3.3V，必须先分压。</li>
+<li><strong>摇杆/游戏手柄读取</strong>：双轴摇杆本质就是两个电位器，读 X/Y 两路 ADC 就能得到方向和力度。</li>
+</ul>
+<h3 id="进阶级配合传感器和算法">进阶级（配合传感器和算法）
+</h3><ul>
+<li><strong>NTC 热敏电阻测温</strong>：这是最常见的低成本测温方案。ADC 读分压电压 → 算出电阻值 → 查 B 值公式或分段查表得到温度。精度可到 ±0.5°C，比内部温度传感器强得多。</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl">  <span class="cm">/* NTC 分压电路：3.3V — R固定(10k) — NTC — GND，ADC 接 NTC 上端 */</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">float</span> <span class="n">r_ntc</span> <span class="o">=</span> <span class="mf">10000.0f</span> <span class="o">*</span> <span class="n">adc_val</span> <span class="o">/</span> <span class="p">(</span><span class="mf">4095.0f</span> <span class="o">-</span> <span class="n">adc_val</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="cm">/* B 值公式：1/T = 1/T0 + (1/B) * ln(R/R0) */</span>
+</span></span><span class="line"><span class="cl">  <span class="cm">/* T0=298.15K(25°C), R0=10000Ω, B=3950 */</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><strong>土壤湿度 / 水位检测</strong>：电容式或电阻式传感器输出模拟量，ADC 直接读，做自动浇花系统。</li>
+<li><strong>压力/称重（配合 HX711 或运放）</strong>：应变片桥式输出几毫伏，经运放放大后 ADC 采集，做电子秤。这时 12 位精度可能不够，要用过采样或外置 24 位 ADC。</li>
+<li><strong>多路电压巡检仪</strong>：16 路 ADC + DMA 自动扫描，做配电柜多回路电压监测。</li>
+<li><strong>红外测距（Sharp GP2Y0A21）</strong>：这类传感器输出的电压和距离成反比曲线，查表插值后能得到 10~80cm 的距离值，做避障小车。</li>
+<li><strong>气体传感器（MQ 系列）</strong>：MQ-2 烟雾、MQ-7 一氧化碳等都是模拟输出，ADC 读浓度做报警器。</li>
+</ul>
+<h3 id="信号处理级">信号处理级
+</h3><ul>
+<li><strong>示波器</strong>：ADC + DMA + 定时器触发实现固定采样率采集，数据传到电脑上位机画波形。GD32F307 的 2.6MSPS 采样率能做到 1MHz 带宽，足够看 I2C/UART 波形。</li>
+<li><strong>音频采集与 FFT 频谱</strong>：麦克风模块输出经运放偏置到 1.65V 中心，ADC 以 8kHz 采样，做 256 点 FFT 得到频谱，实现声控开关、音乐律动灯、简易调音器。</li>
+<li><strong>交流电流检测（互感器）</strong>：电流互感器输出正弦波，快速采样一个周期后算 RMS 有效值，做智能插座功率计量。</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl">  <span class="cm">/* 采一个周期(50Hz=20ms)的数据算 RMS */</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">uint32_t</span> <span class="n">sum_sq</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span><span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">200</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>                      <span class="cm">/* 200 点，每点 100μs */</span>
+</span></span><span class="line"><span class="cl">      <span class="kt">int16_t</span> <span class="n">ac</span> <span class="o">=</span> <span class="nf">adc_channel_sample</span><span class="p">(</span><span class="n">ch</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2048</span><span class="p">;</span>  <span class="cm">/* 减去 1.65V 直流偏置 */</span>
+</span></span><span class="line"><span class="cl">      <span class="n">sum_sq</span> <span class="o">+=</span> <span class="n">ac</span> <span class="o">*</span> <span class="n">ac</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="nf">delay_us</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="cm">/* rms = sqrt(sum_sq / 200) */</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><strong>PID 闭环控制</strong>：ADC 读反馈量（温度、转速、位置）→ PID 计算 → PWM 输出执行。这是自动控制的核心闭环，做恒温箱、电机调速、平衡车都靠这个。</li>
+</ul>
+<h3 id="工业与安全级">工业与安全级
+</h3><ul>
+<li><strong>过压/过流保护（模拟看门狗）</strong>：不用 CPU 参与，ADC 硬件自动比较上下限，超限立刻触发中断关断输出。响应时间可以做到微秒级，比软件判断快几个数量级。见 <code>ADC1_analog_watchdog</code> 示例。</li>
+<li><strong>电机 FOC 控制</strong>：双 ADC 并行模式在 PWM 中心点同时采样三相电流，配合 Clarke/Park 变换实现磁场定向控制。这是无刷电机高性能驱动的标准方案。</li>
+<li><strong>4-20mA 工业信号采集</strong>：工业传感器普遍用 4-20mA 电流环（抗干扰强、可远传）。经过一个精密电阻（如 165Ω）转成 0.66~3.3V 电压后 ADC 采集。</li>
+</ul>
+<p><strong>下一步该学什么</strong>：<code>ADC0_routine_channel_with_DMA</code>（多通道自动采集，实际项目标准做法）→ <code>ADC0_temperature_Vref</code>（读内部温度和参考电压）→ <code>TIMER1_pwmout</code>（学会 PWM 输出，就能做 ADC 读旋钮 → PWM 调光的完整闭环了）。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/adc0_software_trigger_routine_channel_polling/">ADC0_software_trigger_routine_channel_polling</a>
+        
+            <a href="/tags/adc/">Adc</a>
+        
+            <a href="/tags/v3.0.3/">V3.0.3</a>
+        
+    </section>
+
+
+    <section class="article-lastmod">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <span>
+            最后更新于 Sep 08, 2026 16:03 &#43;0800
+        </span>
+    </section></footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/gd32-adc-adc--dma-%E9%87%87%E9%9B%86/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">GD32 ADC — ADC &#43; DMA 采集</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/gd32-adc-adc-%E4%B8%8D%E8%BF%9E%E7%BB%AD%E6%A8%A1%E5%BC%8F/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">GD32 ADC — ADC 不连续模式</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/gd32-adc-adc-%E5%88%86%E8%BE%A8%E7%8E%87%E9%85%8D%E7%BD%AE/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">GD32 ADC — ADC 分辨率配置</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/gd32-adc-adc-%E6%A8%A1%E6%8B%9F%E7%9C%8B%E9%97%A8%E7%8B%97/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">GD32 ADC — ADC 模拟看门狗</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/gd32-adc-adc-%E6%B8%A9%E5%BA%A6-vref/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">GD32 ADC — ADC 温度 &amp; Vref</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="ClingYang/ClingYang.github.io"
+        issue-term="pathname"
+        
+        label="💬comment"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2026 CLing
+    </section>
+    
+    <section class="powerby">
+        
+            世界是你们 <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<style>
+    #TableOfContents > ul, ol {
+        ul, ol {
+            display: none;
+        }
+        .open {
+            display: block;
+        }
+    }
+</style>
+
+<script>
+    function initTocHide() {
+        
+        let toc = document.querySelector(".widget--toc");
+        if (!toc) {
+            return;
+        }
+        
+        window.addEventListener('scroll', function() {
+            
+            let currentLi = document.querySelector(".active-class");
+            if (!currentLi) {
+                return
+            }
+            
+            let elementsByClassName = document.querySelectorAll(".open");
+            if (elementsByClassName.length > 0) {
+                elementsByClassName.forEach((ul) => {
+                    ul.classList.remove("open")
+                })
+            }
+            
+            if (currentLi.children.length > 1) {
+                currentLi.children[1].classList.add("open")
+            }
+            
+            let ul = currentLi.parentElement;
+            do {
+                ul.classList.add("open");
+                ul = ul.parentElement.parentElement
+            } while (ul !== undefined && (ul.localName === 'ul' || ul.localName === 'ol'))
+        });
+    }
+    initTocHide()
+</script>
+
+    </body>
+</html>

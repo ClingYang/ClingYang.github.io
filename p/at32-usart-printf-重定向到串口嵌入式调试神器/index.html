@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="AT32F403A USART 串口 printf 重定向，嵌入式开发最常用的调试方法">
+<title>AT32 USART — printf 重定向到串口（嵌入式调试神器）</title>
+
+<link rel='canonical' href='https://clingyang.github.io/p/at32-usart-printf-%E9%87%8D%E5%AE%9A%E5%90%91%E5%88%B0%E4%B8%B2%E5%8F%A3%E5%B5%8C%E5%85%A5%E5%BC%8F%E8%B0%83%E8%AF%95%E7%A5%9E%E5%99%A8/'>
+
+<link rel="stylesheet" href="/scss/style.min.e14f3ba93baae65b2aef2339f32b6f25d7a0184785ebf4f6bd7d3376ae5dc2d4.css"><meta property='og:title' content="AT32 USART — printf 重定向到串口（嵌入式调试神器）">
+<meta property='og:description' content="AT32F403A USART 串口 printf 重定向，嵌入式开发最常用的调试方法">
+<meta property='og:url' content='https://clingyang.github.io/p/at32-usart-printf-%E9%87%8D%E5%AE%9A%E5%90%91%E5%88%B0%E4%B8%B2%E5%8F%A3%E5%B5%8C%E5%85%A5%E5%BC%8F%E8%B0%83%E8%AF%95%E7%A5%9E%E5%99%A8/'>
+<meta property='og:site_name' content='CLing'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='printf' /><meta property='article:tag' content='串口' /><meta property='article:tag' content='USART' /><meta property='article:tag' content='调试' /><meta property='article:tag' content='AT32F403A' /><meta property='article:published_time' content='2026-09-08T14:56:00&#43;08:00'/><meta property='article:modified_time' content='2026-09-08T16:03:27&#43;08:00'/>
+<meta name="twitter:title" content="AT32 USART — printf 重定向到串口（嵌入式调试神器）">
+<meta name="twitter:description" content="AT32F403A USART 串口 printf 重定向，嵌入式开发最常用的调试方法">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                            height="290" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🏀</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">CLing</a></h1>
+            <h2 class="site-description">你好 欢迎来到我的博客</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>档案</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E6%8A%80%E6%9C%AF%E9%93%BE%E6%8E%A5/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>技术链接</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/excel/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+                
+                <span>Excel教程</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#这个实验是干嘛的">这个实验是干嘛的？</a></li>
+    <li><a href="#硬件准备">硬件准备</a></li>
+    <li><a href="#串口助手软件">串口助手软件</a></li>
+    <li><a href="#完整代码">完整代码</a></li>
+    <li><a href="#代码逐行讲解">代码逐行讲解</a>
+      <ol>
+        <li><a href="#1-头文件">1. 头文件</a></li>
+        <li><a href="#2-全局变量">2. 全局变量</a></li>
+        <li><a href="#3-串口初始化">3. 串口初始化</a></li>
+        <li><a href="#4-printf-输出">4. printf 输出</a></li>
+        <li><a href="#5-延时">5. 延时</a></li>
+      </ol>
+    </li>
+    <li><a href="#printf-重定向的原理进阶">printf 重定向的原理（进阶）</a></li>
+    <li><a href="#常用-printf-格式">常用 printf 格式</a></li>
+    <li><a href="#实验现象">实验现象</a></li>
+    <li><a href="#常见问题">常见问题</a>
+      <ol>
+        <li><a href="#q-串口助手收不到数据">Q: 串口助手收不到数据？</a></li>
+        <li><a href="#q-收到乱码">Q: 收到乱码？</a></li>
+        <li><a href="#q-只能用-usart1-吗">Q: 只能用 USART1 吗？</a></li>
+      </ol>
+    </li>
+    <li><a href="#小结">小结</a></li>
+    <li><a href="#学了串口能做什么">学了串口能做什么？</a>
+      <ol>
+        <li><a href="#调试与监控">调试与监控</a></li>
+        <li><a href="#通信与控制">通信与控制</a></li>
+        <li><a href="#实际应用场景">实际应用场景</a></li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/at32/" >
+                AT32
+            </a>
+        
+            <a href="/categories/usart/" >
+                USART
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/at32-usart-printf-%E9%87%8D%E5%AE%9A%E5%90%91%E5%88%B0%E4%B8%B2%E5%8F%A3%E5%B5%8C%E5%85%A5%E5%BC%8F%E8%B0%83%E8%AF%95%E7%A5%9E%E5%99%A8/">AT32 USART — printf 重定向到串口（嵌入式调试神器）</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            AT32F403A USART 串口 printf 重定向，嵌入式开发最常用的调试方法
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2026-09-08</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 3 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="usart--printf-重定向到串口">USART — printf 重定向到串口
+</h1><blockquote>
+<p><strong>难度</strong>: ⭐（入门必学）<br>
+<strong>固件库</strong>: AT32F403A_407_Firmware_Library V2.2.2<br>
+<strong>源文件</strong>: <code>project/at_start_f403a/examples/usart/printf/src/main.c</code></p>
+</blockquote>
+<hr>
+<h2 id="这个实验是干嘛的">这个实验是干嘛的？
+</h2><p>做嵌入式开发，最头疼的就是&quot;程序跑起来了，但不知道里面发生了什么&quot;。</p>
+<p>在电脑上编程，你可以用 <code>print()</code> 打印变量值来调试。MCU 没有屏幕怎么办？</p>
+<p><strong>答案是：用串口把 printf 的输出发到电脑上。</strong></p>
+<p>这个实验教你把 C 语言的 <code>printf</code> 函数&quot;重定向&quot;到 USART 串口。之后你就可以在代码任意位置写 <code>printf(&quot;温度=%d&quot;, temp)</code>，电脑串口助手就能看到输出。</p>
+<p>这是嵌入式开发<strong>最常用、最实用</strong>的调试手段，没有之一。</p>
+<hr>
+<h2 id="硬件准备">硬件准备
+</h2><p>你需要一个 <strong>USB 转串口模块</strong>（几块钱一个）：</p>
+<div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">模块类型</th>
+					<th style="text-align: left">价格</th>
+					<th style="text-align: left">说明</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left">CH340</td>
+					<td style="text-align: left">~3 块</td>
+					<td style="text-align: left">最便宜，够用</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">CP2102</td>
+					<td style="text-align: left">~5 块</td>
+					<td style="text-align: left">稳定</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">FT232</td>
+					<td style="text-align: left">~10 块</td>
+					<td style="text-align: left">贵但好用</td>
+			</tr>
+	</tbody>
+</table></div>
+<p>接线方式（3 根线）：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">开发板          USB转串口模块
+</span></span><span class="line"><span class="cl">  TX  ─────────→  RX
+</span></span><span class="line"><span class="cl">  RX  ←─────────  TX
+</span></span><span class="line"><span class="cl">  GND ──────────  GND
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>注意</strong>：TX 接 RX，RX 接 TX，要交叉！GND 必须共地。</p>
+<hr>
+<h2 id="串口助手软件">串口助手软件
+</h2><p>电脑端需要一个串口助手来查看输出：</p>
+<div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">软件</th>
+					<th style="text-align: left">平台</th>
+					<th style="text-align: left">推荐度</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left">SSCOM</td>
+					<td style="text-align: left">Windows</td>
+					<td style="text-align: left">⭐⭐⭐ 简单好用</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">XCOM</td>
+					<td style="text-align: left">Windows</td>
+					<td style="text-align: left">⭐⭐⭐ 功能全</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">MobaXterm</td>
+					<td style="text-align: left">Windows</td>
+					<td style="text-align: left">⭐⭐⭐ 自带串口</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">minicom</td>
+					<td style="text-align: left">Linux</td>
+					<td style="text-align: left">⭐⭐</td>
+			</tr>
+	</tbody>
+</table></div>
+<p>打开串口助手，选择正确的 COM 口（设备管理器里看），设置：</p>
+<ul>
+<li>波特率：<strong>115200</strong></li>
+<li>数据位：8</li>
+<li>停止位：1</li>
+<li>校验位：None</li>
+</ul>
+<hr>
+<h2 id="完整代码">完整代码
+</h2><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;at32f403a_407_board.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;at32f403a_407_clock.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* volatile 修饰，告诉编译器这个变量可能被中断修改，不要优化掉 */</span>
+</span></span><span class="line"><span class="cl"><span class="n">__IO</span> <span class="kt">uint32_t</span> <span class="n">time_cnt</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 第一步：系统时钟初始化 */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">system_clock_config</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 第二步：板级初始化（LED、按键等） */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">at32_board_init</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 第三步：串口初始化，波特率 115200 */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">uart_print_init</span><span class="p">(</span><span class="mi">115200</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 第四步：用 printf 打印一条启动消息 */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;usart printf example: retarget the c library printf function to the usart</span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 第五步：主循环，每秒打印一次计数器 */</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;usart printf counter: %u</span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">time_cnt</span><span class="o">++</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">delay_sec</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>   <span class="c1">// 等 1 秒
+</span></span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="代码逐行讲解">代码逐行讲解
+</h2><h3 id="1-头文件">1. 头文件
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;at32f403a_407_board.h&#34;   // 板级支持包，包含 uart_print_init() 等</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;at32f403a_407_clock.h&#34;   // 时钟配置</span><span class="cp">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="2-全局变量">2. 全局变量
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">__IO</span> <span class="kt">uint32_t</span> <span class="n">time_cnt</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><code>__IO</code> 是 <code>volatile</code> 的宏定义，表示这个变量<strong>可能被意外修改</strong>（比如中断里），编译器不要做优化</li>
+<li>如果不加 <code>__IO</code>，编译器可能把 <code>time_cnt++</code> 优化掉，你就看不到计数器变化了</li>
+</ul>
+<h3 id="3-串口初始化">3. 串口初始化
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">uart_print_init</span><span class="p">(</span><span class="mi">115200</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这行代码做了两件事：</p>
+<ol>
+<li><strong>配置 USART1</strong>：设置波特率 115200、8 数据位、无校验、1 停止位</li>
+<li><strong>重定向 printf</strong>：把 <code>printf</code> 的输出接到 USART1 的发送引脚</li>
+</ol>
+<blockquote>
+<p>波特率 115200 意味着每秒可以传输约 11520 个字节（每个字节 10 bit），足够打印调试信息了。</p>
+</blockquote>
+<h3 id="4-printf-输出">4. printf 输出
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">printf</span><span class="p">(</span><span class="s">&#34;usart printf counter: %u</span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">time_cnt</span><span class="o">++</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><code>%u</code> — 无符号整数格式</li>
+<li><code>\r\n</code> — 回车换行（串口助手需要这个才能正确显示）</li>
+<li><code>time_cnt++</code> — 先打印值，再自增</li>
+</ul>
+<h3 id="5-延时">5. 延时
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">delay_sec</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>   <span class="c1">// 等 1 秒
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>如果不加延时，<code>printf</code> 会以 MCU 的速度疯狂输出，串口助手会收到一大堆数据。</p>
+<hr>
+<h2 id="printf-重定向的原理进阶">printf 重定向的原理（进阶）
+</h2><p><code>uart_print_init()</code> 内部做了什么？其实很简单：</p>
+<p>在 C 标准库里，<code>printf</code> 最终会调用一个叫 <code>fputc</code> 的函数来输出每个字符。我们只需要<strong>重写这个函数</strong>，让它把字符发到串口：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="c1">// 这段代码在 at32f403a_407_board.c 里，你不用自己写
+</span></span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">fputc</span><span class="p">(</span><span class="kt">int</span> <span class="n">ch</span><span class="p">,</span> <span class="n">FILE</span> <span class="o">*</span><span class="n">f</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 把字符 ch 通过 USART1 发出去
+</span></span></span><span class="line"><span class="cl">  <span class="nf">usart_data_transmit</span><span class="p">(</span><span class="n">USART1</span><span class="p">,</span> <span class="p">(</span><span class="kt">uint16_t</span><span class="p">)</span><span class="n">ch</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 等待发送完成
+</span></span></span><span class="line"><span class="cl">  <span class="k">while</span><span class="p">(</span><span class="nf">usart_flag_get</span><span class="p">(</span><span class="n">USART1</span><span class="p">,</span> <span class="n">USART_TDC_FLAG</span><span class="p">)</span> <span class="o">==</span> <span class="n">RESET</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">ch</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这就是&quot;重定向&quot;的全部秘密：<strong>替换 fputc，把输出目标从屏幕改成串口</strong>。</p>
+<hr>
+<h2 id="常用-printf-格式">常用 printf 格式
+</h2><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">printf</span><span class="p">(</span><span class="s">&#34;十进制: %d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="mi">123</span><span class="p">);</span>          <span class="c1">// 十进制: 123
+</span></span></span><span class="line"><span class="cl"><span class="nf">printf</span><span class="p">(</span><span class="s">&#34;十六进制: 0x%X</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="mh">0xFF</span><span class="p">);</span>     <span class="c1">// 十六进制: 0xFF
+</span></span></span><span class="line"><span class="cl"><span class="nf">printf</span><span class="p">(</span><span class="s">&#34;浮点数: %.2f</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="mf">3.14</span><span class="p">);</span>       <span class="c1">// 浮点数: 3.14
+</span></span></span><span class="line"><span class="cl"><span class="nf">printf</span><span class="p">(</span><span class="s">&#34;字符串: %s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="s">&#34;hello&#34;</span><span class="p">);</span>      <span class="c1">// 字符串: hello
+</span></span></span><span class="line"><span class="cl"><span class="nf">printf</span><span class="p">(</span><span class="s">&#34;温度=%d, 湿度=%d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">60</span><span class="p">);</span> <span class="c1">// 同时打印多个变量
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="实验现象">实验现象
+</h2><ol>
+<li>编译、下载程序</li>
+<li>打开串口助手，选择正确的 COM 口，波特率 115200</li>
+<li>应该看到：</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">usart printf example: retarget the c library printf function to the usart
+</span></span><span class="line"><span class="cl">usart printf counter: 0
+</span></span><span class="line"><span class="cl">usart printf counter: 1
+</span></span><span class="line"><span class="cl">usart printf counter: 2
+</span></span><span class="line"><span class="cl">...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>每秒打印一行，计数器递增。</p>
+<hr>
+<h2 id="常见问题">常见问题
+</h2><h3 id="q-串口助手收不到数据">Q: 串口助手收不到数据？
+</h3><ol>
+<li>检查 COM 口是否选对（设备管理器里看）</li>
+<li>波特率是否 115200</li>
+<li>TX/RX 是否交叉连接</li>
+<li>GND 是否共地</li>
+<li>程序是否下载成功</li>
+</ol>
+<h3 id="q-收到乱码">Q: 收到乱码？
+</h3><ul>
+<li>波特率不匹配！代码里是 115200，串口助手也要设 115200</li>
+<li>如果时钟配置不对，实际波特率会偏移，也会乱码</li>
+</ul>
+<h3 id="q-只能用-usart1-吗">Q: 只能用 USART1 吗？
+</h3><ul>
+<li><code>uart_print_init()</code> 默认用 USART1</li>
+<li>如果想用其他串口（如 USART2），需要自己修改 <code>fputc</code> 函数</li>
+</ul>
+<hr>
+<h2 id="小结">小结
+</h2><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">概念</th>
+					<th style="text-align: left">说明</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left">USART</td>
+					<td style="text-align: left">通用同步异步收发器，最常用的串行通信接口</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">波特率</td>
+					<td style="text-align: left">每秒传输的 bit 数，双方必须一致</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">printf 重定向</td>
+					<td style="text-align: left">替换 <code>fputc</code>，让 printf 输出到串口</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><code>\r\n</code></td>
+					<td style="text-align: left">回车换行，串口助手显示必需</td>
+			</tr>
+	</tbody>
+</table></div>
+<hr>
+<h2 id="学了串口能做什么">学了串口能做什么？
+</h2><p>串口是嵌入式开发的&quot;万能接口&quot;——调试、通信、联网都靠它：</p>
+<h3 id="调试与监控">调试与监控
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">用途</th>
+					<th style="text-align: left">说明</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left"><strong>变量监控</strong></td>
+					<td style="text-align: left"><code>printf(&quot;温度=%d\n&quot;, temp)</code> 实时查看传感器数据</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>状态打印</strong></td>
+					<td style="text-align: left">程序跑到哪一步了、有没有进中断、错误码是什么</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>性能测量</strong></td>
+					<td style="text-align: left">打印代码执行时间，找出性能瓶颈</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>日志系统</strong></td>
+					<td style="text-align: left">带时间戳的运行日志，出问题后可以回溯</td>
+			</tr>
+	</tbody>
+</table></div>
+<h3 id="通信与控制">通信与控制
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">项目</th>
+					<th style="text-align: left">原理</th>
+					<th style="text-align: left">难度</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left"><strong>串口控制 LED</strong></td>
+					<td style="text-align: left">电脑发指令控制板子上的灯（&ldquo;on&rdquo;/&ldquo;off&rdquo;）</td>
+					<td style="text-align: left">⭐</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>上位机通信</strong></td>
+					<td style="text-align: left">MCU 通过串口把数据发到电脑 Python/C# 程序</td>
+					<td style="text-align: left">⭐⭐</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>蓝牙透传</strong></td>
+					<td style="text-align: left">接 HC-05 蓝牙模块，手机就能控制 MCU</td>
+					<td style="text-align: left">⭐⭐</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>WiFi 联网</strong></td>
+					<td style="text-align: left">接 ESP8266 模块，MCU 通过串口发 AT 指令联网</td>
+					<td style="text-align: left">⭐⭐⭐</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>GPS 定位</strong></td>
+					<td style="text-align: left">接 GPS 模块，解析 NMEA 协议获取经纬度</td>
+					<td style="text-align: left">⭐⭐⭐</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>RS485 总线</strong></td>
+					<td style="text-align: left">多设备联网通信（工业 Modbus 协议）</td>
+					<td style="text-align: left">⭐⭐⭐</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>CAN 转串口</strong></td>
+					<td style="text-align: left">汽车/工业设备数据采集</td>
+					<td style="text-align: left">⭐⭐⭐</td>
+			</tr>
+	</tbody>
+</table></div>
+<h3 id="实际应用场景">实际应用场景
+</h3><ul>
+<li><strong>智能家居</strong>：MCU + ESP8266 + 串口 → 手机远程控制家电</li>
+<li><strong>工业采集</strong>：MCU + RS485 + 串口 → 采集温湿度传感器数据上传</li>
+<li><strong>无人机</strong>：MCU + GPS + 串口 → 获取位置信息</li>
+<li><strong>调试一切</strong>：无论做什么项目，串口 printf 都是你的&quot;眼睛&quot;</li>
+</ul>
+<blockquote>
+<p><strong>核心思路</strong>：串口就是 MCU 的&quot;嘴巴&quot;和&quot;耳朵&quot;。能说（printf 发数据）能听（接收指令），就能和电脑、手机、其他设备对话。</p>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>下一步</strong>：学会了串口打印，接下来可以学 <a class="link" href="/p/at32-adc-current-vref-value-check/" >ADC 采样</a>，用 printf 把 ADC 采样值打印出来。</p>
+</blockquote>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/printf/">Printf</a>
+        
+            <a href="/tags/%E4%B8%B2%E5%8F%A3/">串口</a>
+        
+            <a href="/tags/usart/">Usart</a>
+        
+            <a href="/tags/%E8%B0%83%E8%AF%95/">调试</a>
+        
+            <a href="/tags/at32f403a/">AT32F403A</a>
+        
+    </section>
+
+
+    <section class="article-lastmod">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <span>
+            最后更新于 Sep 08, 2026 16:03 &#43;0800
+        </span>
+    </section></footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/at32-usart-dma-%E4%B8%AD%E6%96%AD%E6%94%B6%E5%8F%91/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AT32 USART — DMA 中断收发</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/at32-usart-dma-%E8%BD%AE%E8%AF%A2%E6%94%B6%E5%8F%91/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AT32 USART — DMA 轮询收发</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/at32-usart-rs485-%E9%80%9A%E4%BF%A1/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AT32 USART — RS485 通信</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/at32-usart-%E4%B8%AD%E6%96%AD%E6%94%B6%E5%8F%91/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AT32 USART — 中断收发</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/at32-usart-%E5%8D%8A%E5%8F%8C%E5%B7%A5%E9%80%9A%E4%BF%A1/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AT32 USART — 半双工通信</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="ClingYang/ClingYang.github.io"
+        issue-term="pathname"
+        
+        label="💬comment"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2026 CLing
+    </section>
+    
+    <section class="powerby">
+        
+            世界是你们 <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<style>
+    #TableOfContents > ul, ol {
+        ul, ol {
+            display: none;
+        }
+        .open {
+            display: block;
+        }
+    }
+</style>
+
+<script>
+    function initTocHide() {
+        
+        let toc = document.querySelector(".widget--toc");
+        if (!toc) {
+            return;
+        }
+        
+        window.addEventListener('scroll', function() {
+            
+            let currentLi = document.querySelector(".active-class");
+            if (!currentLi) {
+                return
+            }
+            
+            let elementsByClassName = document.querySelectorAll(".open");
+            if (elementsByClassName.length > 0) {
+                elementsByClassName.forEach((ul) => {
+                    ul.classList.remove("open")
+                })
+            }
+            
+            if (currentLi.children.length > 1) {
+                currentLi.children[1].classList.add("open")
+            }
+            
+            let ul = currentLi.parentElement;
+            do {
+                ul.classList.add("open");
+                ul = ul.parentElement.parentElement
+            } while (ul !== undefined && (ul.localName === 'ul' || ul.localName === 'ol'))
+        });
+    }
+    initTocHide()
+</script>
+
+    </body>
+</html>

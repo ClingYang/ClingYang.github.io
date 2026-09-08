@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="AT32F403A 定时器 TMR3 输出 4 路不同占空比的 PWM 信号">
+<title>AT32 TIM — PWM 输出（LED 呼吸灯 &#43; 电机调速的基础）</title>
+
+<link rel='canonical' href='https://clingyang.github.io/p/at32-tim-pwm-%E8%BE%93%E5%87%BAled-%E5%91%BC%E5%90%B8%E7%81%AF--%E7%94%B5%E6%9C%BA%E8%B0%83%E9%80%9F%E7%9A%84%E5%9F%BA%E7%A1%80/'>
+
+<link rel="stylesheet" href="/scss/style.min.e14f3ba93baae65b2aef2339f32b6f25d7a0184785ebf4f6bd7d3376ae5dc2d4.css"><meta property='og:title' content="AT32 TIM — PWM 输出（LED 呼吸灯 + 电机调速的基础）">
+<meta property='og:description' content="AT32F403A 定时器 TMR3 输出 4 路不同占空比的 PWM 信号">
+<meta property='og:url' content='https://clingyang.github.io/p/at32-tim-pwm-%E8%BE%93%E5%87%BAled-%E5%91%BC%E5%90%B8%E7%81%AF--%E7%94%B5%E6%9C%BA%E8%B0%83%E9%80%9F%E7%9A%84%E5%9F%BA%E7%A1%80/'>
+<meta property='og:site_name' content='CLing'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='PWM' /><meta property='article:tag' content='定时器' /><meta property='article:tag' content='TMR3' /><meta property='article:tag' content='占空比' /><meta property='article:tag' content='AT32F403A' /><meta property='article:published_time' content='2026-09-08T15:11:00&#43;08:00'/><meta property='article:modified_time' content='2026-09-08T16:03:27&#43;08:00'/>
+<meta name="twitter:title" content="AT32 TIM — PWM 输出（LED 呼吸灯 + 电机调速的基础）">
+<meta name="twitter:description" content="AT32F403A 定时器 TMR3 输出 4 路不同占空比的 PWM 信号">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                            height="290" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🏀</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">CLing</a></h1>
+            <h2 class="site-description">你好 欢迎来到我的博客</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>档案</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E6%8A%80%E6%9C%AF%E9%93%BE%E6%8E%A5/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>技术链接</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/excel/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+                
+                <span>Excel教程</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#这个实验是干嘛的">这个实验是干嘛的？</a></li>
+    <li><a href="#硬件准备">硬件准备</a></li>
+    <li><a href="#pwm-核心概念">PWM 核心概念</a>
+      <ol>
+        <li><a href="#关键参数">关键参数</a></li>
+        <li><a href="#pwm-工作原理">PWM 工作原理</a></li>
+      </ol>
+    </li>
+    <li><a href="#完整代码">完整代码</a></li>
+    <li><a href="#代码分段讲解">代码分段讲解</a>
+      <ol>
+        <li><a href="#1-gpio-复用模式">1. GPIO 复用模式</a></li>
+        <li><a href="#2-预分频器">2. 预分频器</a></li>
+        <li><a href="#3-arr-和-ccr">3. ARR 和 CCR</a></li>
+        <li><a href="#4-pwm-模式-a-vs-b">4. PWM 模式 A vs B</a></li>
+      </ol>
+    </li>
+    <li><a href="#实验现象">实验现象</a></li>
+    <li><a href="#如何动态改变占空比">如何动态改变占空比？</a></li>
+    <li><a href="#常见问题">常见问题</a>
+      <ol>
+        <li><a href="#q-引脚没有-pwm-输出">Q: 引脚没有 PWM 输出？</a></li>
+        <li><a href="#q-pwm-频率不对">Q: PWM 频率不对？</a></li>
+        <li><a href="#q-想生成-50hz-pwm控制舵机">Q: 想生成 50Hz PWM（控制舵机）？</a></li>
+      </ol>
+    </li>
+    <li><a href="#小结">小结</a></li>
+    <li><a href="#学了-pwm-能做什么">学了 PWM 能做什么？</a>
+      <ol>
+        <li><a href="#led-控制">LED 控制</a></li>
+        <li><a href="#电机控制">电机控制</a></li>
+        <li><a href="#音频与信号">音频与信号</a></li>
+        <li><a href="#电源与通信">电源与通信</a></li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/at32/" >
+                AT32
+            </a>
+        
+            <a href="/categories/tmr/" >
+                TMR
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/at32-tim-pwm-%E8%BE%93%E5%87%BAled-%E5%91%BC%E5%90%B8%E7%81%AF--%E7%94%B5%E6%9C%BA%E8%B0%83%E9%80%9F%E7%9A%84%E5%9F%BA%E7%A1%80/">AT32 TIM — PWM 输出（LED 呼吸灯 &#43; 电机调速的基础）</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            AT32F403A 定时器 TMR3 输出 4 路不同占空比的 PWM 信号
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2026-09-08</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 5 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="tim--pwm-输出">TIM — PWM 输出
+</h1><blockquote>
+<p><strong>难度</strong>: ⭐⭐（需要了解定时器基本概念）<br>
+<strong>固件库</strong>: AT32F403A_407_Firmware_Library V2.2.2<br>
+<strong>源文件</strong>: <code>project/at_start_f403a/examples/tmr/pwm_output_tmr3/src/main.c</code></p>
+</blockquote>
+<hr>
+<h2 id="这个实验是干嘛的">这个实验是干嘛的？
+</h2><p>PWM（Pulse Width Modulation，脉冲宽度调制）是一种<strong>用数字信号模拟模拟信号</strong>的技术。</p>
+<p>简单说：MCU 只能输出 0V 或 3.3V，不能输出 1.5V。但如果你快速地在 0V 和 3.3V 之间切换，改变高电平的占比，就能模拟出不同的&quot;平均电压&quot;：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">占空比 10%:  ┃▄┃▄▄▄▄▄▄▄▄▄  → 平均电压 ≈ 0.33V → LED 很暗
+</span></span><span class="line"><span class="cl">占空比 50%:  ┃▄▄▄▄▄┃▄▄▄▄▄  → 平均电压 ≈ 1.65V → LED 中等亮度
+</span></span><span class="line"><span class="cl">占空比 90%:  ┃▄▄▄▄▄▄▄▄▄┃▄  → 平均电压 ≈ 2.97V → LED 很亮
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>本实验</strong>用 TMR3 的 4 个通道输出 4 路不同占空比的 PWM：</p>
+<ul>
+<li>通道 1：50% 占空比</li>
+<li>通道 2：37.5%</li>
+<li>通道 3：25%</li>
+<li>通道 4：12.5%</li>
+</ul>
+<hr>
+<h2 id="硬件准备">硬件准备
+</h2><ul>
+<li>AT32F403A 开发板</li>
+<li>示波器（看波形）或 LED（看亮度变化）</li>
+</ul>
+<p>PWM 输出引脚（TMR3 的 4 个通道）：</p>
+<div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">通道</th>
+					<th style="text-align: left">引脚</th>
+					<th style="text-align: left">占空比</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left">CH1</td>
+					<td style="text-align: left">PA6</td>
+					<td style="text-align: left">50%</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">CH2</td>
+					<td style="text-align: left">PA7</td>
+					<td style="text-align: left">37.5%</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">CH3</td>
+					<td style="text-align: left">PB0</td>
+					<td style="text-align: left">25%</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">CH4</td>
+					<td style="text-align: left">PB1</td>
+					<td style="text-align: left">12.5%</td>
+			</tr>
+	</tbody>
+</table></div>
+<p>如果接 LED：PA6 的 LED 最亮，PB1 的 LED 最暗。</p>
+<hr>
+<h2 id="pwm-核心概念">PWM 核心概念
+</h2><h3 id="关键参数">关键参数
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">参数</th>
+					<th style="text-align: left">含义</th>
+					<th style="text-align: left">本例数值</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left"><strong>ARR</strong>（重装载值）</td>
+					<td style="text-align: left">定时器计数到多少归零</td>
+					<td style="text-align: left">665</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>PSC</strong>（预分频器）</td>
+					<td style="text-align: left">时钟分频系数</td>
+					<td style="text-align: left">系统时钟/24MHz - 1</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>CCR</strong>（比较值）</td>
+					<td style="text-align: left">计数到多少时翻转输出</td>
+					<td style="text-align: left">通道不同值不同</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>占空比</strong></td>
+					<td style="text-align: left">CCR / (ARR+1)</td>
+					<td style="text-align: left">50%, 37.5%, 25%, 12.5%</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>PWM 频率</strong></td>
+					<td style="text-align: left">时钟 / (PSC+1) / (ARR+1)</td>
+					<td style="text-align: left">24MHz / 1 / 666 ≈ 36KHz</td>
+			</tr>
+	</tbody>
+</table></div>
+<h3 id="pwm-工作原理">PWM 工作原理
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">计数器: 0 → 1 → 2 → ... → CCR → ... → ARR → 0 → 1 → ...
+</span></span><span class="line"><span class="cl">输出:   高电平 ──────────┐                ┌────────── 高电平
+</span></span><span class="line"><span class="cl">                         └── 低电平 ──────┘
+</span></span><span class="line"><span class="cl">                         ↑ CCR 时刻翻转
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>计数器从 0 向上计数到 ARR，然后归零重新开始</li>
+<li>计数 &lt; CCR 时，输出高电平</li>
+<li>计数 ≥ CCR 时，输出低电平</li>
+<li>CCR 越大，高电平时间越长，占空比越大</li>
+</ul>
+<hr>
+<h2 id="完整代码">完整代码
+</h2><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;at32f403a_407_board.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;at32f403a_407_clock.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 4 个通道的比较值（决定占空比） */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">uint16_t</span> <span class="n">ccr1_val</span> <span class="o">=</span> <span class="mi">333</span><span class="p">;</span>   <span class="c1">// 333/666 = 50%
+</span></span></span><span class="line"><span class="cl"><span class="kt">uint16_t</span> <span class="n">ccr2_val</span> <span class="o">=</span> <span class="mi">249</span><span class="p">;</span>   <span class="c1">// 249/666 = 37.4%
+</span></span></span><span class="line"><span class="cl"><span class="kt">uint16_t</span> <span class="n">ccr3_val</span> <span class="o">=</span> <span class="mi">166</span><span class="p">;</span>   <span class="c1">// 166/666 = 25%
+</span></span></span><span class="line"><span class="cl"><span class="kt">uint16_t</span> <span class="n">ccr4_val</span> <span class="o">=</span> <span class="mi">83</span><span class="p">;</span>    <span class="c1">// 83/666  = 12.5%
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">uint16_t</span> <span class="n">prescaler_value</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* GPIO 配置：把定时器通道映射到引脚 */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">gpio_configuration</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">gpio_init_type</span> <span class="n">gpio_init_struct</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">gpio_default_para_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">gpio_init_struct</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* PA6(CH1) + PA7(CH2) */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">gpio_init_struct</span><span class="p">.</span><span class="n">gpio_pins</span> <span class="o">=</span> <span class="n">GPIO_PINS_6</span> <span class="o">|</span> <span class="n">GPIO_PINS_7</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">gpio_init_struct</span><span class="p">.</span><span class="n">gpio_out_type</span> <span class="o">=</span> <span class="n">GPIO_OUTPUT_PUSH_PULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">gpio_init_struct</span><span class="p">.</span><span class="n">gpio_pull</span> <span class="o">=</span> <span class="n">GPIO_PULL_NONE</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">gpio_init_struct</span><span class="p">.</span><span class="n">gpio_mode</span> <span class="o">=</span> <span class="n">GPIO_MODE_MUX</span><span class="p">;</span>        <span class="c1">// 复用模式！
+</span></span></span><span class="line"><span class="cl">  <span class="n">gpio_init_struct</span><span class="p">.</span><span class="n">gpio_drive_strength</span> <span class="o">=</span> <span class="n">GPIO_DRIVE_STRENGTH_STRONGER</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">gpio_init</span><span class="p">(</span><span class="n">GPIOA</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">gpio_init_struct</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* PB0(CH3) + PB1(CH4) */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">gpio_init_struct</span><span class="p">.</span><span class="n">gpio_pins</span> <span class="o">=</span> <span class="n">GPIO_PINS_0</span> <span class="o">|</span> <span class="n">GPIO_PINS_1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">gpio_init</span><span class="p">(</span><span class="n">GPIOB</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">gpio_init_struct</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 时钟使能 */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">crm_configuration</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">crm_periph_clock_enable</span><span class="p">(</span><span class="n">CRM_TMR3_PERIPH_CLOCK</span><span class="p">,</span> <span class="n">TRUE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">crm_periph_clock_enable</span><span class="p">(</span><span class="n">CRM_GPIOA_PERIPH_CLOCK</span><span class="p">,</span> <span class="n">TRUE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">crm_periph_clock_enable</span><span class="p">(</span><span class="n">CRM_GPIOB_PERIPH_CLOCK</span><span class="p">,</span> <span class="n">TRUE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">system_clock_config</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 第一步：使能时钟 */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">crm_configuration</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 第二步：配置 GPIO（复用模式） */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">gpio_configuration</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 第三步：计算预分频值 */</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 例：系统时钟 240MHz，要得到 24MHz 定时器时钟
+</span></span></span><span class="line"><span class="cl">  <span class="c1">// prescaler_value = 240MHz / 24MHz - 1 = 9
+</span></span></span><span class="line"><span class="cl">  <span class="n">prescaler_value</span> <span class="o">=</span> <span class="p">(</span><span class="kt">uint16_t</span><span class="p">)(</span><span class="n">system_core_clock</span> <span class="o">/</span> <span class="mi">24000000</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 第四步：定时器基本配置 */</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// ARR = 665，PSC = 9
+</span></span></span><span class="line"><span class="cl">  <span class="c1">// PWM 频率 = 24MHz / (9+1) / (665+1) ≈ 3.6KHz
+</span></span></span><span class="line"><span class="cl">  <span class="nf">tmr_base_init</span><span class="p">(</span><span class="n">TMR3</span><span class="p">,</span> <span class="mi">665</span><span class="p">,</span> <span class="n">prescaler_value</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">tmr_cnt_dir_set</span><span class="p">(</span><span class="n">TMR3</span><span class="p">,</span> <span class="n">TMR_COUNT_UP</span><span class="p">);</span>              <span class="c1">// 向上计数
+</span></span></span><span class="line"><span class="cl">  <span class="nf">tmr_clock_source_div_set</span><span class="p">(</span><span class="n">TMR3</span><span class="p">,</span> <span class="n">TMR_CLOCK_DIV1</span><span class="p">);</span>   <span class="c1">// 不分频
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 第五步：配置 4 个通道为 PWM 模式 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">tmr_output_config_type</span> <span class="n">tmr_oc_init_structure</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">tmr_output_default_para_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">tmr_oc_init_structure</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">tmr_oc_init_structure</span><span class="p">.</span><span class="n">oc_mode</span> <span class="o">=</span> <span class="n">TMR_OUTPUT_CONTROL_PWM_MODE_A</span><span class="p">;</span>  <span class="c1">// PWM 模式 A
+</span></span></span><span class="line"><span class="cl">  <span class="n">tmr_oc_init_structure</span><span class="p">.</span><span class="n">oc_idle_state</span> <span class="o">=</span> <span class="n">FALSE</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">tmr_oc_init_structure</span><span class="p">.</span><span class="n">oc_polarity</span> <span class="o">=</span> <span class="n">TMR_OUTPUT_ACTIVE_HIGH</span><span class="p">;</span>     <span class="c1">// 高电平有效
+</span></span></span><span class="line"><span class="cl">  <span class="n">tmr_oc_init_structure</span><span class="p">.</span><span class="n">oc_output_state</span> <span class="o">=</span> <span class="n">TRUE</span><span class="p">;</span>                    <span class="c1">// 使能输出
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 配置通道 1，CCR = 333，占空比 = 333/666 ≈ 50% */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">tmr_output_channel_config</span><span class="p">(</span><span class="n">TMR3</span><span class="p">,</span> <span class="n">TMR_SELECT_CHANNEL_1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">tmr_oc_init_structure</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">tmr_channel_value_set</span><span class="p">(</span><span class="n">TMR3</span><span class="p">,</span> <span class="n">TMR_SELECT_CHANNEL_1</span><span class="p">,</span> <span class="n">ccr1_val</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">tmr_output_channel_buffer_enable</span><span class="p">(</span><span class="n">TMR3</span><span class="p">,</span> <span class="n">TMR_SELECT_CHANNEL_1</span><span class="p">,</span> <span class="n">TRUE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 配置通道 2，CCR = 249，占空比 ≈ 37.4% */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">tmr_output_channel_config</span><span class="p">(</span><span class="n">TMR3</span><span class="p">,</span> <span class="n">TMR_SELECT_CHANNEL_2</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">tmr_oc_init_structure</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">tmr_channel_value_set</span><span class="p">(</span><span class="n">TMR3</span><span class="p">,</span> <span class="n">TMR_SELECT_CHANNEL_2</span><span class="p">,</span> <span class="n">ccr2_val</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">tmr_output_channel_buffer_enable</span><span class="p">(</span><span class="n">TMR3</span><span class="p">,</span> <span class="n">TMR_SELECT_CHANNEL_2</span><span class="p">,</span> <span class="n">TRUE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 配置通道 3，CCR = 166，占空比 ≈ 25% */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">tmr_output_channel_config</span><span class="p">(</span><span class="n">TMR3</span><span class="p">,</span> <span class="n">TMR_SELECT_CHANNEL_3</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">tmr_oc_init_structure</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">tmr_channel_value_set</span><span class="p">(</span><span class="n">TMR3</span><span class="p">,</span> <span class="n">TMR_SELECT_CHANNEL_3</span><span class="p">,</span> <span class="n">ccr3_val</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">tmr_output_channel_buffer_enable</span><span class="p">(</span><span class="n">TMR3</span><span class="p">,</span> <span class="n">TMR_SELECT_CHANNEL_3</span><span class="p">,</span> <span class="n">TRUE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 配置通道 4，CCR = 83，占空比 ≈ 12.5% */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">tmr_output_channel_config</span><span class="p">(</span><span class="n">TMR3</span><span class="p">,</span> <span class="n">TMR_SELECT_CHANNEL_4</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">tmr_oc_init_structure</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">tmr_channel_value_set</span><span class="p">(</span><span class="n">TMR3</span><span class="p">,</span> <span class="n">TMR_SELECT_CHANNEL_4</span><span class="p">,</span> <span class="n">ccr4_val</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">tmr_output_channel_buffer_enable</span><span class="p">(</span><span class="n">TMR3</span><span class="p">,</span> <span class="n">TMR_SELECT_CHANNEL_4</span><span class="p">,</span> <span class="n">TRUE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 使能 ARR 预装载 */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">tmr_period_buffer_enable</span><span class="p">(</span><span class="n">TMR3</span><span class="p">,</span> <span class="n">TRUE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 第六步：启动定时器 */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">tmr_counter_enable</span><span class="p">(</span><span class="n">TMR3</span><span class="p">,</span> <span class="n">TRUE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* PWM 输出已启动，主循环可以做其他事 */</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 如果要动态改变占空比，在这里调用：
+</span></span></span><span class="line"><span class="cl">    <span class="c1">// tmr_channel_value_set(TMR3, TMR_SELECT_CHANNEL_1, new_ccr_val);
+</span></span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="代码分段讲解">代码分段讲解
+</h2><h3 id="1-gpio-复用模式">1. GPIO 复用模式
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">gpio_init_struct</span><span class="p">.</span><span class="n">gpio_mode</span> <span class="o">=</span> <span class="n">GPIO_MODE_MUX</span><span class="p">;</span>  <span class="c1">// 复用模式
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>关键点</strong>：PWM 输出的引脚必须配置为<strong>复用模式</strong>（MUX），不是普通输出模式（OUTPUT）。</p>
+<p>为什么？因为引脚的控制权要交给定时器硬件，而不是 CPU。定时器自动翻转引脚电平，CPU 不用管。</p>
+<h3 id="2-预分频器">2. 预分频器
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">prescaler_value</span> <span class="o">=</span> <span class="p">(</span><span class="kt">uint16_t</span><span class="p">)(</span><span class="n">system_core_clock</span> <span class="o">/</span> <span class="mi">24000000</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>定时器的时钟源是系统时钟（比如 240MHz），太快了。预分频器把它降频：</p>
+<ul>
+<li>PSC = 9 → 定时器时钟 = 240MHz / 10 = 24MHz</li>
+<li>定时器每 41.67ns 计数一次</li>
+</ul>
+<h3 id="3-arr-和-ccr">3. ARR 和 CCR
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">tmr_base_init</span><span class="p">(</span><span class="n">TMR3</span><span class="p">,</span> <span class="mi">665</span><span class="p">,</span> <span class="n">prescaler_value</span><span class="p">);</span>  <span class="c1">// ARR = 665
+</span></span></span><span class="line"><span class="cl"><span class="nf">tmr_channel_value_set</span><span class="p">(</span><span class="n">TMR3</span><span class="p">,</span> <span class="n">TMR_SELECT_CHANNEL_1</span><span class="p">,</span> <span class="mi">333</span><span class="p">);</span>  <span class="c1">// CCR = 333
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>ARR = 665：计数器从 0 计到 665 就归零，一个周期 = 666 个计数</li>
+<li>CCR = 333：计数到 333 时输出翻转</li>
+<li>占空比 = 333 / 666 ≈ 50%</li>
+</ul>
+<h3 id="4-pwm-模式-a-vs-b">4. PWM 模式 A vs B
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">tmr_oc_init_structure</span><span class="p">.</span><span class="n">oc_mode</span> <span class="o">=</span> <span class="n">TMR_OUTPUT_CONTROL_PWM_MODE_A</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><strong>PWM 模式 A</strong>：计数 &lt; CCR 时输出高电平（最常用）</li>
+<li><strong>PWM 模式 B</strong>：计数 &lt; CCR 时输出低电平（反相）</li>
+</ul>
+<hr>
+<h2 id="实验现象">实验现象
+</h2><p>用示波器观察 4 个引脚：</p>
+<ul>
+<li>PA6：50% 占空比的方波</li>
+<li>PA7：37.5% 占空比</li>
+<li>PB0：25% 占空比</li>
+<li>PB1：12.5% 占空比</li>
+</ul>
+<p>如果接 LED：PA6 最亮，PB1 最暗。</p>
+<hr>
+<h2 id="如何动态改变占空比">如何动态改变占空比？
+</h2><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="c1">// 在主循环或中断中调用
+</span></span></span><span class="line"><span class="cl"><span class="nf">tmr_channel_value_set</span><span class="p">(</span><span class="n">TMR3</span><span class="p">,</span> <span class="n">TMR_SELECT_CHANNEL_1</span><span class="p">,</span> <span class="n">new_ccr</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>new_ccr</code> 范围：0 ~ ARR（0 ~ 665）</p>
+<ul>
+<li><code>new_ccr = 0</code> → 占空比 0% → LED 灭</li>
+<li><code>new_ccr = 333</code> → 占空比 50% → LED 半亮</li>
+<li><code>new_ccr = 665</code> → 占空比 100% → LED 全亮</li>
+</ul>
+<hr>
+<h2 id="常见问题">常见问题
+</h2><h3 id="q-引脚没有-pwm-输出">Q: 引脚没有 PWM 输出？
+</h3><ul>
+<li>GPIO 是否配置为<strong>复用模式</strong>（MUX）？普通输出模式不行</li>
+<li>定时器时钟是否使能？</li>
+<li><code>tmr_counter_enable()</code> 是否调用？</li>
+</ul>
+<h3 id="q-pwm-频率不对">Q: PWM 频率不对？
+</h3><ul>
+<li>检查 PSC 和 ARR 的值</li>
+<li>PWM 频率 = 定时器时钟 / (PSC+1) / (ARR+1)</li>
+<li>确认系统时钟是否正确（<code>system_core_clock</code>）</li>
+</ul>
+<h3 id="q-想生成-50hz-pwm控制舵机">Q: 想生成 50Hz PWM（控制舵机）？
+</h3><ul>
+<li>舵机需要 50Hz（20ms 周期）</li>
+<li>假设定时器时钟 24MHz：ARR = 24000000 / 50 / (PSC+1) - 1</li>
+<li>PSC = 11 → ARR = 39999 → 50Hz</li>
+<li>CCR 范围：1000<del>5000 对应 0.5ms</del>2.5ms → 0°~180°</li>
+</ul>
+<hr>
+<h2 id="小结">小结
+</h2><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">概念</th>
+					<th style="text-align: left">说明</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left">PWM</td>
+					<td style="text-align: left">用数字信号模拟模拟信号</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">ARR</td>
+					<td style="text-align: left">重装载值，决定 PWM 周期</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">CCR</td>
+					<td style="text-align: left">比较值，决定占空比</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">占空比</td>
+					<td style="text-align: left">CCR / (ARR+1)，高电平占比</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">复用模式</td>
+					<td style="text-align: left">GPIO 必须配置为 MUX 模式</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">预装载</td>
+					<td style="text-align: left">缓冲写入，避免毛刺</td>
+			</tr>
+	</tbody>
+</table></div>
+<hr>
+<h2 id="学了-pwm-能做什么">学了 PWM 能做什么？
+</h2><p>PWM 是嵌入式中最实用的&quot;万能模拟器&quot;：</p>
+<h3 id="led-控制">LED 控制
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">项目</th>
+					<th style="text-align: left">原理</th>
+					<th style="text-align: left">难度</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left"><strong>LED 呼吸灯</strong></td>
+					<td style="text-align: left">CCR 从 0 渐增到 ARR 再渐减</td>
+					<td style="text-align: left">⭐⭐</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>RGB 调色</strong></td>
+					<td style="text-align: left">3 路 PWM 控制红绿蓝，混合出任意颜色</td>
+					<td style="text-align: left">⭐⭐</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>背光调节</strong></td>
+					<td style="text-align: left">LCD/键盘背光亮度无级调节</td>
+					<td style="text-align: left">⭐</td>
+			</tr>
+	</tbody>
+</table></div>
+<h3 id="电机控制">电机控制
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">项目</th>
+					<th style="text-align: left">原理</th>
+					<th style="text-align: left">难度</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left"><strong>直流电机调速</strong></td>
+					<td style="text-align: left">PWM + MOS 管 → 改变占空比 = 改变转速</td>
+					<td style="text-align: left">⭐⭐</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>舵机控制</strong></td>
+					<td style="text-align: left">50Hz PWM，脉宽 0.5~2.5ms → 0°~180°</td>
+					<td style="text-align: left">⭐⭐</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>步进电机驱动</strong></td>
+					<td style="text-align: left">PWM 控制细分驱动器</td>
+					<td style="text-align: left">⭐⭐⭐</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>无刷电机（BLDC）</strong></td>
+					<td style="text-align: left">6 路互补 PWM + 死区控制</td>
+					<td style="text-align: left">⭐⭐⭐⭐</td>
+			</tr>
+	</tbody>
+</table></div>
+<h3 id="音频与信号">音频与信号
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">项目</th>
+					<th style="text-align: left">原理</th>
+					<th style="text-align: left">难度</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left"><strong>蜂鸣器播放音乐</strong></td>
+					<td style="text-align: left">不同频率 PWM = 不同音调</td>
+					<td style="text-align: left">⭐⭐</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>简易信号发生器</strong></td>
+					<td style="text-align: left">改变频率和占空比输出方波</td>
+					<td style="text-align: left">⭐⭐</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>DAC 替代</strong></td>
+					<td style="text-align: left">PWM + RC 滤波 → 模拟电压输出</td>
+					<td style="text-align: left">⭐⭐⭐</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>红外遥控发射</strong></td>
+					<td style="text-align: left">38KHz PWM 载波 + 数据调制</td>
+					<td style="text-align: left">⭐⭐⭐</td>
+			</tr>
+	</tbody>
+</table></div>
+<h3 id="电源与通信">电源与通信
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">项目</th>
+					<th style="text-align: left">原理</th>
+					<th style="text-align: left">难度</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left"><strong>开关电源</strong></td>
+					<td style="text-align: left">PWM 控制 MOS 管 → DC-DC 降压/升压</td>
+					<td style="text-align: left">⭐⭐⭐⭐</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>充电控制</strong></td>
+					<td style="text-align: left">PWM 控制充电电流（恒流充电）</td>
+					<td style="text-align: left">⭐⭐⭐</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>可控硅调光</strong></td>
+					<td style="text-align: left">PWM 控制双向可控硅导通角</td>
+					<td style="text-align: left">⭐⭐⭐</td>
+			</tr>
+	</tbody>
+</table></div>
+<blockquote>
+<p><strong>核心思路</strong>：PWM 的本质是&quot;用时间换精度&quot;。只要控制高电平的时间占比，就能模拟出任意电压、任意频率的信号。LED 亮度、电机转速、声音音调、电源电压……所有需要&quot;连续调节&quot;的场景，PWM 都能搞定。</p>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>下一步</strong>：学会了 PWM，可以学 <a class="link" href="/p/at32-dma-flash-to-sram/" >DMA</a>，了解如何用 DMA 配合定时器实现更高级的波形生成。</p>
+</blockquote>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/pwm/">Pwm</a>
+        
+            <a href="/tags/%E5%AE%9A%E6%97%B6%E5%99%A8/">定时器</a>
+        
+            <a href="/tags/tmr3/">TMR3</a>
+        
+            <a href="/tags/%E5%8D%A0%E7%A9%BA%E6%AF%94/">占空比</a>
+        
+            <a href="/tags/at32f403a/">AT32F403A</a>
+        
+    </section>
+
+
+    <section class="article-lastmod">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <span>
+            最后更新于 Sep 08, 2026 16:03 &#43;0800
+        </span>
+    </section></footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/at32-tmr-6-%E6%AD%A5%E6%8D%A2%E7%9B%B8-bldc/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AT32 TMR — 6 步换相 (BLDC)</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/at32-tmr-7-%E8%B7%AF-pwm-%E8%BE%93%E5%87%BA/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AT32 TMR — 7 路 PWM 输出</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/at32-tmr-dma-%E7%AA%81%E5%8F%91%E4%BC%A0%E8%BE%93/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AT32 TMR — DMA 突发传输</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/at32-tmr-pwm-%E8%BE%93%E5%85%A5-dma/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AT32 TMR — PWM 输入 DMA</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/at32-tmr-pwm-%E8%BE%93%E5%85%A5%E6%8D%95%E8%8E%B7/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AT32 TMR — PWM 输入捕获</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="ClingYang/ClingYang.github.io"
+        issue-term="pathname"
+        
+        label="💬comment"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2026 CLing
+    </section>
+    
+    <section class="powerby">
+        
+            世界是你们 <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<style>
+    #TableOfContents > ul, ol {
+        ul, ol {
+            display: none;
+        }
+        .open {
+            display: block;
+        }
+    }
+</style>
+
+<script>
+    function initTocHide() {
+        
+        let toc = document.querySelector(".widget--toc");
+        if (!toc) {
+            return;
+        }
+        
+        window.addEventListener('scroll', function() {
+            
+            let currentLi = document.querySelector(".active-class");
+            if (!currentLi) {
+                return
+            }
+            
+            let elementsByClassName = document.querySelectorAll(".open");
+            if (elementsByClassName.length > 0) {
+                elementsByClassName.forEach((ul) => {
+                    ul.classList.remove("open")
+                })
+            }
+            
+            if (currentLi.children.length > 1) {
+                currentLi.children[1].classList.add("open")
+            }
+            
+            let ul = currentLi.parentElement;
+            do {
+                ul.classList.add("open");
+                ul = ul.parentElement.parentElement
+            } while (ul !== undefined && (ul.localName === 'ul' || ul.localName === 'ol'))
+        });
+    }
+    initTocHide()
+</script>
+
+    </body>
+</html>

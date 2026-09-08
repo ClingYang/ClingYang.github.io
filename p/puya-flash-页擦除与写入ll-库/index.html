@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="PUYA PY32F0xx_Firmware V1.5.0 内部 Flash 页擦除与写入（FLASH_PageEraseAndWrite）示例教学（LL 库版本）">
+<title>PUYA FLASH — 页擦除与写入（LL 库）</title>
+
+<link rel='canonical' href='https://clingyang.github.io/p/puya-flash-%E9%A1%B5%E6%93%A6%E9%99%A4%E4%B8%8E%E5%86%99%E5%85%A5ll-%E5%BA%93/'>
+
+<link rel="stylesheet" href="/scss/style.min.e14f3ba93baae65b2aef2339f32b6f25d7a0184785ebf4f6bd7d3376ae5dc2d4.css"><meta property='og:title' content="PUYA FLASH — 页擦除与写入（LL 库）">
+<meta property='og:description' content="PUYA PY32F0xx_Firmware V1.5.0 内部 Flash 页擦除与写入（FLASH_PageEraseAndWrite）示例教学（LL 库版本）">
+<meta property='og:url' content='https://clingyang.github.io/p/puya-flash-%E9%A1%B5%E6%93%A6%E9%99%A4%E4%B8%8E%E5%86%99%E5%85%A5ll-%E5%BA%93/'>
+<meta property='og:site_name' content='CLing'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='FLASH_PageEraseAndWrite' /><meta property='article:tag' content='flash' /><meta property='article:tag' content='V1.5.0' /><meta property='article:tag' content='PY32F030' /><meta property='article:tag' content='LL' /><meta property='article:published_time' content='2026-09-08T14:52:21&#43;08:00'/><meta property='article:modified_time' content='2026-09-08T16:31:23&#43;08:00'/>
+<meta name="twitter:title" content="PUYA FLASH — 页擦除与写入（LL 库）">
+<meta name="twitter:description" content="PUYA PY32F0xx_Firmware V1.5.0 内部 Flash 页擦除与写入（FLASH_PageEraseAndWrite）示例教学（LL 库版本）">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                            height="290" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🏀</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">CLing</a></h1>
+            <h2 class="site-description">你好 欢迎来到我的博客</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>档案</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E6%8A%80%E6%9C%AF%E9%93%BE%E6%8E%A5/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>技术链接</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/excel/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+                
+                <span>Excel教程</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#功能简介">功能简介</a></li>
+    <li><a href="#硬件准备">硬件准备</a></li>
+    <li><a href="#完整代码">完整代码</a></li>
+    <li><a href="#代码分段讲解">代码分段讲解</a>
+      <ol>
+        <li><a href="#1-解锁与时序">1. 解锁与时序</a></li>
+        <li><a href="#2-页擦除时序关键">2. 页擦除时序（关键）</a></li>
+        <li><a href="#3-页编程时序">3. 页编程时序</a></li>
+        <li><a href="#4-校验与加锁">4. 校验与加锁</a></li>
+      </ol>
+    </li>
+    <li><a href="#实验现象">实验现象</a></li>
+    <li><a href="#常见问题">常见问题</a></li>
+    <li><a href="#小结">小结</a></li>
+    <li><a href="#拓展应用">拓展应用</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/puya/" >
+                PUYA
+            </a>
+        
+            <a href="/categories/flash/" >
+                FLASH
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/puya-flash-%E9%A1%B5%E6%93%A6%E9%99%A4%E4%B8%8E%E5%86%99%E5%85%A5ll-%E5%BA%93/">PUYA FLASH — 页擦除与写入（LL 库）</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            PUYA PY32F0xx_Firmware V1.5.0 内部 Flash 页擦除与写入（FLASH_PageEraseAndWrite）示例教学（LL 库版本）
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2026-09-08</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 3 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="flash--页擦除与写入ll-库">FLASH — 页擦除与写入（LL 库）
+</h1><blockquote>
+<p><strong>HAL vs LL</strong>：PUYA 固件库提供 HAL 和 LL 两套 API。</p>
+<ul>
+<li>HAL 库：封装度高，可移植性强，适合快速开发</li>
+<li>LL 库：接近寄存器操作，代码精简效率高，适合性能敏感场景
+本文使用 LL 库版本。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p><strong>固件库</strong>: PY32F0xx_Firmware V1.5.0<br>
+<strong>芯片</strong>: PY32F030（PY32F002A / F003 同库可参考）<br>
+<strong>源文件</strong>: <code>PUYA/PY32F0xx_Firmware_V1.5.0/Projects/PY32F030-STK/Example_LL/FLASH/FLASH_PageEraseAndWrite/Src/main.c</code></p>
+</blockquote>
+<hr>
+<h2 id="功能简介">功能简介
+</h2><p>本示例演示如何<strong>安全地改写片内 Flash</strong>：向 <code>0x08004000</code> 起始的用户区写入一段 64 字的测试数据，掉电后仍可保留。完整流程是：解锁 Flash → 配置编程时序 → 页擦除 → 校验空白 → 按页编程 → 加锁 → 回读校验。按键用于避免每次上电都擦写。</p>
+<p>与 HAL 版（<code>HAL_FLASH_Unlock</code> / <code>HAL_FLASH_Program</code> / <code>HAL_FLASH_Lock</code> + <code>FLASH_EraseInitTypeDef</code>）相比，LL 版把“每次擦除/编程都要等 BUSY、置/清 EOP、使能/关闭页操作”这些细节完全摊开——更接近 Flash 控制器的真实寄存器时序。</p>
+<h2 id="硬件准备">硬件准备
+</h2><ul>
+<li>PY32F030 开发板</li>
+<li>板载用户按键（BUTTON_USER）、绿 LED</li>
+<li>注意：<code>0x08004000</code> 是用户 Flash 区，务必确认没有被你的程序占用（否则会破坏自身代码）</li>
+</ul>
+<h2 id="完整代码">完整代码
+</h2><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span><span class="lnt">113
+</span><span class="lnt">114
+</span><span class="lnt">115
+</span><span class="lnt">116
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;main.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;py32f030xx_ll_Start_Kit.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#define FLASH_USER_START_ADDR   0x08004000
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">const</span> <span class="kt">uint32_t</span> <span class="n">DATA</span><span class="p">[</span><span class="mi">64</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="mh">0x01010101</span><span class="p">,</span> <span class="mh">0x23456789</span><span class="p">,</span> <span class="mh">0x3456789A</span><span class="p">,</span> <span class="mh">0x456789AB</span><span class="p">,</span> <span class="cm">/* ... 共 64 字 ... */</span>
+</span></span><span class="line"><span class="cl">  <span class="mh">0x23456789</span><span class="p">,</span> <span class="mh">0xAAAAAAAA</span><span class="p">,</span> <span class="mh">0x55555555</span><span class="p">,</span> <span class="mh">0x23456789</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">APP_SystemClockConfig</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">APP_FlashErase</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">APP_FlashProgram</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">APP_FlashBlank</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">APP_FlashVerify</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">APP_SystemClockConfig</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nf">LL_APB1_GRP2_EnableClock</span><span class="p">(</span><span class="n">LL_APB1_GRP2_PERIPH_SYSCFG</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">LL_APB1_GRP1_EnableClock</span><span class="p">(</span><span class="n">LL_APB1_GRP1_PERIPH_PWR</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nf">BSP_LED_Init</span><span class="p">(</span><span class="n">LED_GREEN</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">BSP_PB_Init</span><span class="p">(</span><span class="n">BUTTON_USER</span><span class="p">,</span> <span class="n">BUTTON_MODE_GPIO</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="nf">BSP_PB_GetState</span><span class="p">(</span><span class="n">BUTTON_USER</span><span class="p">))</span> <span class="p">{}</span>   <span class="cm">/* 等按键，避免每次上电都擦写 */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nf">LL_FLASH_Unlock</span><span class="p">(</span><span class="n">FLASH</span><span class="p">);</span>                    <span class="cm">/* 解锁 Flash */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">LL_FLASH_TIMMING_SEQUENCE_CONFIG_24M</span><span class="p">();</span>    <span class="cm">/* 按 24MHz 配置编程时序 */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nf">APP_FlashErase</span><span class="p">();</span>     <span class="cm">/* 页擦除 */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">APP_FlashBlank</span><span class="p">();</span>     <span class="cm">/* 校验空白 */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">APP_FlashProgram</span><span class="p">();</span>   <span class="cm">/* 写数据 */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">LL_FLASH_Lock</span><span class="p">(</span><span class="n">FLASH</span><span class="p">);</span> <span class="cm">/* 加锁 */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nf">APP_FlashVerify</span><span class="p">();</span>    <span class="cm">/* 回读校验 */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">BSP_LED_On</span><span class="p">(</span><span class="n">LED_GREEN</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm">  * @brief  页擦除：逐页擦到覆盖完数据区
+</span></span></span><span class="line"><span class="cl"><span class="cm">  */</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">APP_FlashErase</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">uint32_t</span> <span class="n">start</span> <span class="o">=</span> <span class="n">FLASH_USER_START_ADDR</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">uint32_t</span> <span class="n">end</span>   <span class="o">=</span> <span class="n">FLASH_USER_START_ADDR</span> <span class="o">+</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">DATA</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="n">start</span> <span class="o">&lt;</span> <span class="n">end</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="nf">LL_FLASH_IsActiveFlag_BUSY</span><span class="p">(</span><span class="n">FLASH</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">);</span>   <span class="cm">/* 等不忙 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">LL_FLASH_EnableIT_EOP</span><span class="p">(</span><span class="n">FLASH</span><span class="p">);</span>                     <span class="cm">/* 使能结束中断标志 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">LL_FLASH_EnablePageErase</span><span class="p">(</span><span class="n">FLASH</span><span class="p">);</span>                  <span class="cm">/* 进入页擦除模式 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">LL_FLASH_SetEraseAddress</span><span class="p">(</span><span class="n">FLASH</span><span class="p">,</span> <span class="n">start</span><span class="p">);</span>           <span class="cm">/* 设置擦除地址 */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="nf">LL_FLASH_IsActiveFlag_BUSY</span><span class="p">(</span><span class="n">FLASH</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">);</span>   <span class="cm">/* 等擦完 */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="nf">LL_FLASH_IsActiveFlag_EOP</span><span class="p">(</span><span class="n">FLASH</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">);</span>    <span class="cm">/* 等 EOP */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">LL_FLASH_ClearFlag_EOP</span><span class="p">(</span><span class="n">FLASH</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">LL_FLASH_DisableIT_EOP</span><span class="p">(</span><span class="n">FLASH</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">LL_FLASH_DisablePageErase</span><span class="p">(</span><span class="n">FLASH</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">start</span> <span class="o">+=</span> <span class="n">FLASH_PAGE_SIZE</span><span class="p">;</span>                         <span class="cm">/* 指向下一页 */</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm">  * @brief  按页编程
+</span></span></span><span class="line"><span class="cl"><span class="cm">  */</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">APP_FlashProgram</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">uint32_t</span> <span class="n">start</span> <span class="o">=</span> <span class="n">FLASH_USER_START_ADDR</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">uint32_t</span> <span class="n">end</span>   <span class="o">=</span> <span class="n">FLASH_USER_START_ADDR</span> <span class="o">+</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">DATA</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">uint32_t</span> <span class="o">*</span><span class="n">src</span> <span class="o">=</span> <span class="p">(</span><span class="kt">uint32_t</span> <span class="o">*</span><span class="p">)</span><span class="n">DATA</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="n">start</span> <span class="o">&lt;</span> <span class="n">end</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="nf">LL_FLASH_IsActiveFlag_BUSY</span><span class="p">(</span><span class="n">FLASH</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">LL_FLASH_EnableIT_EOP</span><span class="p">(</span><span class="n">FLASH</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">LL_FLASH_EnablePageProgram</span><span class="p">(</span><span class="n">FLASH</span><span class="p">);</span>                <span class="cm">/* 进入页编程模式 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">LL_FLASH_PageProgram</span><span class="p">(</span><span class="n">FLASH</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">src</span><span class="p">);</span>          <span class="cm">/* 写一页 */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="nf">LL_FLASH_IsActiveFlag_BUSY</span><span class="p">(</span><span class="n">FLASH</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="nf">LL_FLASH_IsActiveFlag_EOP</span><span class="p">(</span><span class="n">FLASH</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">LL_FLASH_ClearFlag_EOP</span><span class="p">(</span><span class="n">FLASH</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">LL_FLASH_DisableIT_EOP</span><span class="p">(</span><span class="n">FLASH</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">LL_FLASH_DisablePageProgram</span><span class="p">(</span><span class="n">FLASH</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">start</span> <span class="o">+=</span> <span class="n">FLASH_PAGE_SIZE</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">src</span>   <span class="o">+=</span> <span class="n">FLASH_PAGE_SIZE</span> <span class="o">/</span> <span class="mi">4</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm">  * @brief  空白校验：擦除后应为全 0xFFFFFFFF
+</span></span></span><span class="line"><span class="cl"><span class="cm">  */</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">APP_FlashBlank</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">uint32_t</span> <span class="n">addr</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="n">addr</span> <span class="o">&lt;</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">DATA</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="mh">0xFFFFFFFF</span> <span class="o">!=</span> <span class="nf">HW32_REG</span><span class="p">(</span><span class="n">FLASH_USER_START_ADDR</span> <span class="o">+</span> <span class="n">addr</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">      <span class="nf">APP_ErrorHandler</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">addr</span> <span class="o">+=</span> <span class="mi">4</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm">  * @brief  回读校验：与源数据一致
+</span></span></span><span class="line"><span class="cl"><span class="cm">  */</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">APP_FlashVerify</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">uint32_t</span> <span class="n">addr</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="n">addr</span> <span class="o">&lt;</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">DATA</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">DATA</span><span class="p">[</span><span class="n">addr</span> <span class="o">/</span> <span class="mi">4</span><span class="p">]</span> <span class="o">!=</span> <span class="nf">HW32_REG</span><span class="p">(</span><span class="n">FLASH_USER_START_ADDR</span> <span class="o">+</span> <span class="n">addr</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">      <span class="nf">APP_ErrorHandler</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">addr</span> <span class="o">+=</span> <span class="mi">4</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* APP_SystemClockConfig 配置 HSI=24MHz；APP_ErrorHandler 略 */</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="代码分段讲解">代码分段讲解
+</h2><h3 id="1-解锁与时序">1. 解锁与时序
+</h3><p>Flash 上电默认<strong>加锁</strong>，写操作前必须 <code>LL_FLASH_Unlock()</code>。此外有个 LL 特有、极易遗漏的步骤：<code>LL_FLASH_TIMMING_SEQUENCE_CONFIG_24M()</code>——它按当前 HSI 频率（24MHz）配置 Flash 编程等待时序。频率配错会导致编程失败或读出错误。</p>
+<h3 id="2-页擦除时序关键">2. 页擦除时序（关键）
+</h3><p>PY32 的 Flash 只能<strong>按页擦除</strong>（不能字节擦除），擦前须全 1。LL 的擦除动作由一连串寄存器操作组成：</p>
+<ol>
+<li>等 <code>BUSY=0</code>；</li>
+<li>使能 EOP 标志；</li>
+<li><code>LL_FLASH_EnablePageErase()</code> 进入页擦除模式；</li>
+<li><code>LL_FLASH_SetEraseAddress()</code> 设地址；</li>
+<li>再等 <code>BUSY=0</code> 与 <code>EOP=1</code>，清 EOP、退出擦除模式。</li>
+</ol>
+<p>注意每擦一页都要重复这套时序，且地址按 <code>FLASH_PAGE_SIZE</code> 递增。</p>
+<h3 id="3-页编程时序">3. 页编程时序
+</h3><p>写入同理：进入页编程模式 → <code>LL_FLASH_PageProgram()</code> 写一页 → 等 BUSY/EOP → 清标志、退出。HAL 把这套时序封在 <code>HAL_FLASH_Program()</code> 里，LL 则逐句暴露，你能清楚看到“模式开关”和“EOP 轮询”的存在。</p>
+<h3 id="4-校验与加锁">4. 校验与加锁
+</h3><ul>
+<li>擦除后 <code>APP_FlashBlank()</code> 确认全是 <code>0xFFFFFFFF</code>（否则说明没擦干净，进错误）。</li>
+<li>编程后 <code>APP_FlashVerify()</code> 回读与源数据比对。</li>
+<li>最后 <code>LL_FLASH_Lock()</code> 重新加锁，防止误操作改写代码区。</li>
+</ul>
+<h2 id="实验现象">实验现象
+</h2><ol>
+<li>下载程序，复位后按住用户按键触发擦写流程（或先不按，等决定时机）。</li>
+<li>流程执行完且校验通过 → 板载绿 LED 常亮。</li>
+<li>掉电再上电，<code>0x08004000</code> 处的数据依然保留（可用调试器 memory 窗口查看）。</li>
+<li>若校验失败 → 程序停在 <code>APP_ErrorHandler()</code> 死循环（LED 不亮）。</li>
+</ol>
+<h2 id="常见问题">常见问题
+</h2><ol>
+<li>
+<p><strong>写入后读出来是 0x00000000 或乱码？</strong></p>
+<ul>
+<li>几乎都是漏了 <code>LL_FLASH_TIMMING_SEQUENCE_CONFIG_24M()</code>，或系统时钟实际频率与设置不符。</li>
+<li>确认解锁 <code>LL_FLASH_Unlock()</code> 在写操作之前。</li>
+</ul>
+</li>
+<li>
+<p><strong>擦写把程序搞挂了？</strong></p>
+<ul>
+<li>确认 <code>FLASH_USER_START_ADDR(0x08004000)</code> 不在你程序的占用区间内。用超过芯片容量的地址也会失败。</li>
+</ul>
+</li>
+<li>
+<p><strong>想存用户配置（如校准值）？</strong></p>
+<ul>
+<li>把 <code>DATA[]</code> 换成你的结构体，注意按 4 字节对齐；读取时直接从该地址 <code>HW32_REG()</code> 读回。</li>
+</ul>
+</li>
+</ol>
+<h2 id="小结">小结
+</h2><ul>
+<li>LL 写 Flash 范式：<strong>解锁 → 配时序 → 循环(等BUSY→使能页操作→设地址→等EOP→清标志)擦除/编程 → 加锁 → 校验</strong>。</li>
+<li>相比 HAL，LL 把“页操作模式开关”“EOP 标志轮询”等底层时序完全摊开，理解更深。</li>
+<li>“先配时序、再解锁、按页操作、最后加锁”是必须遵守的铁律。</li>
+</ul>
+<h2 id="拓展应用">拓展应用
+</h2><ul>
+<li>把示例改成“只在数据变化时才擦写”，延长 Flash 寿命（Flash 擦写次数有限）。</li>
+<li>配合“双备份+版本号”做掉电安全的参数存储。</li>
+<li>用扇区擦除（<code>FLASH_SectorEraseAndWrite</code> 示例）适配不同颗粒。</li>
+<li>结合 IAP（在应用中编程）做固件远程升级。</li>
+</ul>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/flash_pageeraseandwrite/">FLASH_PageEraseAndWrite</a>
+        
+            <a href="/tags/flash/">Flash</a>
+        
+            <a href="/tags/v1.5.0/">V1.5.0</a>
+        
+            <a href="/tags/py32f030/">PY32F030</a>
+        
+            <a href="/tags/ll/">LL</a>
+        
+    </section>
+
+
+    <section class="article-lastmod">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <span>
+            最后更新于 Sep 08, 2026 16:31 &#43;0800
+        </span>
+    </section></footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/puya-flash-%E9%A1%B5%E6%93%A6%E9%99%A4%E4%B8%8E%E5%86%99%E5%85%A5hal-%E5%BA%93/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA FLASH — 页擦除与写入（HAL 库）</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/puya-flash-flash_pageeraseandwrite/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA FLASH — FLASH_PageEraseAndWrite</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/puya-flash-flash_pageeraseandwrite/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA FLASH — FLASH_PageEraseAndWrite</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/puya-flash-flash_sectoreraseandwrite/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA FLASH — FLASH_SectorEraseAndWrite</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/puya-adc-%E5%8D%95%E9%80%9A%E9%81%93%E8%BD%AC%E6%8D%A2%E5%86%85%E9%83%A8%E6%B8%A9%E5%BA%A6%E4%BC%A0%E6%84%9F%E5%99%A8ll-%E5%BA%93/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA ADC — 单通道转换（内部温度传感器）（LL 库）</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="ClingYang/ClingYang.github.io"
+        issue-term="pathname"
+        
+        label="💬comment"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2026 CLing
+    </section>
+    
+    <section class="powerby">
+        
+            世界是你们 <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<style>
+    #TableOfContents > ul, ol {
+        ul, ol {
+            display: none;
+        }
+        .open {
+            display: block;
+        }
+    }
+</style>
+
+<script>
+    function initTocHide() {
+        
+        let toc = document.querySelector(".widget--toc");
+        if (!toc) {
+            return;
+        }
+        
+        window.addEventListener('scroll', function() {
+            
+            let currentLi = document.querySelector(".active-class");
+            if (!currentLi) {
+                return
+            }
+            
+            let elementsByClassName = document.querySelectorAll(".open");
+            if (elementsByClassName.length > 0) {
+                elementsByClassName.forEach((ul) => {
+                    ul.classList.remove("open")
+                })
+            }
+            
+            if (currentLi.children.length > 1) {
+                currentLi.children[1].classList.add("open")
+            }
+            
+            let ul = currentLi.parentElement;
+            do {
+                ul.classList.add("open");
+                ul = ul.parentElement.parentElement
+            } while (ul !== undefined && (ul.localName === 'ul' || ul.localName === 'ol'))
+        });
+    }
+    initTocHide()
+</script>
+
+    </body>
+</html>

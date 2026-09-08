@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="AT32F403A SPI 接口读写 W25Q 系列 Flash 芯片，学会 SPI 通信和外部存储操作">
+<title>AT32 SPI — 读写 W25Q Flash（外部存储芯片）</title>
+
+<link rel='canonical' href='https://clingyang.github.io/p/at32-spi-%E8%AF%BB%E5%86%99-w25q-flash%E5%A4%96%E9%83%A8%E5%AD%98%E5%82%A8%E8%8A%AF%E7%89%87/'>
+
+<link rel="stylesheet" href="/scss/style.min.e14f3ba93baae65b2aef2339f32b6f25d7a0184785ebf4f6bd7d3376ae5dc2d4.css"><meta property='og:title' content="AT32 SPI — 读写 W25Q Flash（外部存储芯片）">
+<meta property='og:description' content="AT32F403A SPI 接口读写 W25Q 系列 Flash 芯片，学会 SPI 通信和外部存储操作">
+<meta property='og:url' content='https://clingyang.github.io/p/at32-spi-%E8%AF%BB%E5%86%99-w25q-flash%E5%A4%96%E9%83%A8%E5%AD%98%E5%82%A8%E8%8A%AF%E7%89%87/'>
+<meta property='og:site_name' content='CLing'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='SPI' /><meta property='article:tag' content='W25Q' /><meta property='article:tag' content='Flash' /><meta property='article:tag' content='外部存储' /><meta property='article:tag' content='AT32F403A' /><meta property='article:published_time' content='2026-09-08T15:03:00&#43;08:00'/><meta property='article:modified_time' content='2026-09-08T16:03:27&#43;08:00'/>
+<meta name="twitter:title" content="AT32 SPI — 读写 W25Q Flash（外部存储芯片）">
+<meta name="twitter:description" content="AT32F403A SPI 接口读写 W25Q 系列 Flash 芯片，学会 SPI 通信和外部存储操作">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                            height="290" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🏀</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">CLing</a></h1>
+            <h2 class="site-description">你好 欢迎来到我的博客</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>档案</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E6%8A%80%E6%9C%AF%E9%93%BE%E6%8E%A5/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>技术链接</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/excel/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+                
+                <span>Excel教程</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#这个实验是干嘛的">这个实验是干嘛的？</a></li>
+    <li><a href="#硬件准备">硬件准备</a></li>
+    <li><a href="#spi-基础知识">SPI 基础知识</a></li>
+    <li><a href="#完整代码">完整代码</a></li>
+    <li><a href="#代码分段讲解">代码分段讲解</a>
+      <ol>
+        <li><a href="#1-初始化-spi-flash">1. 初始化 SPI Flash</a></li>
+        <li><a href="#2-读取芯片-id">2. 读取芯片 ID</a></li>
+        <li><a href="#3-擦除扇区">3. 擦除扇区</a></li>
+        <li><a href="#4-写入数据">4. 写入数据</a></li>
+        <li><a href="#5-读取数据">5. 读取数据</a></li>
+      </ol>
+    </li>
+    <li><a href="#实验现象">实验现象</a></li>
+    <li><a href="#常见问题">常见问题</a>
+      <ol>
+        <li><a href="#q-读到的-id-是-0x0000-或-0xffff">Q: 读到的 ID 是 0x0000 或 0xFFFF？</a></li>
+        <li><a href="#q-写入后读出来的数据不对">Q: 写入后读出来的数据不对？</a></li>
+        <li><a href="#q-想存储大文件怎么办">Q: 想存储大文件怎么办？</a></li>
+      </ol>
+    </li>
+    <li><a href="#小结">小结</a></li>
+    <li><a href="#学了-spi-能做什么">学了 SPI 能做什么？</a>
+      <ol>
+        <li><a href="#存储与显示">存储与显示</a></li>
+        <li><a href="#传感器与通信">传感器与通信</a></li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/at32/" >
+                AT32
+            </a>
+        
+            <a href="/categories/spi/" >
+                SPI
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/at32-spi-%E8%AF%BB%E5%86%99-w25q-flash%E5%A4%96%E9%83%A8%E5%AD%98%E5%82%A8%E8%8A%AF%E7%89%87/">AT32 SPI — 读写 W25Q Flash（外部存储芯片）</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            AT32F403A SPI 接口读写 W25Q 系列 Flash 芯片，学会 SPI 通信和外部存储操作
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2026-09-08</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 4 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="spi--读写-w25q-flash">SPI — 读写 W25Q Flash
+</h1><blockquote>
+<p><strong>难度</strong>: ⭐⭐（需要了解 SPI 基本概念）<br>
+<strong>固件库</strong>: AT32F403A_407_Firmware_Library V2.2.2<br>
+<strong>源文件</strong>: <code>project/at_start_f403a/examples/spi/w25q_flash/src/main.c</code></p>
+</blockquote>
+<hr>
+<h2 id="这个实验是干嘛的">这个实验是干嘛的？
+</h2><p>MCU 内部的 Flash 空间有限（几百 KB），存不下大文件（字库、图片、音频）。这时候就需要<strong>外部 Flash 芯片</strong>。</p>
+<p>W25Q 系列是最常用的 SPI Flash，容量从 1MB 到 256MB 都有，价格便宜（几毛钱），接口简单（4 根线）。</p>
+<p><strong>本实验做的事情</strong>：</p>
+<ol>
+<li>通过 SPI 读取 Flash 芯片的 ID（确认芯片存在且型号正确）</li>
+<li>擦除一个扇区（Flash 必须先擦后写）</li>
+<li>写入 512 字节测试数据</li>
+<li>读回数据并与原始数据比对</li>
+<li>数据一致 → LED 亮（成功），不一致 → LED 灭（失败）</li>
+</ol>
+<hr>
+<h2 id="硬件准备">硬件准备
+</h2><p>你需要一个 <strong>W25Q Flash 模块</strong>（淘宝几块钱）：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">开发板          W25Q 模块
+</span></span><span class="line"><span class="cl">  PA4 (CS)  ──→  CS
+</span></span><span class="line"><span class="cl">  PA5 (SCK) ──→  CLK
+</span></span><span class="line"><span class="cl">  PA6 (MISO)←──  DO
+</span></span><span class="line"><span class="cl">  PA7 (MOSI)──→  DI
+</span></span><span class="line"><span class="cl">  3.3V      ──→  VCC
+</span></span><span class="line"><span class="cl">  GND       ──→  GND
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>注意</strong>：</p>
+<ul>
+<li>CS 是片选信号，拉低选中芯片</li>
+<li>SPI 通信必须共地</li>
+<li>W25Q 供电 3.3V，不要接 5V</li>
+</ul>
+<hr>
+<h2 id="spi-基础知识">SPI 基础知识
+</h2><p>SPI 是一种<strong>同步、全双工</strong>的串行通信接口，只需要 4 根线：</p>
+<div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">信号</th>
+					<th style="text-align: left">全称</th>
+					<th style="text-align: left">方向</th>
+					<th style="text-align: left">说明</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left">SCK</td>
+					<td style="text-align: left">Serial Clock</td>
+					<td style="text-align: left">主→从</td>
+					<td style="text-align: left">时钟信号，主机产生</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">MOSI</td>
+					<td style="text-align: left">Master Out Slave In</td>
+					<td style="text-align: left">主→从</td>
+					<td style="text-align: left">主机发数据给从机</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">MISO</td>
+					<td style="text-align: left">Master In Slave Out</td>
+					<td style="text-align: left">从→主</td>
+					<td style="text-align: left">从机发数据给主机</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">CS</td>
+					<td style="text-align: left">Chip Select</td>
+					<td style="text-align: left">主→从</td>
+					<td style="text-align: left">片选，拉低选中从机</td>
+			</tr>
+	</tbody>
+</table></div>
+<p><strong>SPI 的特点</strong>：</p>
+<ul>
+<li>速度比 I2C 快得多（可达几十 MHz）</li>
+<li>全双工：主机和从机可以同时收发</li>
+<li>每个从机需要一根独立的 CS 线</li>
+</ul>
+<hr>
+<h2 id="完整代码">完整代码
+</h2><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;at32f403a_407_board.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;at32f403a_407_clock.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;spi_flash.h&#34;    // W25Q 驱动（官方封装好的）</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 测试地址和缓冲区大小 */</span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define FLASH_TEST_ADDR    0x1000    </span><span class="c1">// 测试起始地址
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define BUF_SIZE           0x256     </span><span class="c1">// 512 字节
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="n">tx_buffer</span><span class="p">[</span><span class="n">BUF_SIZE</span><span class="p">];</span>   <span class="c1">// 发送缓冲区
+</span></span></span><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="n">rx_buffer</span><span class="p">[</span><span class="n">BUF_SIZE</span><span class="p">];</span>   <span class="c1">// 接收缓冲区
+</span></span></span><span class="line"><span class="cl"><span class="k">volatile</span> <span class="n">error_status</span> <span class="n">transfer_status</span> <span class="o">=</span> <span class="n">ERROR</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 填充测试数据：0x00, 0x01, 0x02, ... 0xFF */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">tx_data_fill</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">uint32_t</span> <span class="n">i</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span><span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">BUF_SIZE</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">tx_buffer</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 缓冲区比对 */</span>
+</span></span><span class="line"><span class="cl"><span class="n">error_status</span> <span class="nf">buffer_compare</span><span class="p">(</span><span class="kt">uint8_t</span><span class="o">*</span> <span class="n">p1</span><span class="p">,</span> <span class="kt">uint8_t</span><span class="o">*</span> <span class="n">p2</span><span class="p">,</span> <span class="kt">uint16_t</span> <span class="n">len</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span><span class="p">(</span><span class="n">len</span><span class="o">--</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span><span class="p">(</span><span class="o">*</span><span class="n">p1</span> <span class="o">!=</span> <span class="o">*</span><span class="n">p2</span><span class="p">)</span> <span class="k">return</span> <span class="n">ERROR</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">p1</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">p2</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">SUCCESS</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">__IO</span> <span class="kt">uint32_t</span> <span class="n">flash_id</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nf">system_clock_config</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">at32_board_init</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">tx_data_fill</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">uart_print_init</span><span class="p">(</span><span class="mi">115200</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* ===== 第一步：初始化 SPI Flash ===== */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">spiflash_init</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* ===== 第二步：读取芯片 ID ===== */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">flash_id</span> <span class="o">=</span> <span class="nf">spiflash_read_id</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 验证 ID 是否是 W25Q 系列 */</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span><span class="p">(</span><span class="n">flash_id</span> <span class="o">!=</span> <span class="n">W25Q128</span> <span class="o">&amp;&amp;</span> <span class="n">flash_id</span> <span class="o">!=</span> <span class="n">W25Q64</span> <span class="o">&amp;&amp;</span>
+</span></span><span class="line"><span class="cl">     <span class="n">flash_id</span> <span class="o">!=</span> <span class="n">W25Q32</span>  <span class="o">&amp;&amp;</span> <span class="n">flash_id</span> <span class="o">!=</span> <span class="n">W25Q16</span> <span class="o">&amp;&amp;</span> <span class="n">flash_id</span> <span class="o">!=</span> <span class="n">W25Q80</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;flash id check error! id: %x</span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">flash_id</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// LED 快闪报错
+</span></span></span><span class="line"><span class="cl">    <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">50</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nf">at32_led_toggle</span><span class="p">(</span><span class="n">LED2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="nf">at32_led_toggle</span><span class="p">(</span><span class="n">LED3</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="nf">delay_ms</span><span class="p">(</span><span class="mi">200</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">else</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;flash id check success! id: %x</span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">flash_id</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* ===== 第三步：擦除扇区 ===== */</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// Flash 必须先擦后写！擦除后所有字节变成 0xFF
+</span></span></span><span class="line"><span class="cl">  <span class="nf">spiflash_sector_erase</span><span class="p">(</span><span class="n">FLASH_TEST_ADDR</span> <span class="o">/</span> <span class="n">SPIF_SECTOR_SIZE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* ===== 第四步：写入数据 ===== */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">spiflash_write</span><span class="p">(</span><span class="n">tx_buffer</span><span class="p">,</span> <span class="n">FLASH_TEST_ADDR</span><span class="p">,</span> <span class="n">BUF_SIZE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* ===== 第五步：读回数据 ===== */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">spiflash_read</span><span class="p">(</span><span class="n">rx_buffer</span><span class="p">,</span> <span class="n">FLASH_TEST_ADDR</span><span class="p">,</span> <span class="n">BUF_SIZE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 打印读到的数据 */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;Read Data: &#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">BUF_SIZE</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;%x &#34;</span><span class="p">,</span> <span class="n">rx_buffer</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* ===== 第六步：比对验证 ===== */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">transfer_status</span> <span class="o">=</span> <span class="nf">buffer_compare</span><span class="p">(</span><span class="n">rx_buffer</span><span class="p">,</span> <span class="n">tx_buffer</span><span class="p">,</span> <span class="n">BUF_SIZE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">if</span><span class="p">(</span><span class="n">transfer_status</span> <span class="o">==</span> <span class="n">SUCCESS</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\r\n</span><span class="s">flash data read write success!</span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">at32_led_on</span><span class="p">(</span><span class="n">LED2</span><span class="p">);</span>   <span class="c1">// LED2 亮 = 成功
+</span></span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">else</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\r\n</span><span class="s">flash data read write ERROR!</span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">at32_led_off</span><span class="p">(</span><span class="n">LED2</span><span class="p">);</span>  <span class="c1">// LED2 灭 = 失败
+</span></span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">while</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="代码分段讲解">代码分段讲解
+</h2><h3 id="1-初始化-spi-flash">1. 初始化 SPI Flash
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">spiflash_init</span><span class="p">();</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这行做了什么：</p>
+<ul>
+<li>配置 SPI1 为主机模式</li>
+<li>配置时钟极性（CPOL）和相位（CPHA）—— W25Q 要求 CPOL=0, CPHA=0</li>
+<li>配置 CS 引脚（PA4）为 GPIO 输出</li>
+<li>拉高 CS（不选中芯片）</li>
+</ul>
+<h3 id="2-读取芯片-id">2. 读取芯片 ID
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">flash_id</span> <span class="o">=</span> <span class="nf">spiflash_read_id</span><span class="p">();</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>每个 W25Q 芯片都有一个唯一的制造商 ID + 设备 ID：</p>
+<ul>
+<li>W25Q80 → <code>0xEF14</code></li>
+<li>W25Q16 → <code>0xEF15</code></li>
+<li>W25Q32 → <code>0xEF16</code></li>
+<li>W25Q64 → <code>0xEF17</code></li>
+<li>W25Q128 → <code>0xEF18</code></li>
+</ul>
+<p>读 ID 的命令是 <code>0x90</code>，SPI 时序：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">主机发送: [0x90] [0x00] [0x00] [0x00] [dummy] [dummy]
+</span></span><span class="line"><span class="cl">从机返回: [dummy] [dummy] [dummy] [dummy] [制造商ID] [设备ID]
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="3-擦除扇区">3. 擦除扇区
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">spiflash_sector_erase</span><span class="p">(</span><span class="n">FLASH_TEST_ADDR</span> <span class="o">/</span> <span class="n">SPIF_SECTOR_SIZE</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>Flash 的铁律：必须先擦后写！</strong></p>
+<p>Flash 只能把 1 写成 0，不能把 0 写成 1。所以写之前必须先擦除（把所有位变成 1 = 0xFF）。</p>
+<p>W25Q 的最小擦除单位是<strong>扇区</strong>（4KB）。擦除命令是 <code>0x20</code>。</p>
+<h3 id="4-写入数据">4. 写入数据
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">spiflash_write</span><span class="p">(</span><span class="n">tx_buffer</span><span class="p">,</span> <span class="n">FLASH_TEST_ADDR</span><span class="p">,</span> <span class="n">BUF_SIZE</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>写入流程：</p>
+<ol>
+<li>发送写使能命令（<code>0x06</code>）— 必须先使能才能写</li>
+<li>发送页编程命令（<code>0x02</code>）+ 地址 + 数据</li>
+<li>等待写入完成（读状态寄存器，等 BUSY 位清零）</li>
+</ol>
+<p><strong>注意</strong>：W25Q 一次最多写 256 字节（一页），跨页需要分多次写。</p>
+<h3 id="5-读取数据">5. 读取数据
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">spiflash_read</span><span class="p">(</span><span class="n">rx_buffer</span><span class="p">,</span> <span class="n">FLASH_TEST_ADDR</span><span class="p">,</span> <span class="n">BUF_SIZE</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>读取最简单：发送读命令（<code>0x03</code>）+ 地址，然后持续读取数据。没有长度限制。</p>
+<hr>
+<h2 id="实验现象">实验现象
+</h2><p>串口输出：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">flash id check success! id: ef16
+</span></span><span class="line"><span class="cl">Read Data: 0 1 2 3 4 5 6 7 8 9 a b c d e f 10 11 ...
+</span></span><span class="line"><span class="cl">flash data read write success!
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>LED2 亮起表示读写成功</li>
+<li>如果 LED 快闪，说明芯片 ID 读取失败（接线问题）</li>
+</ul>
+<hr>
+<h2 id="常见问题">常见问题
+</h2><h3 id="q-读到的-id-是-0x0000-或-0xffff">Q: 读到的 ID 是 0x0000 或 0xFFFF？
+</h3><ul>
+<li>检查接线：CS、SCK、MOSI、MISO 是否正确</li>
+<li>检查供电：W25Q 需要 3.3V</li>
+<li>检查 SPI 模式：CPOL=0, CPHA=0</li>
+</ul>
+<h3 id="q-写入后读出来的数据不对">Q: 写入后读出来的数据不对？
+</h3><ul>
+<li>是否先擦除了？Flash 必须先擦后写</li>
+<li>擦除后检查是否全为 0xFF</li>
+<li>写入地址是否对齐（扇区边界 4KB 对齐）</li>
+</ul>
+<h3 id="q-想存储大文件怎么办">Q: 想存储大文件怎么办？
+</h3><ul>
+<li>Flash 文件系统：FatFs + SPI Flash</li>
+<li>或者简单方案：固定地址存储，自己管理地址分配</li>
+</ul>
+<hr>
+<h2 id="小结">小结
+</h2><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">概念</th>
+					<th style="text-align: left">说明</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left">SPI</td>
+					<td style="text-align: left">高速同步串行接口，4 线制</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">W25Q</td>
+					<td style="text-align: left">最常用的 SPI Flash 芯片</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">先擦后写</td>
+					<td style="text-align: left">Flash 的铁律，擦除后全为 0xFF</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">扇区</td>
+					<td style="text-align: left">最小擦除单位，W25Q 是 4KB</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">页写入</td>
+					<td style="text-align: left">一次最多写 256 字节</td>
+			</tr>
+	</tbody>
+</table></div>
+<hr>
+<h2 id="学了-spi-能做什么">学了 SPI 能做什么？
+</h2><p>SPI 是连接&quot;高速外设&quot;的主力接口：</p>
+<h3 id="存储与显示">存储与显示
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">项目</th>
+					<th style="text-align: left">原理</th>
+					<th style="text-align: left">难度</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left"><strong>字库存储</strong></td>
+					<td style="text-align: left">中文字库烧录到 W25Q，LCD 显示中文</td>
+					<td style="text-align: left">⭐⭐⭐</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>图片存储</strong></td>
+					<td style="text-align: left">BMP/JPG 图片存 Flash，LCD 显示</td>
+					<td style="text-align: left">⭐⭐⭐</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>数据记录</strong></td>
+					<td style="text-align: left">传感器数据存 Flash，掉电不丢失</td>
+					<td style="text-align: left">⭐⭐</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>固件升级</strong></td>
+					<td style="text-align: left">新固件存 Flash，IAP 从 Flash 加载运行</td>
+					<td style="text-align: left">⭐⭐⭐⭐</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>LCD 驱动</strong></td>
+					<td style="text-align: left">SPI 接口的 TFT LCD（ST7735、ILI9341）</td>
+					<td style="text-align: left">⭐⭐⭐</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>OLED 显示</strong></td>
+					<td style="text-align: left">SPI 接口的 OLED 屏（SSD1306）</td>
+					<td style="text-align: left">⭐⭐</td>
+			</tr>
+	</tbody>
+</table></div>
+<h3 id="传感器与通信">传感器与通信
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">项目</th>
+					<th style="text-align: left">原理</th>
+					<th style="text-align: left">难度</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left"><strong>SD 卡读写</strong></td>
+					<td style="text-align: left">SPI 模式访问 SD 卡，实现大容量存储</td>
+					<td style="text-align: left">⭐⭐⭐</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>加速度计</strong></td>
+					<td style="text-align: left">SPI 接口的 MEMS 传感器（MPU6050）</td>
+					<td style="text-align: left">⭐⭐⭐</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>LoRa 通信</strong></td>
+					<td style="text-align: left">SPI 接口的 LoRa 模块（SX1278）</td>
+					<td style="text-align: left">⭐⭐⭐⭐</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>以太网</strong></td>
+					<td style="text-align: left">SPI 接口的以太网芯片（W5500）</td>
+					<td style="text-align: left">⭐⭐⭐⭐</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>CAN 控制器</strong></td>
+					<td style="text-align: left">SPI 接口的 CAN 芯片（MCP2515）</td>
+					<td style="text-align: left">⭐⭐⭐</td>
+			</tr>
+	</tbody>
+</table></div>
+<blockquote>
+<p><strong>核心思路</strong>：SPI 的核心优势是<strong>速度快</strong>。Flash、LCD、传感器这些需要大量数据传输的外设，几乎都用 SPI。掌握了 SPI，你就打开了连接各种高速外设的大门。</p>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>下一步</strong>：学会了 SPI，可以学 <a class="link" href="/p/at32-i2c-eeprom/" >I2C 读写 EEPROM</a>，了解另一种常用的低速通信总线。</p>
+</blockquote>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/spi/">SPI</a>
+        
+            <a href="/tags/w25q/">W25Q</a>
+        
+            <a href="/tags/flash/">Flash</a>
+        
+            <a href="/tags/%E5%A4%96%E9%83%A8%E5%AD%98%E5%82%A8/">外部存储</a>
+        
+            <a href="/tags/at32f403a/">AT32F403A</a>
+        
+    </section>
+
+
+    <section class="article-lastmod">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <span>
+            最后更新于 Sep 08, 2026 16:03 &#43;0800
+        </span>
+    </section></footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/at32-flash-%E5%86%85%E9%83%A8-flash-%E8%AF%BB%E5%86%99%E6%8E%89%E7%94%B5%E4%B8%8D%E4%B8%A2%E5%A4%B1%E7%9A%84%E7%94%A8%E6%88%B7%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AT32 FLASH — 内部 Flash 读写（掉电不丢失的用户数据存储）</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/at32-spi-crc-%E6%A0%A1%E9%AA%8C%E8%BD%AE%E8%AF%A2%E4%BC%A0%E8%BE%93/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AT32 SPI — CRC 校验轮询传输</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/at32-spi-%E5%85%A8%E5%8F%8C%E5%B7%A5-dma-jtag-%E5%BC%95%E8%84%9A/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AT32 SPI — 全双工 DMA (JTAG 引脚)</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/at32-spi-%E5%85%A8%E5%8F%8C%E5%B7%A5%E8%BD%AE%E8%AF%A2%E9%80%9A%E4%BF%A1/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AT32 SPI — 全双工轮询通信</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/at32-spi-%E5%8D%8A%E5%8F%8C%E5%B7%A5-dma-jtag-%E5%BC%95%E8%84%9A/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AT32 SPI — 半双工 DMA (JTAG 引脚)</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="ClingYang/ClingYang.github.io"
+        issue-term="pathname"
+        
+        label="💬comment"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2026 CLing
+    </section>
+    
+    <section class="powerby">
+        
+            世界是你们 <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<style>
+    #TableOfContents > ul, ol {
+        ul, ol {
+            display: none;
+        }
+        .open {
+            display: block;
+        }
+    }
+</style>
+
+<script>
+    function initTocHide() {
+        
+        let toc = document.querySelector(".widget--toc");
+        if (!toc) {
+            return;
+        }
+        
+        window.addEventListener('scroll', function() {
+            
+            let currentLi = document.querySelector(".active-class");
+            if (!currentLi) {
+                return
+            }
+            
+            let elementsByClassName = document.querySelectorAll(".open");
+            if (elementsByClassName.length > 0) {
+                elementsByClassName.forEach((ul) => {
+                    ul.classList.remove("open")
+                })
+            }
+            
+            if (currentLi.children.length > 1) {
+                currentLi.children[1].classList.add("open")
+            }
+            
+            let ul = currentLi.parentElement;
+            do {
+                ul.classList.add("open");
+                ul = ul.parentElement.parentElement
+            } while (ul !== undefined && (ul.localName === 'ul' || ul.localName === 'ol'))
+        });
+    }
+    initTocHide()
+</script>
+
+    </body>
+</html>

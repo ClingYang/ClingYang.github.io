@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="PUYA PY32F0xx_Firmware V1.5.0 SPI 全双工主机（SPI_TwoBoards_FullDuplexMaster_DMA）示例教学">
+<title>PUYA SPI — 全双工主机（DMA）（HAL 库）</title>
+
+<link rel='canonical' href='https://clingyang.github.io/p/puya-spi-%E5%85%A8%E5%8F%8C%E5%B7%A5%E4%B8%BB%E6%9C%BAdmahal-%E5%BA%93/'>
+
+<link rel="stylesheet" href="/scss/style.min.e14f3ba93baae65b2aef2339f32b6f25d7a0184785ebf4f6bd7d3376ae5dc2d4.css"><meta property='og:title' content="PUYA SPI — 全双工主机（DMA）（HAL 库）">
+<meta property='og:description' content="PUYA PY32F0xx_Firmware V1.5.0 SPI 全双工主机（SPI_TwoBoards_FullDuplexMaster_DMA）示例教学">
+<meta property='og:url' content='https://clingyang.github.io/p/puya-spi-%E5%85%A8%E5%8F%8C%E5%B7%A5%E4%B8%BB%E6%9C%BAdmahal-%E5%BA%93/'>
+<meta property='og:site_name' content='CLing'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='SPI_TwoBoards_FullDuplexMaster_DMA' /><meta property='article:tag' content='spi' /><meta property='article:tag' content='V1.5.0' /><meta property='article:tag' content='PY32F030' /><meta property='article:tag' content='HAL' /><meta property='article:published_time' content='2026-09-08T14:52:21&#43;08:00'/><meta property='article:modified_time' content='2026-09-08T16:31:23&#43;08:00'/>
+<meta name="twitter:title" content="PUYA SPI — 全双工主机（DMA）（HAL 库）">
+<meta name="twitter:description" content="PUYA PY32F0xx_Firmware V1.5.0 SPI 全双工主机（SPI_TwoBoards_FullDuplexMaster_DMA）示例教学">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                            height="290" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🏀</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">CLing</a></h1>
+            <h2 class="site-description">你好 欢迎来到我的博客</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>档案</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E6%8A%80%E6%9C%AF%E9%93%BE%E6%8E%A5/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>技术链接</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/excel/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+                
+                <span>Excel教程</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#功能简介">功能简介</a></li>
+    <li><a href="#硬件准备">硬件准备</a></li>
+    <li><a href="#完整代码主机部分">完整代码（主机部分）</a></li>
+    <li><a href="#代码分段讲解">代码分段讲解</a>
+      <ol>
+        <li><a href="#1-时钟极性--相位cpol--cpha">1. 时钟极性 / 相位（CPOL / CPHA）</a></li>
+        <li><a href="#2-全双工本质">2. 全双工本质</a></li>
+        <li><a href="#3-dma-vs-轮询">3. DMA vs 轮询</a></li>
+        <li><a href="#4-nss-片选">4. NSS 片选</a></li>
+      </ol>
+    </li>
+    <li><a href="#实验现象">实验现象</a></li>
+    <li><a href="#常见问题">常见问题</a></li>
+    <li><a href="#小结">小结</a></li>
+    <li><a href="#拓展应用">拓展应用</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/puya/" >
+                PUYA
+            </a>
+        
+            <a href="/categories/spi/" >
+                SPI
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/puya-spi-%E5%85%A8%E5%8F%8C%E5%B7%A5%E4%B8%BB%E6%9C%BAdmahal-%E5%BA%93/">PUYA SPI — 全双工主机（DMA）（HAL 库）</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            PUYA PY32F0xx_Firmware V1.5.0 SPI 全双工主机（SPI_TwoBoards_FullDuplexMaster_DMA）示例教学
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2026-09-08</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 2 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="spi--全双工主机dmahal-库">SPI — 全双工主机（DMA）（HAL 库）
+</h1><blockquote>
+<p><strong>固件库</strong>: PY32F0xx_Firmware V1.5.0<br>
+<strong>芯片</strong>: PY32F030<br>
+<strong>源文件</strong>: <code>PUYA/PY32F0xx_Firmware_V1.5.0/Projects/PY32F030-STK/Example/SPI/SPI_TwoBoards_FullDuplexMaster_DMA/Src/main.c</code></p>
+</blockquote>
+<hr>
+<h2 id="功能简介">功能简介
+</h2><p>SPI（Serial Peripheral Interface）是一种四线制、全双工、同步串行总线，速率远高于 I2C，常用于 LCD、Flash、ADC、无线通信模块等。</p>
+<p>本示例演示 <strong>SPI1 主机 + DMA 全双工</strong>通信：</p>
+<ul>
+<li>主机通过 <code>HAL_SPI_TransmitReceive_DMA()</code> <strong>同时收发</strong> 15 字节；</li>
+<li>数据搬运由 <strong>DMA</strong> 完成，CPU 在传输期间可腾出手做别的事；</li>
+<li>传输完成后回调函数里校验收发是否一致，一致则点亮绿灯。</li>
+<li>本工程仅提供主机（Master DMA）示例；同目录另有时钟/引脚由 <code>HAL_SPI_MspInit</code> 配置（在 <code>py32f0xx_hal_msp.c</code> 中绑定 SPI1 引脚与 DMA 通道）。</li>
+</ul>
+<blockquote>
+<p>说明：PY32F0xx V1.5.0 的 STK 示例里 SPI 全双工只提供了 DMA 版（无纯轮询版）。若想用轮询，可把 <code>HAL_SPI_TransmitReceive_DMA</code> 换成 <code>HAL_SPI_TransmitReceive</code>（轮询版 API 同样存在），二者配置完全一致。</p>
+</blockquote>
+<h2 id="硬件准备">硬件准备
+</h2><ul>
+<li>两块 PY32F030 开发板（一主一从），或用一块板把 MOSI↔MISO 短接做回环</li>
+<li>交叉连接：主 MOSI↔从 MOSI，主 MISO↔从 MISO，主 SCK↔从 SCK，主 NSS↔从 NSS，共地</li>
+<li>板载 LED / 按键用于交互（示例需按键触发一次传输）</li>
+</ul>
+<h2 id="完整代码主机部分">完整代码（主机部分）
+</h2><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;main.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#define DATA_LENGTH 15
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">SPI_HandleTypeDef</span> <span class="n">Spi1Handle</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="n">TxBuff</span><span class="p">[</span><span class="mi">15</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">11</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span><span class="mi">13</span><span class="p">,</span><span class="mi">14</span><span class="p">,</span><span class="mi">15</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="n">RxBuff</span><span class="p">[</span><span class="mi">15</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl"><span class="n">DMA_HandleTypeDef</span> <span class="n">HdmaCh1</span><span class="p">;</span>   <span class="cm">/* 发送 DMA 通道 */</span>
+</span></span><span class="line"><span class="cl"><span class="n">DMA_HandleTypeDef</span> <span class="n">HdmaCh2</span><span class="p">;</span>   <span class="cm">/* 接收 DMA 通道 */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">HAL_Init</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">APP_SystemClockConfig</span><span class="p">();</span>    <span class="cm">/* 配置系统时钟（HSI 8MHz） */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nf">BSP_LED_Init</span><span class="p">(</span><span class="n">LED_GREEN</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">BSP_PB_Init</span><span class="p">(</span><span class="n">BUTTON_KEY</span><span class="p">,</span> <span class="n">BUTTON_MODE_GPIO</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* SPI1 参数配置 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Spi1Handle</span><span class="p">.</span><span class="n">Instance</span>               <span class="o">=</span> <span class="n">SPI1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Spi1Handle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">BaudRatePrescaler</span> <span class="o">=</span> <span class="n">SPI_BAUDRATEPRESCALER_256</span><span class="p">;</span> <span class="cm">/* 波特率预分频 256 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Spi1Handle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">Direction</span>         <span class="o">=</span> <span class="n">SPI_DIRECTION_2LINES</span><span class="p">;</span>      <span class="cm">/* 全双工（2 线） */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Spi1Handle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">CLKPolarity</span>       <span class="o">=</span> <span class="n">SPI_POLARITY_LOW</span><span class="p">;</span>          <span class="cm">/* 时钟极性：空闲低 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Spi1Handle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">CLKPhase</span>          <span class="o">=</span> <span class="n">SPI_PHASE_1EDGE</span><span class="p">;</span>           <span class="cm">/* 第 1 个边沿采样 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Spi1Handle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">DataSize</span>          <span class="o">=</span> <span class="n">SPI_DATASIZE_8BIT</span><span class="p">;</span>         <span class="cm">/* 8 位数据 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Spi1Handle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">FirstBit</span>          <span class="o">=</span> <span class="n">SPI_FIRSTBIT_MSB</span><span class="p">;</span>          <span class="cm">/* 高位先发 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Spi1Handle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">NSS</span>               <span class="o">=</span> <span class="n">SPI_NSS_HARD_OUTPUT</span><span class="p">;</span>       <span class="cm">/* NSS 硬件输出（主机自动拉低） */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">Spi1Handle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">Mode</span>              <span class="o">=</span> <span class="n">SPI_MODE_MASTER</span><span class="p">;</span>           <span class="cm">/* 主机模式 */</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="nf">HAL_SPI_DeInit</span><span class="p">(</span><span class="o">&amp;</span><span class="n">Spi1Handle</span><span class="p">)</span> <span class="o">!=</span> <span class="n">HAL_OK</span><span class="p">)</span> <span class="nf">APP_ErrorHandler</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="nf">HAL_SPI_Init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">Spi1Handle</span><span class="p">)</span> <span class="o">!=</span> <span class="n">HAL_OK</span><span class="p">)</span>   <span class="nf">APP_ErrorHandler</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 等按键按下，启动一次全双工收发（DMA 方式） */</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="nf">BSP_PB_GetState</span><span class="p">(</span><span class="n">BUTTON_KEY</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="nf">HAL_SPI_TransmitReceive_DMA</span><span class="p">(</span><span class="o">&amp;</span><span class="n">Spi1Handle</span><span class="p">,</span> <span class="p">(</span><span class="kt">uint8_t</span><span class="o">*</span><span class="p">)</span><span class="n">TxBuff</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                                  <span class="p">(</span><span class="kt">uint8_t</span><span class="o">*</span><span class="p">)</span><span class="n">RxBuff</span><span class="p">,</span> <span class="n">DATA_LENGTH</span><span class="p">)</span> <span class="o">!=</span> <span class="n">HAL_OK</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">APP_ErrorHandler</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nf">APP_WaitAndCheckEndOfTransfer</span><span class="p">();</span>  <span class="cm">/* 等传输完成并校验 */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 等待 SPI 回到 READY，再比较收发缓冲 */</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">APP_WaitAndCheckEndOfTransfer</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="n">Spi1Handle</span><span class="p">.</span><span class="n">State</span> <span class="o">!=</span> <span class="n">HAL_SPI_STATE_READY</span><span class="p">)</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="nf">APP_Buffercmp8</span><span class="p">((</span><span class="kt">uint8_t</span><span class="o">*</span><span class="p">)</span><span class="n">TxBuff</span><span class="p">,</span> <span class="p">(</span><span class="kt">uint8_t</span><span class="o">*</span><span class="p">)</span><span class="n">RxBuff</span><span class="p">,</span> <span class="n">DATA_LENGTH</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">APP_LedBlinking</span><span class="p">();</span>   <span class="cm">/* 不一致：闪烁报警 */</span>
+</span></span><span class="line"><span class="cl">  <span class="k">else</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">BSP_LED_On</span><span class="p">(</span><span class="n">LED_GREEN</span><span class="p">);</span> <span class="cm">/* 一致：绿灯常亮 */</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="代码分段讲解">代码分段讲解
+</h2><h3 id="1-时钟极性--相位cpol--cpha">1. 时钟极性 / 相位（CPOL / CPHA）
+</h3><p>SPI 通信双方必须 <strong>CPOL、CPHA 一致</strong>，否则收到的是错位数据：</p>
+<ul>
+<li>本例 <code>CPOL=LOW, CPHA=1EDGE</code> 对应 <strong>Mode 0</strong>（常用默认）。</li>
+<li>四种组合：Mode0(0,0)、Mode1(0,1)、Mode2(1,0)、Mode3(1,1)，按从设备手册选择。</li>
+</ul>
+<h3 id="2-全双工本质">2. 全双工本质
+</h3><p>SPI 移位寄存器决定了“发的同时也在收”。<code>HAL_SPI_TransmitReceive</code> 把 <code>TxBuff</code> 逐位发出，同时把 MISO 上的数据逐位存入 <code>RxBuff</code>。回环（MOSI 接 MISO）时，发什么就收到什么，便于自测。</p>
+<h3 id="3-dma-vs-轮询">3. DMA vs 轮询
+</h3><ul>
+<li><strong>DMA 版</strong>：<code>HAL_SPI_TransmitReceive_DMA</code> 启动后由 DMA 控制器搬运数据，CPU 立刻返回，可在回调/状态查询里做别的事，适合大数据量。</li>
+<li><strong>轮询版</strong>：把上面函数换成 <code>HAL_SPI_TransmitReceive(&amp;Spi1Handle, Tx, Rx, len)</code>（阻塞直到完成），代码更短，适合小数据量教学。</li>
+</ul>
+<h3 id="4-nss-片选">4. NSS 片选
+</h3><p>本例 <code>SPI_NSS_HARD_OUTPUT</code>：主机 NSS 引脚由硬件自动在传输时拉低、结束后拉高，省去手动控制。若用软件片选，改 <code>SPI_NSS_SOFT</code> 并自行 <code>HAL_GPIO_WritePin(NSS, RESET/SET)</code>。</p>
+<h2 id="实验现象">实验现象
+</h2><ul>
+<li>按下用户键后启动一次 15 字节全双工收发；</li>
+<li>回环或正确对接从机时，收发一致，<strong>绿灯常亮</strong>；</li>
+<li>数据异常则绿灯 500ms 周期闪烁。</li>
+</ul>
+<h2 id="常见问题">常见问题
+</h2><ol>
+<li>
+<p><strong>收不到数据 / 全是 0xFF？</strong></p>
+<ul>
+<li>检查 CPOL/CPHA 是否与从机一致。</li>
+<li>确认接线：MOSI-MOSI、MISO-MISO、SCK-SCK、NSS-NSS，并<strong>共地</strong>。</li>
+<li>波特率（<code>BaudRatePrescaler</code>）不要超过从机最大 SPI 时钟。</li>
+</ul>
+</li>
+<li>
+<p><strong>想用轮询版？</strong></p>
+<ul>
+<li>直接调用 <code>HAL_SPI_TransmitReceive()</code>（不带 <code>_DMA</code>），其余配置不变。</li>
+</ul>
+</li>
+<li>
+<p><strong>DMA 传输只发不收 / 卡在 BUSY？</strong></p>
+<ul>
+<li>确认 <code>HAL_SPI_MspInit</code> 中已为 SPI1 的 TX/RX 绑定正确的 DMA 通道并使能 DMA 时钟；传输完成需等 <code>State == HAL_SPI_STATE_READY</code>。</li>
+</ul>
+</li>
+</ol>
+<h2 id="小结">小结
+</h2><ul>
+<li>SPI 主机配置要点：<strong>波特率分频、CPOL/CPHA、数据位宽、MSB/LSB、NSS 方式、主/从模式</strong>。</li>
+<li>全双工 = 同时收发；回环自测最方便。</li>
+<li>DMA 适合大批量数据，轮询版更简单；两者配置相同，仅启动函数不同。</li>
+</ul>
+<h2 id="拓展应用">拓展应用
+</h2><ul>
+<li>驱动 SPI Flash（W25Qxx）、LCD（ST7735/ILI9341）、SD 卡（SPI 模式）。</li>
+<li>对接 SPI ADC（如 ADS1118）、无线模块（nRF24L01、SX1278）。</li>
+<li>改用 <code>SPI_NSS_SOFT</code> 一主多从，用不同 NSS 选片。</li>
+<li>把 DMA 版改为中断/DMA 双缓冲，实现连续高速数据流（音频、屏幕刷新）。</li>
+</ul>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/spi_twoboards_fullduplexmaster_dma/">SPI_TwoBoards_FullDuplexMaster_DMA</a>
+        
+            <a href="/tags/spi/">SPI</a>
+        
+            <a href="/tags/v1.5.0/">V1.5.0</a>
+        
+            <a href="/tags/py32f030/">PY32F030</a>
+        
+            <a href="/tags/hal/">HAL</a>
+        
+    </section>
+
+
+    <section class="article-lastmod">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <span>
+            最后更新于 Sep 08, 2026 16:31 &#43;0800
+        </span>
+    </section></footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/puya-spi-%E5%85%A8%E5%8F%8C%E5%B7%A5%E4%B8%BB%E6%9C%BA%E4%B8%AD%E6%96%AD%E6%96%B9%E5%BC%8Fll-%E5%BA%93/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA SPI — 全双工主机（中断方式）（LL 库）</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/puya-spi-spi_twoboards_fullduplexmaster_dma/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA SPI — SPI_TwoBoards_FullDuplexMaster_DMA</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/puya-spi-spi_twoboards_fullduplexslave_dma/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA SPI — SPI_TwoBoards_FullDuplexSlave_DMA</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/puya-dma-%E5%86%85%E5%AD%98%E5%88%B0%E5%86%85%E5%AD%98%E6%90%AC%E8%BF%90sramsramhal-%E5%BA%93/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA DMA — 内存到内存搬运（SRAM→SRAM）（HAL 库）</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/puya-flash-%E9%A1%B5%E6%93%A6%E9%99%A4%E4%B8%8E%E5%86%99%E5%85%A5hal-%E5%BA%93/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA FLASH — 页擦除与写入（HAL 库）</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="ClingYang/ClingYang.github.io"
+        issue-term="pathname"
+        
+        label="💬comment"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2026 CLing
+    </section>
+    
+    <section class="powerby">
+        
+            世界是你们 <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<style>
+    #TableOfContents > ul, ol {
+        ul, ol {
+            display: none;
+        }
+        .open {
+            display: block;
+        }
+    }
+</style>
+
+<script>
+    function initTocHide() {
+        
+        let toc = document.querySelector(".widget--toc");
+        if (!toc) {
+            return;
+        }
+        
+        window.addEventListener('scroll', function() {
+            
+            let currentLi = document.querySelector(".active-class");
+            if (!currentLi) {
+                return
+            }
+            
+            let elementsByClassName = document.querySelectorAll(".open");
+            if (elementsByClassName.length > 0) {
+                elementsByClassName.forEach((ul) => {
+                    ul.classList.remove("open")
+                })
+            }
+            
+            if (currentLi.children.length > 1) {
+                currentLi.children[1].classList.add("open")
+            }
+            
+            let ul = currentLi.parentElement;
+            do {
+                ul.classList.add("open");
+                ul = ul.parentElement.parentElement
+            } while (ul !== undefined && (ul.localName === 'ul' || ul.localName === 'ol'))
+        });
+    }
+    initTocHide()
+</script>
+
+    </body>
+</html>

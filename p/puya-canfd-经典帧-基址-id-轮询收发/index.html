@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="PUYA PY32F403_Firmware V1.4.5 CANFD 经典帧基址 ID 轮询收发（CANFD_Classic_BaseID_polling）示例教学">
+<title>PUYA CANFD — 经典帧 基址 ID 轮询收发</title>
+
+<link rel='canonical' href='https://clingyang.github.io/p/puya-canfd-%E7%BB%8F%E5%85%B8%E5%B8%A7-%E5%9F%BA%E5%9D%80-id-%E8%BD%AE%E8%AF%A2%E6%94%B6%E5%8F%91/'>
+
+<link rel="stylesheet" href="/scss/style.min.e14f3ba93baae65b2aef2339f32b6f25d7a0184785ebf4f6bd7d3376ae5dc2d4.css"><meta property='og:title' content="PUYA CANFD — 经典帧 基址 ID 轮询收发">
+<meta property='og:description' content="PUYA PY32F403_Firmware V1.4.5 CANFD 经典帧基址 ID 轮询收发（CANFD_Classic_BaseID_polling）示例教学">
+<meta property='og:url' content='https://clingyang.github.io/p/puya-canfd-%E7%BB%8F%E5%85%B8%E5%B8%A7-%E5%9F%BA%E5%9D%80-id-%E8%BD%AE%E8%AF%A2%E6%94%B6%E5%8F%91/'>
+<meta property='og:site_name' content='CLing'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='CANFD_Classic_BaseID_polling' /><meta property='article:tag' content='canfd' /><meta property='article:tag' content='V1.4.5' /><meta property='article:tag' content='PY32F403' /><meta property='article:published_time' content='2026-09-08T14:52:21&#43;08:00'/><meta property='article:modified_time' content='2026-09-08T16:03:27&#43;08:00'/>
+<meta name="twitter:title" content="PUYA CANFD — 经典帧 基址 ID 轮询收发">
+<meta name="twitter:description" content="PUYA PY32F403_Firmware V1.4.5 CANFD 经典帧基址 ID 轮询收发（CANFD_Classic_BaseID_polling）示例教学">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                            height="290" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🏀</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">CLing</a></h1>
+            <h2 class="site-description">你好 欢迎来到我的博客</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>档案</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E6%8A%80%E6%9C%AF%E9%93%BE%E6%8E%A5/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>技术链接</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/excel/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+                
+                <span>Excel教程</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#功能简介">功能简介</a></li>
+    <li><a href="#硬件准备">硬件准备</a></li>
+    <li><a href="#完整代码">完整代码</a></li>
+    <li><a href="#代码分段讲解">代码分段讲解</a>
+      <ol>
+        <li><a href="#1-经典帧-vs-fd-帧">1. 经典帧 vs FD 帧</a></li>
+        <li><a href="#2-波特率配置bit-timing">2. 波特率配置（BIT Timing）</a></li>
+        <li><a href="#3-过滤器filter">3. 过滤器（Filter）</a></li>
+        <li><a href="#4-发送-fifo-与轮询">4. 发送 FIFO 与轮询</a></li>
+      </ol>
+    </li>
+    <li><a href="#实验现象">实验现象</a></li>
+    <li><a href="#常见问题">常见问题</a></li>
+    <li><a href="#小结">小结</a></li>
+    <li><a href="#拓展应用">拓展应用</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/puya/" >
+                PUYA
+            </a>
+        
+            <a href="/categories/canfd/" >
+                CANFD
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/puya-canfd-%E7%BB%8F%E5%85%B8%E5%B8%A7-%E5%9F%BA%E5%9D%80-id-%E8%BD%AE%E8%AF%A2%E6%94%B6%E5%8F%91/">PUYA CANFD — 经典帧 基址 ID 轮询收发</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            PUYA PY32F403_Firmware V1.4.5 CANFD 经典帧基址 ID 轮询收发（CANFD_Classic_BaseID_polling）示例教学
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2026-09-08</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 3 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="canfd--经典帧-基址-id-轮询收发">CANFD — 经典帧 基址 ID 轮询收发
+</h1><blockquote>
+<p><strong>固件库</strong>: PY32F403_Firmware V1.4.5<br>
+<strong>芯片</strong>: PY32F403<br>
+<strong>源文件</strong>: <code>PUYA/PY32F403_Firmware_V1.4.5/Projects/PY32F403-STK/Example/CANFD/CANFD_Classic_BaseID_polling/Src/main.c</code></p>
+</blockquote>
+<hr>
+<h2 id="功能简介">功能简介
+</h2><p>CAN / CAN-FD 是汽车与工业中最可靠的串行总线，采用差分信号（CANH/CANL），多主、带仲裁、抗干扰强。PY32F403 内置 <strong>CANFD</strong> 控制器，兼容经典 CAN 2.0B 与 CAN-FD。</p>
+<p>本示例演示<strong>经典帧（Classic，非 FD）模式 + 轮询收发</strong>：</p>
+<ul>
+<li>配置 CANFD 为经典帧、正常模式，波特率 <strong>250Kbps</strong>（Nominal 段配置）；</li>
+<li>设置过滤器：只接收 ID 高 11 位为 <code>0x12F</code> 的报文（<code>MaskID = 0</code> 表示仅比较 ID 本身）；</li>
+<li>往发送 FIFO（PTB）放入一帧 ID=<code>0x123</code>、8 字节数据 <code>{1..8}</code>，激活发送；</li>
+<li><strong>轮询</strong>等待接收 FIFO 非空，读回后用 <code>printf</code> 打印长度与数据。</li>
+</ul>
+<blockquote>
+<p>这是“自收发”验证：同一控制器既发又收（需外部接好终端电阻，或回环模式）。经典帧即普通 CAN 2.0，每帧最多 8 字节；FD 帧可到 64 字节。</p>
+</blockquote>
+<h2 id="硬件准备">硬件准备
+</h2><ul>
+<li>PY32F403 开发板（带 CANFD 收发器，或外接 TJA1050/MCP2551）</li>
+<li>CANH、CANL 双绞线，总线两端各接 <strong>120Ω 终端电阻</strong></li>
+<li>接好调试串口（用于 <code>printf</code> 观察）</li>
+<li>单板自测时可启用回环（修改 <code>Mode</code> 为 <code>CANFD_MODE_LOOPBACK</code>）</li>
+</ul>
+<h2 id="完整代码">完整代码
+</h2><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;main.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">CANFD_HandleTypeDef</span> <span class="n">CanfdHandle</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">CANFD_FilterTypeDef</span> <span class="n">CanfdFilter</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">CANFD_TxHeaderTypeDef</span> <span class="n">CanfdTxHeader</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="n">TxData</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="mh">0x1</span><span class="p">,</span><span class="mh">0x2</span><span class="p">,</span><span class="mh">0x3</span><span class="p">,</span><span class="mh">0x4</span><span class="p">,</span><span class="mh">0x5</span><span class="p">,</span><span class="mh">0x6</span><span class="p">,</span><span class="mh">0x7</span><span class="p">,</span><span class="mh">0x8</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">CANFD_RxHeaderTypeDef</span> <span class="n">CanfdRxHeader</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="n">RxData</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="n">DLCtoBytes</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span><span class="mi">16</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">24</span><span class="p">,</span><span class="mi">32</span><span class="p">,</span><span class="mi">48</span><span class="p">,</span><span class="mi">64</span><span class="p">};</span> <span class="cm">/* DLC→字节数 */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">uint32_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">HAL_Init</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">APP_SystemClockConfig</span><span class="p">();</span>     <span class="cm">/* 系统时钟：HSE */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">BSP_USART_Config</span><span class="p">();</span>          <span class="cm">/* 调试串口（printf 用） */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* CANFD 基本配置 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">CanfdHandle</span><span class="p">.</span><span class="n">Instance</span>                   <span class="o">=</span> <span class="n">CANFD</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">CanfdHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">FrameFormat</span>           <span class="o">=</span> <span class="n">CANFD_FRAME_CLASSIC</span><span class="p">;</span>  <span class="cm">/* 经典帧 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">CanfdHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">Mode</span>                  <span class="o">=</span> <span class="n">CANFD_MODE_NORMAL</span><span class="p">;</span>    <span class="cm">/* 正常模式 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">CanfdHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">Prescaler</span>             <span class="o">=</span> <span class="mi">1U</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">CanfdHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">NominalSyncJumpWidth</span>  <span class="o">=</span> <span class="mi">16U</span><span class="p">;</span>  <span class="cm">/* 250KHz */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">CanfdHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">NominalTimeSeg1</span>       <span class="o">=</span> <span class="mi">64U</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">CanfdHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">NominalTimeSeg2</span>       <span class="o">=</span> <span class="mi">16U</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">CanfdHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">DataSyncJumpWidth</span>     <span class="o">=</span> <span class="mi">16U</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">CanfdHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">DataTimeSeg1</span>          <span class="o">=</span> <span class="mi">64U</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">CanfdHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">DataTimeSeg2</span>          <span class="o">=</span> <span class="mi">16U</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">CanfdHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">SecondSamplePointOffset</span> <span class="o">=</span> <span class="mi">0U</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="nf">HAL_CANFD_Init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">CanfdHandle</span><span class="p">)</span> <span class="o">!=</span> <span class="n">HAL_OK</span><span class="p">)</span> <span class="nf">APP_ErrorHandler</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 过滤器：仅接收 ID = 0x12F（标准 11 位） */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">CanfdFilter</span><span class="p">.</span><span class="n">IdType</span>        <span class="o">=</span> <span class="n">CANFD_STANDARD_ID</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">CanfdFilter</span><span class="p">.</span><span class="n">FilterChannel</span> <span class="o">=</span> <span class="n">CANFD_FILTER_CHANNEL_0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">CanfdFilter</span><span class="p">.</span><span class="n">Rank</span>          <span class="o">=</span> <span class="n">CANFD_FILTER_RANK_CHANNEL_NUMBER</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">CanfdFilter</span><span class="p">.</span><span class="n">FilterID</span>      <span class="o">=</span> <span class="mh">0x12F</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">CanfdFilter</span><span class="p">.</span><span class="n">FilterFormat</span>  <span class="o">=</span> <span class="mh">0xFFFFFFFF</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">CanfdFilter</span><span class="p">.</span><span class="n">MaskID</span>        <span class="o">=</span> <span class="mh">0x0</span><span class="p">;</span>  <span class="cm">/* 只比较 ID 本身 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">CanfdFilter</span><span class="p">.</span><span class="n">MaskFormat</span>    <span class="o">=</span> <span class="mh">0xFFFFFFFF</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="nf">HAL_CANFD_ConfigFilter</span><span class="p">(</span><span class="o">&amp;</span><span class="n">CanfdHandle</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">CanfdFilter</span><span class="p">)</span> <span class="o">!=</span> <span class="n">HAL_OK</span><span class="p">)</span> <span class="nf">APP_ErrorHandler</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="nf">HAL_CANFD_Start</span><span class="p">(</span><span class="o">&amp;</span><span class="n">CanfdHandle</span><span class="p">)</span> <span class="o">!=</span> <span class="n">HAL_OK</span><span class="p">)</span> <span class="nf">APP_ErrorHandler</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 组装并发送一帧（PTB 优先发送缓冲区） */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">CanfdTxHeader</span><span class="p">.</span><span class="n">Identifier</span>  <span class="o">=</span> <span class="mh">0x123</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">CanfdTxHeader</span><span class="p">.</span><span class="n">IdType</span>      <span class="o">=</span> <span class="n">CANFD_STANDARD_ID</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">CanfdTxHeader</span><span class="p">.</span><span class="n">TxFrameType</span> <span class="o">=</span> <span class="n">CANFD_DATA_FRAME</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">CanfdTxHeader</span><span class="p">.</span><span class="n">FrameFormat</span> <span class="o">=</span> <span class="n">CANFD_FRAME_CLASSIC</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">CanfdTxHeader</span><span class="p">.</span><span class="n">Handle</span>      <span class="o">=</span> <span class="mh">0x0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">CanfdTxHeader</span><span class="p">.</span><span class="n">DataLength</span>  <span class="o">=</span> <span class="n">CANFD_DLC_BYTES_8</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="nf">HAL_CANFD_AddMessageToTxFifo</span><span class="p">(</span><span class="o">&amp;</span><span class="n">CanfdHandle</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">CanfdTxHeader</span><span class="p">,</span> <span class="n">TxData</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                                    <span class="n">CANFD_TX_FIFO_PTB</span><span class="p">)</span> <span class="o">!=</span> <span class="n">HAL_OK</span><span class="p">)</span> <span class="nf">APP_ErrorHandler</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="nf">HAL_CANFD_ActivateTxRequest</span><span class="p">(</span><span class="o">&amp;</span><span class="n">CanfdHandle</span><span class="p">,</span> <span class="n">CANFD_TXFIFO_PTB_SEND</span><span class="p">)</span> <span class="o">!=</span> <span class="n">HAL_OK</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">APP_ErrorHandler</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 轮询等待接收 FIFO 有数据 */</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="nf">__HAL_CANFD_GET_RX_FIFO_FILL_LEVEL</span><span class="p">(</span><span class="o">&amp;</span><span class="n">CanfdHandle</span><span class="p">)</span> <span class="o">==</span> <span class="n">CANFD_RX_FIFO_EMPTY</span><span class="p">)</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="nf">HAL_CANFD_GetRxMessage</span><span class="p">(</span><span class="o">&amp;</span><span class="n">CanfdHandle</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">CanfdRxHeader</span><span class="p">,</span> <span class="n">RxData</span><span class="p">)</span> <span class="o">!=</span> <span class="n">HAL_OK</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">APP_ErrorHandler</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 打印结果 */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;decimal data length: %d</span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">DLCtoBytes</span><span class="p">[</span><span class="n">CanfdRxHeader</span><span class="p">.</span><span class="n">DataLength</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;hexadecimal data: </span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">DLCtoBytes</span><span class="p">[</span><span class="n">CanfdRxHeader</span><span class="p">.</span><span class="n">DataLength</span><span class="p">];</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;%x &#34;</span><span class="p">,</span> <span class="n">RxData</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="代码分段讲解">代码分段讲解
+</h2><h3 id="1-经典帧-vs-fd-帧">1. 经典帧 vs FD 帧
+</h3><ul>
+<li><code>CANFD_FRAME_CLASSIC</code>：经典 CAN 2.0，DLC 最大 8 字节。</li>
+<li><code>CANFD_FRAME_FD</code>：CAN-FD，支持更长数据段与更高数据波特率（Data 段可独立配置 <code>DataTimeSeg1/2</code>）。</li>
+</ul>
+<h3 id="2-波特率配置bit-timing">2. 波特率配置（BIT Timing）
+</h3><p>CAN 波特率由<strong>同步段 + BS1 + BS2</strong> 与分频决定。本例 Nominal 段 <code>(SJW16 + TS1 64 + TS2 16)</code> 配合 <code>Prescaler=1</code> 得到 250K。实际配置需对照 PY32F403 参考手册的时钟树（CANFD 时钟源）。</p>
+<h3 id="3-过滤器filter">3. 过滤器（Filter）
+</h3><p>CANFD 用过滤器决定“哪些报文进 RX FIFO”。<code>MaskID = 0</code> 表示只按 <code>FilterID</code>（0x12F）精确匹配；若想接收某一范围，可设 Mask 屏蔽某些位（如只比较高 8 位）。</p>
+<h3 id="4-发送-fifo-与轮询">4. 发送 FIFO 与轮询
+</h3><ul>
+<li><code>AddMessageToTxFifo(..., PTB)</code>：把报文放进<strong>优先发送缓冲区</strong>（PTB），然后 <code>ActivateTxRequest(PTB_SEND)</code> 触发发送。</li>
+<li>接收用 <code>__HAL_CANFD_GET_RX_FIFO_FILL_LEVEL</code> 轮询是否有数据，再 <code>GetRxMessage</code> 取出。</li>
+</ul>
+<h2 id="实验现象">实验现象
+</h2><ul>
+<li>
+<p>串口打印：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">decimal data length: 8
+</span></span><span class="line"><span class="cl">hexadecimal data:
+</span></span><span class="line"><span class="cl">1 2 3 4 5 6 7 8
+</span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+<li>
+<p>在回环/正常模式下，发出的 8 字节被自身（或另一节点）正确接收。</p>
+</li>
+</ul>
+<h2 id="常见问题">常见问题
+</h2><ol>
+<li>
+<p><strong>收不到数据？</strong></p>
+<ul>
+<li>检查 CANH/CANL 是否接反、是否接了 120Ω 终端电阻、总线是否正常（示波器看差分波形）。</li>
+<li>过滤器 <code>FilterID/MaskID</code> 与发送 ID 不匹配会被硬件丢弃。</li>
+<li>单板自测请用 <code>CANFD_MODE_LOOPBACK</code>，可无需外部收发器。</li>
+</ul>
+</li>
+<li>
+<p><strong>波特率不对/错误帧多？</strong></p>
+<ul>
+<li>仔细核算 BIT Timing 与 CANFD 的时钟源频率；经典帧与 FD 帧的 Nominal/Data 段参数要分别正确。</li>
+</ul>
+</li>
+<li>
+<p><strong>想用中断/DMA？</strong></p>
+<ul>
+<li>同目录有 <code>CANFD_ExtendedID_IT</code> 等中断版；轮询版最简单，适合入门。</li>
+</ul>
+</li>
+</ol>
+<h2 id="小结">小结
+</h2><ul>
+<li>CANFD 流程：<strong>Init → ConfigFilter → Start → AddMessageToTxFifo → ActivateTxRequest → 等待/读取 Rx</strong>。</li>
+<li>经典帧每帧 ≤8 字节；FD 帧更长更快。</li>
+<li>过滤器决定接收范围；总线必须差分接线 + 终端电阻。</li>
+</ul>
+<h2 id="拓展应用">拓展应用
+</h2><ul>
+<li>汽车/工业节点通信：定义 ID 优先级与报文矩阵。</li>
+<li>多节点组网：用过滤器分组，主从轮询采集传感器。</li>
+<li>升级为 CAN-FD：提高数据段波特率，传输大块数据（如固件、图像）。</li>
+<li>配合中断实现“收到即处理”的实时通信。</li>
+</ul>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/canfd_classic_baseid_polling/">CANFD_Classic_BaseID_polling</a>
+        
+            <a href="/tags/canfd/">Canfd</a>
+        
+            <a href="/tags/v1.4.5/">V1.4.5</a>
+        
+            <a href="/tags/py32f403/">PY32F403</a>
+        
+    </section>
+
+
+    <section class="article-lastmod">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <span>
+            最后更新于 Sep 08, 2026 16:03 &#43;0800
+        </span>
+    </section></footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/puya-canfd-canfd_baseid_polling/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA CANFD — CANFD_BaseID_polling</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/puya-canfd-canfd_extendedid_it/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA CANFD — CANFD_ExtendedID_IT</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/puya-canfd-canfd_extendedid_lbme_polling/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA CANFD — CANFD_ExtendedID_LBME_polling</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/puya-canfd-canfd_extendedid_lbmi_polling/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA CANFD — CANFD_ExtendedID_LBMI_polling</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/puya-esmc-%E5%A4%96%E9%83%A8%E4%B8%B2%E8%A1%8C%E5%AD%98%E5%82%A8%E5%99%A8%E6%8E%A7%E5%88%B6%E5%99%A8qspi-flash-%E8%AF%BB%E5%86%99/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA ESMC — 外部串行存储器控制器（QSPI Flash 读写）</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="ClingYang/ClingYang.github.io"
+        issue-term="pathname"
+        
+        label="💬comment"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2026 CLing
+    </section>
+    
+    <section class="powerby">
+        
+            世界是你们 <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<style>
+    #TableOfContents > ul, ol {
+        ul, ol {
+            display: none;
+        }
+        .open {
+            display: block;
+        }
+    }
+</style>
+
+<script>
+    function initTocHide() {
+        
+        let toc = document.querySelector(".widget--toc");
+        if (!toc) {
+            return;
+        }
+        
+        window.addEventListener('scroll', function() {
+            
+            let currentLi = document.querySelector(".active-class");
+            if (!currentLi) {
+                return
+            }
+            
+            let elementsByClassName = document.querySelectorAll(".open");
+            if (elementsByClassName.length > 0) {
+                elementsByClassName.forEach((ul) => {
+                    ul.classList.remove("open")
+                })
+            }
+            
+            if (currentLi.children.length > 1) {
+                currentLi.children[1].classList.add("open")
+            }
+            
+            let ul = currentLi.parentElement;
+            do {
+                ul.classList.add("open");
+                ul = ul.parentElement.parentElement
+            } while (ul !== undefined && (ul.localName === 'ul' || ul.localName === 'ol'))
+        });
+    }
+    initTocHide()
+</script>
+
+    </body>
+</html>

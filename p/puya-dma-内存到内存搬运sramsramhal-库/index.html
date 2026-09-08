@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="PUYA PY32F0xx_Firmware V1.5.0 DMA 内存到内存搬运（DMA_SramToSram）示例教学">
+<title>PUYA DMA — 内存到内存搬运（SRAM→SRAM）（HAL 库）</title>
+
+<link rel='canonical' href='https://clingyang.github.io/p/puya-dma-%E5%86%85%E5%AD%98%E5%88%B0%E5%86%85%E5%AD%98%E6%90%AC%E8%BF%90sramsramhal-%E5%BA%93/'>
+
+<link rel="stylesheet" href="/scss/style.min.e14f3ba93baae65b2aef2339f32b6f25d7a0184785ebf4f6bd7d3376ae5dc2d4.css"><meta property='og:title' content="PUYA DMA — 内存到内存搬运（SRAM→SRAM）（HAL 库）">
+<meta property='og:description' content="PUYA PY32F0xx_Firmware V1.5.0 DMA 内存到内存搬运（DMA_SramToSram）示例教学">
+<meta property='og:url' content='https://clingyang.github.io/p/puya-dma-%E5%86%85%E5%AD%98%E5%88%B0%E5%86%85%E5%AD%98%E6%90%AC%E8%BF%90sramsramhal-%E5%BA%93/'>
+<meta property='og:site_name' content='CLing'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='DMA_SramToSram' /><meta property='article:tag' content='dma' /><meta property='article:tag' content='V1.5.0' /><meta property='article:tag' content='PY32F030' /><meta property='article:tag' content='HAL' /><meta property='article:published_time' content='2026-09-08T14:52:21&#43;08:00'/><meta property='article:modified_time' content='2026-09-08T16:31:23&#43;08:00'/>
+<meta name="twitter:title" content="PUYA DMA — 内存到内存搬运（SRAM→SRAM）（HAL 库）">
+<meta name="twitter:description" content="PUYA PY32F0xx_Firmware V1.5.0 DMA 内存到内存搬运（DMA_SramToSram）示例教学">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                            height="290" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🏀</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">CLing</a></h1>
+            <h2 class="site-description">你好 欢迎来到我的博客</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>档案</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E6%8A%80%E6%9C%AF%E9%93%BE%E6%8E%A5/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>技术链接</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/excel/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+                
+                <span>Excel教程</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#功能简介">功能简介</a></li>
+    <li><a href="#硬件准备">硬件准备</a></li>
+    <li><a href="#完整代码">完整代码</a></li>
+    <li><a href="#代码分段讲解">代码分段讲解</a>
+      <ol>
+        <li><a href="#1-地址自增与数据宽度">1. 地址自增与数据宽度</a></li>
+        <li><a href="#2-模式-normal-vs-circular">2. 模式 Normal vs Circular</a></li>
+        <li><a href="#3-中断回调">3. 中断回调</a></li>
+      </ol>
+    </li>
+    <li><a href="#实验现象">实验现象</a></li>
+    <li><a href="#常见问题">常见问题</a></li>
+    <li><a href="#小结">小结</a></li>
+    <li><a href="#拓展应用">拓展应用</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/puya/" >
+                PUYA
+            </a>
+        
+            <a href="/categories/dma/" >
+                DMA
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/puya-dma-%E5%86%85%E5%AD%98%E5%88%B0%E5%86%85%E5%AD%98%E6%90%AC%E8%BF%90sramsramhal-%E5%BA%93/">PUYA DMA — 内存到内存搬运（SRAM→SRAM）（HAL 库）</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            PUYA PY32F0xx_Firmware V1.5.0 DMA 内存到内存搬运（DMA_SramToSram）示例教学
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2026-09-08</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 3 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="dma--内存到内存搬运sram--sramhal-库">DMA — 内存到内存搬运（SRAM → SRAM）（HAL 库）
+</h1><blockquote>
+<p><strong>固件库</strong>: PY32F0xx_Firmware V1.5.0<br>
+<strong>芯片</strong>: PY32F030<br>
+<strong>源文件</strong>: <code>PUYA/PY32F0xx_Firmware_V1.5.0/Projects/PY32F030-STK/Example/DMA/DMA_SramToSram/Src/main.c</code></p>
+</blockquote>
+<hr>
+<h2 id="功能简介">功能简介
+</h2><p>DMA（Direct Memory Access，直接存储器访问）允许<strong>在不占用 CPU 的情况下</strong>让数据在存储器之间或存储器与外设之间自动搬运。CPU 只需“下单”，DMA 控制器在后台搬运，搬完产生中断通知 CPU。</p>
+<p>本示例演示最直观的 <strong>内存→内存（Memory-to-Memory）</strong> 模式：</p>
+<ul>
+<li>在源缓冲 <code>aSRC_Const_Buffer[32]</code> 填入 <code>0,1,2,…31</code>；</li>
+<li>启动 DMA 把 32 个 <strong>32 位字</strong> 搬到 <code>aDST_Buffer[32]</code>；</li>
+<li>用<strong>传输完成中断回调</strong>校验数据是否一致；</li>
+<li>一致则点亮绿灯，不一致/出错则闪烁报警。</li>
+</ul>
+<blockquote>
+<p><code>BUFFER_SIZE</code> 在 <code>main.h</code> 中定义为 <strong>32</strong>。这是理解“DMA 替 CPU 干活”的最佳入门示例；后面接 ADC/SPI 时都是同样的套路，只是源/目的换成外设寄存器。</p>
+</blockquote>
+<h2 id="硬件准备">硬件准备
+</h2><ul>
+<li>PY32F030 开发板</li>
+<li>板载 LED（观察结果）</li>
+<li>无需外接，纯内部 SRAM 搬运</li>
+</ul>
+<h2 id="完整代码">完整代码
+</h2><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span><span class="lnt">80
+</span><span class="lnt">81
+</span><span class="lnt">82
+</span><span class="lnt">83
+</span><span class="lnt">84
+</span><span class="lnt">85
+</span><span class="lnt">86
+</span><span class="lnt">87
+</span><span class="lnt">88
+</span><span class="lnt">89
+</span><span class="lnt">90
+</span><span class="lnt">91
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;main.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">DMA_HandleTypeDef</span> <span class="n">DmaHandle</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">uint32_t</span> <span class="n">aSRC_Const_Buffer</span><span class="p">[</span><span class="n">BUFFER_SIZE</span><span class="p">];</span>  <span class="cm">/* 源缓冲 */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">uint32_t</span> <span class="n">aDST_Buffer</span><span class="p">[</span><span class="n">BUFFER_SIZE</span><span class="p">];</span>        <span class="cm">/* 目的缓冲 */</span>
+</span></span><span class="line"><span class="cl"><span class="n">__IO</span> <span class="kt">uint32_t</span> <span class="n">transferCompleteDetected</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="cm">/* 传输完成标志 */</span>
+</span></span><span class="line"><span class="cl"><span class="n">__IO</span> <span class="kt">uint32_t</span> <span class="n">transferErrorDetected</span>    <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="cm">/* 传输错误标志 */</span>
+</span></span><span class="line"><span class="cl"><span class="n">__IO</span> <span class="kt">uint32_t</span> <span class="n">transferFailedDetected</span>   <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="cm">/* 数据校验失败标志 */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">HAL_Init</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">BSP_LED_Init</span><span class="p">(</span><span class="n">LED_GREEN</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 准备源数据 0~31 */</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="kt">uint8_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">BUFFER_SIZE</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">aSRC_Const_Buffer</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nf">APP_DmaConfig</span><span class="p">();</span>  <span class="cm">/* 配置并注册回调、使能中断 */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 启动 DMA 传输（中断方式，CPU 立即返回） */</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="nf">HAL_DMA_Start_IT</span><span class="p">(</span><span class="o">&amp;</span><span class="n">DmaHandle</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                       <span class="p">(</span><span class="kt">uint32_t</span><span class="p">)</span><span class="o">&amp;</span><span class="n">aSRC_Const_Buffer</span><span class="p">,</span>  <span class="cm">/* 源地址 */</span>
+</span></span><span class="line"><span class="cl">                       <span class="p">(</span><span class="kt">uint32_t</span><span class="p">)</span><span class="o">&amp;</span><span class="n">aDST_Buffer</span><span class="p">,</span>        <span class="cm">/* 目的地址 */</span>
+</span></span><span class="line"><span class="cl">                       <span class="n">BUFFER_SIZE</span><span class="p">)</span> <span class="o">!=</span> <span class="n">HAL_OK</span><span class="p">)</span>        <span class="cm">/* 传输个数（单位=数据宽度） */</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">APP_ErrorHandler</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">transferFailedDetected</span> <span class="o">==</span> <span class="mi">1</span> <span class="o">&amp;&amp;</span> <span class="n">transferCompleteDetected</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span> <span class="nf">BSP_LED_Toggle</span><span class="p">(</span><span class="n">LED_GREEN</span><span class="p">);</span> <span class="nf">HAL_Delay</span><span class="p">(</span><span class="mi">500</span><span class="p">);</span> <span class="p">}</span> <span class="cm">/* 数据错：快闪 */</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">transferFailedDetected</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">transferCompleteDetected</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nf">BSP_LED_On</span><span class="p">(</span><span class="n">LED_GREEN</span><span class="p">);</span>   <span class="cm">/* 成功：绿灯常亮 */</span>
+</span></span><span class="line"><span class="cl">      <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">transferErrorDetected</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nf">BSP_LED_On</span><span class="p">(</span><span class="n">LED_GREEN</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span> <span class="nf">BSP_LED_Toggle</span><span class="p">(</span><span class="n">LED_GREEN</span><span class="p">);</span> <span class="nf">HAL_Delay</span><span class="p">(</span><span class="mi">500</span><span class="p">);</span> <span class="p">}</span> <span class="cm">/* 出错：闪烁 */</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm">  * @brief  DMA 配置
+</span></span></span><span class="line"><span class="cl"><span class="cm">  */</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">APP_DmaConfig</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">__HAL_RCC_DMA_CLK_ENABLE</span><span class="p">();</span>                 <span class="cm">/* 开启 DMA 时钟 */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">DmaHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">Direction</span>           <span class="o">=</span> <span class="n">DMA_MEMORY_TO_MEMORY</span><span class="p">;</span>  <span class="cm">/* 内存到内存 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">DmaHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">PeriphInc</span>           <span class="o">=</span> <span class="n">DMA_PINC_ENABLE</span><span class="p">;</span>       <span class="cm">/* 外设(源)地址自增 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">DmaHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">MemInc</span>              <span class="o">=</span> <span class="n">DMA_MINC_ENABLE</span><span class="p">;</span>       <span class="cm">/* 内存(目的)地址自增 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">DmaHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">PeriphDataAlignment</span> <span class="o">=</span> <span class="n">DMA_PDATAALIGN_WORD</span><span class="p">;</span>   <span class="cm">/* 源数据宽度 32 位 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">DmaHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">MemDataAlignment</span>    <span class="o">=</span> <span class="n">DMA_MDATAALIGN_WORD</span><span class="p">;</span>   <span class="cm">/* 目的数据宽度 32 位 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">DmaHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">Mode</span>                <span class="o">=</span> <span class="n">DMA_NORMAL</span><span class="p">;</span>            <span class="cm">/* 普通模式（非循环） */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">DmaHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">Priority</span>            <span class="o">=</span> <span class="n">DMA_PRIORITY_HIGH</span><span class="p">;</span>     <span class="cm">/* 通道优先级高 */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">DmaHandle</span><span class="p">.</span><span class="n">Instance</span> <span class="o">=</span> <span class="n">DMA1_Channel1</span><span class="p">;</span>          <span class="cm">/* 使用 DMA1 通道 1 */</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="nf">HAL_DMA_Init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">DmaHandle</span><span class="p">)</span> <span class="o">!=</span> <span class="n">HAL_OK</span><span class="p">)</span> <span class="nf">APP_ErrorHandler</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 注册“传输完成”和“传输错误”两个回调 */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">HAL_DMA_RegisterCallback</span><span class="p">(</span><span class="o">&amp;</span><span class="n">DmaHandle</span><span class="p">,</span> <span class="n">HAL_DMA_XFER_CPLT_CB_ID</span><span class="p">,</span>  <span class="n">APP_TransferComplete</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">HAL_DMA_RegisterCallback</span><span class="p">(</span><span class="o">&amp;</span><span class="n">DmaHandle</span><span class="p">,</span> <span class="n">HAL_DMA_XFER_ERROR_CB_ID</span><span class="p">,</span> <span class="n">APP_TransferError</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">HAL_NVIC_EnableIRQ</span><span class="p">(</span><span class="n">DMA1_Channel1_IRQn</span><span class="p">);</span>      <span class="cm">/* 使能 DMA 中断 */</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 传输完成回调：校验数据 */</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">APP_TransferComplete</span><span class="p">(</span><span class="n">DMA_HandleTypeDef</span> <span class="o">*</span><span class="n">DmaHandle</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="kt">uint16_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">BUFFER_SIZE</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">aDST_Buffer</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="n">aSRC_Const_Buffer</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">transferFailedDetected</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="n">transferCompleteDetected</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 传输错误回调 */</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">APP_TransferError</span><span class="p">(</span><span class="n">DMA_HandleTypeDef</span> <span class="o">*</span><span class="n">DmaHandle</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">transferErrorDetected</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="代码分段讲解">代码分段讲解
+</h2><h3 id="1-地址自增与数据宽度">1. 地址自增与数据宽度
+</h3><ul>
+<li><code>PeriphInc / MemInc = ENABLE</code>：搬运时源、目的地址都自动 +1（按数据宽度递增）。若对固定寄存器（如 USART TDR）搬运，应把对应端设为 <code>DISABLE</code>。</li>
+<li><code>PDATAALIGN_WORD / MDATAALIGN_WORD</code>：每次搬 4 字节。传输个数 <code>BUFFER_SIZE</code> 的单位是“次”，不是字节；32 字 × 4 = 128 字节。</li>
+</ul>
+<h3 id="2-模式-normal-vs-circular">2. 模式 Normal vs Circular
+</h3><ul>
+<li><code>DMA_NORMAL</code>：搬完一次即停。</li>
+<li><code>DMA_CIRCULAR</code>：搬完自动从头再来，常用于 DAC 波形输出、ADC 连续采样等持续场景。</li>
+</ul>
+<h3 id="3-中断回调">3. 中断回调
+</h3><p><code>HAL_DMA_Start_IT</code> 启动后 CPU 立刻返回，搬运在后台进行；完成后硬件触发 <code>DMA1_Channel1_IRQn</code>，HAL 在中断里调用你注册的 <code>APP_TransferComplete</code>。这就是 DMA “解放 CPU” 的核心。</p>
+<h2 id="实验现象">实验现象
+</h2><ul>
+<li>DMA 在后台把 32 个字从源搬到目的；</li>
+<li>校验一致：<strong>绿灯常亮</strong>；不一致或出错：绿灯闪烁。</li>
+</ul>
+<h2 id="常见问题">常见问题
+</h2><ol>
+<li>
+<p><strong>编译报 <code>BUFFER_SIZE</code> 未定义？</strong></p>
+<ul>
+<li>它在 <code>main.h</code>（<code>#define BUFFER_SIZE 32</code>）中，确认工程包含该头文件。</li>
+</ul>
+</li>
+<li>
+<p><strong>传输没完成/不进回调？</strong></p>
+<ul>
+<li>确认 <code>__HAL_RCC_DMA_CLK_ENABLE()</code> 已调用，且 <code>HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn)</code> 已使能。</li>
+<li>确认 <code>DMA1_Channel1_IRQHandler</code> 在 <code>startup</code> 中正确指向 HAL 的中断处理（库工程默认已连）。</li>
+</ul>
+</li>
+<li>
+<p><strong>数据错位？</strong></p>
+<ul>
+<li>检查源/目的地址自增与数据宽度是否匹配；外设寄存器做源/目的时要把对应端 <code>Inc</code> 设为 <code>DISABLE</code>。</li>
+</ul>
+</li>
+<li>
+<p><strong>想连续搬运？</strong></p>
+<ul>
+<li>把 <code>Mode</code> 改为 <code>DMA_CIRCULAR</code>，并配合外设（如 ADC/DAC）使用。</li>
+</ul>
+</li>
+</ol>
+<h2 id="小结">小结
+</h2><ul>
+<li>DMA 四要素：<strong>方向、地址自增、数据宽度、模式（普通/循环）</strong>。</li>
+<li>内存↔内存、内存↔外设都用同一套 <code>HAL_DMA_*</code> API，区别只在地址与 <code>Inc</code> 配置。</li>
+<li>中断方式让 CPU “下单后就去干别的”，搬完由回调通知，是提升效率的关键。</li>
+</ul>
+<h2 id="拓展应用">拓展应用
+</h2><ul>
+<li><code>ADC_ContinuousConversion_DMA</code>：ADC 连续采样，DMA 自动把结果搬进数组。</li>
+<li><code>SPI/DMA</code>（见 <code>SPI_TwoBoards_FullDuplexMaster_DMA</code>）：大批量 SPI 数据后台收发。</li>
+<li><code>DMA_CIRCULAR</code> + DAC：播放波形/音频。</li>
+<li>双缓冲（Double Buffer）：一边 DMA 搬当前块，CPU 处理上一块，实现零等待流式处理。</li>
+</ul>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/dma_sramtosram/">DMA_SramToSram</a>
+        
+            <a href="/tags/dma/">DMA</a>
+        
+            <a href="/tags/v1.5.0/">V1.5.0</a>
+        
+            <a href="/tags/py32f030/">PY32F030</a>
+        
+            <a href="/tags/hal/">HAL</a>
+        
+    </section>
+
+
+    <section class="article-lastmod">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <span>
+            最后更新于 Sep 08, 2026 16:31 &#43;0800
+        </span>
+    </section></footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/puya-dma-%E5%86%85%E5%AD%98%E5%88%B0%E5%86%85%E5%AD%98%E6%90%AC%E8%BF%90sramsramll-%E5%BA%93/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA DMA — 内存到内存搬运（SRAM→SRAM）（LL 库）</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/puya-dma-dma_sramtosram/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA DMA — DMA_SramToSram</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/puya-flash-%E9%A1%B5%E6%93%A6%E9%99%A4%E4%B8%8E%E5%86%99%E5%85%A5hal-%E5%BA%93/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA FLASH — 页擦除与写入（HAL 库）</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/puya-gpio-gpio-%E7%BF%BB%E8%BD%AC%E8%BE%93%E5%87%BAhal-%E5%BA%93/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA GPIO — GPIO 翻转输出（HAL 库）</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/puya-i2c-%E4%B8%BB%E6%9C%BA%E8%BD%AE%E8%AF%A2%E9%80%9A%E4%BF%A1hal-%E5%BA%93/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA I2C — 主机轮询通信（HAL 库）</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="ClingYang/ClingYang.github.io"
+        issue-term="pathname"
+        
+        label="💬comment"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2026 CLing
+    </section>
+    
+    <section class="powerby">
+        
+            世界是你们 <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<style>
+    #TableOfContents > ul, ol {
+        ul, ol {
+            display: none;
+        }
+        .open {
+            display: block;
+        }
+    }
+</style>
+
+<script>
+    function initTocHide() {
+        
+        let toc = document.querySelector(".widget--toc");
+        if (!toc) {
+            return;
+        }
+        
+        window.addEventListener('scroll', function() {
+            
+            let currentLi = document.querySelector(".active-class");
+            if (!currentLi) {
+                return
+            }
+            
+            let elementsByClassName = document.querySelectorAll(".open");
+            if (elementsByClassName.length > 0) {
+                elementsByClassName.forEach((ul) => {
+                    ul.classList.remove("open")
+                })
+            }
+            
+            if (currentLi.children.length > 1) {
+                currentLi.children[1].classList.add("open")
+            }
+            
+            let ul = currentLi.parentElement;
+            do {
+                ul.classList.add("open");
+                ul = ul.parentElement.parentElement
+            } while (ul !== undefined && (ul.localName === 'ul' || ul.localName === 'ol'))
+        });
+    }
+    initTocHide()
+</script>
+
+    </body>
+</html>

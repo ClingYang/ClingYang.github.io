@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="AT32F403A 内部 Flash 读写操作，把程序存储器当 EEPROM 用">
+<title>AT32 FLASH — 内部 Flash 读写（掉电不丢失的用户数据存储）</title>
+
+<link rel='canonical' href='https://clingyang.github.io/p/at32-flash-%E5%86%85%E9%83%A8-flash-%E8%AF%BB%E5%86%99%E6%8E%89%E7%94%B5%E4%B8%8D%E4%B8%A2%E5%A4%B1%E7%9A%84%E7%94%A8%E6%88%B7%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/'>
+
+<link rel="stylesheet" href="/scss/style.min.e14f3ba93baae65b2aef2339f32b6f25d7a0184785ebf4f6bd7d3376ae5dc2d4.css"><meta property='og:title' content="AT32 FLASH — 内部 Flash 读写（掉电不丢失的用户数据存储）">
+<meta property='og:description' content="AT32F403A 内部 Flash 读写操作，把程序存储器当 EEPROM 用">
+<meta property='og:url' content='https://clingyang.github.io/p/at32-flash-%E5%86%85%E9%83%A8-flash-%E8%AF%BB%E5%86%99%E6%8E%89%E7%94%B5%E4%B8%8D%E4%B8%A2%E5%A4%B1%E7%9A%84%E7%94%A8%E6%88%B7%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/'>
+<meta property='og:site_name' content='CLing'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Flash' /><meta property='article:tag' content='掉电存储' /><meta property='article:tag' content='EEPROM替代' /><meta property='article:tag' content='AT32F403A' /><meta property='article:published_time' content='2026-09-08T15:11:00&#43;08:00'/><meta property='article:modified_time' content='2026-09-08T16:03:27&#43;08:00'/>
+<meta name="twitter:title" content="AT32 FLASH — 内部 Flash 读写（掉电不丢失的用户数据存储）">
+<meta name="twitter:description" content="AT32F403A 内部 Flash 读写操作，把程序存储器当 EEPROM 用">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                            height="290" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🏀</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">CLing</a></h1>
+            <h2 class="site-description">你好 欢迎来到我的博客</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>档案</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E6%8A%80%E6%9C%AF%E9%93%BE%E6%8E%A5/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>技术链接</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/excel/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+                
+                <span>Excel教程</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#这个实验是干嘛的">这个实验是干嘛的？</a></li>
+    <li><a href="#硬件准备">硬件准备</a></li>
+    <li><a href="#flash-的特性必须了解">Flash 的特性（必须了解！）</a>
+      <ol>
+        <li><a href="#flash-vs-ram-vs-eeprom">Flash vs RAM vs EEPROM</a></li>
+        <li><a href="#flash-的铁律">Flash 的铁律</a></li>
+        <li><a href="#地址规划">地址规划</a></li>
+      </ol>
+    </li>
+    <li><a href="#完整代码">完整代码</a></li>
+    <li><a href="#代码分段讲解">代码分段讲解</a>
+      <ol>
+        <li><a href="#1-写入地址选择">1. 写入地址选择</a></li>
+        <li><a href="#2-flash_write-内部做了什么">2. flash_write 内部做了什么</a></li>
+        <li><a href="#3-flash_read-做了什么">3. flash_read 做了什么</a></li>
+        <li><a href="#4-为什么用-uint16_t">4. 为什么用 uint16_t？</a></li>
+      </ol>
+    </li>
+    <li><a href="#实验现象">实验现象</a></li>
+    <li><a href="#实际应用存储校准参数">实际应用：存储校准参数</a></li>
+    <li><a href="#常见问题">常见问题</a>
+      <ol>
+        <li><a href="#q-写入后程序跑飞了">Q: 写入后程序跑飞了？</a></li>
+        <li><a href="#q-写入次数有限制吗">Q: 写入次数有限制吗？</a></li>
+        <li><a href="#q-写入速度很慢">Q: 写入速度很慢？</a></li>
+        <li><a href="#q-想存储字符串结构体">Q: 想存储字符串/结构体？</a></li>
+      </ol>
+    </li>
+    <li><a href="#小结">小结</a></li>
+    <li><a href="#学了-flash-读写能做什么">学了 Flash 读写能做什么？</a>
+      <ol>
+        <li><a href="#数据存储">数据存储</a></li>
+        <li><a href="#固件升级iap">固件升级（IAP）</a></li>
+        <li><a href="#与外部-flash-的对比">与外部 Flash 的对比</a></li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/at32/" >
+                AT32
+            </a>
+        
+            <a href="/categories/flash/" >
+                FLASH
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/at32-flash-%E5%86%85%E9%83%A8-flash-%E8%AF%BB%E5%86%99%E6%8E%89%E7%94%B5%E4%B8%8D%E4%B8%A2%E5%A4%B1%E7%9A%84%E7%94%A8%E6%88%B7%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/">AT32 FLASH — 内部 Flash 读写（掉电不丢失的用户数据存储）</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            AT32F403A 内部 Flash 读写操作，把程序存储器当 EEPROM 用
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2026-09-08</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 4 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="flash--内部-flash-读写">FLASH — 内部 Flash 读写
+</h1><blockquote>
+<p><strong>难度</strong>: ⭐⭐（理解 Flash 特性即可）<br>
+<strong>固件库</strong>: AT32F403A_407_Firmware_Library V2.2.2<br>
+<strong>源文件</strong>: <code>project/at_start_f403a/examples/flash/flash_write_read/src/main.c</code></p>
+</blockquote>
+<hr>
+<h2 id="这个实验是干嘛的">这个实验是干嘛的？
+</h2><p>MCU 的内部 Flash 主要用来存储程序代码。但它有一个&quot;隐藏技能&quot;：<strong>你可以在程序运行时，把 Flash 的空闲区域当作 EEPROM 使用，存储掉电不丢失的用户数据</strong>。</p>
+<p><strong>有什么用？</strong></p>
+<ul>
+<li>存储校准参数（ADC 偏移、温度补偿系数）</li>
+<li>存储用户设置（亮度、音量、WiFi 密码）</li>
+<li>存储运行计数（开机次数、累计运行时间）</li>
+<li>存储故障日志（最后一条错误信息）</li>
+</ul>
+<p><strong>省掉了外部 EEPROM 芯片</strong>，省成本、省引脚、省 PCB 空间。</p>
+<p><strong>本实验</strong>在 Flash 地址 <code>0x08002800</code>（偏移 10KB）处写入 3000 个 16 位数据，然后读回比对。</p>
+<hr>
+<h2 id="硬件准备">硬件准备
+</h2><p><strong>不需要任何外部硬件！</strong> 操作的是 MCU 内部 Flash。</p>
+<hr>
+<h2 id="flash-的特性必须了解">Flash 的特性（必须了解！）
+</h2><h3 id="flash-vs-ram-vs-eeprom">Flash vs RAM vs EEPROM
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">特性</th>
+					<th style="text-align: left">Flash</th>
+					<th style="text-align: left">RAM</th>
+					<th style="text-align: left">EEPROM</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left">掉电保存</td>
+					<td style="text-align: left">是</td>
+					<td style="text-align: left">否</td>
+					<td style="text-align: left">是</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">读取速度</td>
+					<td style="text-align: left">快</td>
+					<td style="text-align: left">最快</td>
+					<td style="text-align: left">快</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">写入速度</td>
+					<td style="text-align: left">慢（ms 级）</td>
+					<td style="text-align: left">最快</td>
+					<td style="text-align: left">慢（ms 级）</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">擦写次数</td>
+					<td style="text-align: left">1 万~10 万次</td>
+					<td style="text-align: left">无限</td>
+					<td style="text-align: left">100 万次</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">最小擦除单位</td>
+					<td style="text-align: left">扇区（2KB/4KB）</td>
+					<td style="text-align: left">无</td>
+					<td style="text-align: left">字节</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">写入限制</td>
+					<td style="text-align: left">必须先擦后写</td>
+					<td style="text-align: left">无</td>
+					<td style="text-align: left">无</td>
+			</tr>
+	</tbody>
+</table></div>
+<h3 id="flash-的铁律">Flash 的铁律
+</h3><ol>
+<li><strong>只能把 1 写成 0</strong>，不能把 0 写成 1</li>
+<li><strong>必须先擦除</strong>（把所有位变成 1 = 0xFF），才能写入</li>
+<li><strong>擦除按扇区</strong>，最小 2KB（AT32F403A）</li>
+<li><strong>写入按半字</strong>（16 位）</li>
+</ol>
+<h3 id="地址规划">地址规划
+</h3><p>AT32F403A 的 Flash 从 <code>0x08000000</code> 开始：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">0x08000000 ┌─────────────────┐
+</span></span><span class="line"><span class="cl">           │   程序代码区     │  ← 千万别覆盖！
+</span></span><span class="line"><span class="cl">           │   (前 10KB)      │
+</span></span><span class="line"><span class="cl">0x08002800 ├─────────────────┤  ← 本实验从这里开始写
+</span></span><span class="line"><span class="cl">           │   用户数据区     │
+</span></span><span class="line"><span class="cl">           │   (空闲 Flash)   │
+</span></span><span class="line"><span class="cl">0x08020000 └─────────────────┘  ← Flash 结束
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>警告</strong>：写入地址不能和程序代码重叠，否则会把程序擦掉，MCU 变砖！</p>
+<hr>
+<h2 id="完整代码">完整代码
+</h2><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;at32f403a_407_board.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;at32f403a_407_clock.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;flash.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#define TEST_BUFFER_SIZE       3000
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define TEST_FLASH_ADDRESS     (0x08000000 + 1024 * 10)  </span><span class="c1">// 偏移 10KB
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">uint16_t</span> <span class="n">buffer_write</span><span class="p">[</span><span class="n">TEST_BUFFER_SIZE</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="kt">uint16_t</span> <span class="n">buffer_read</span><span class="p">[</span><span class="n">TEST_BUFFER_SIZE</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 缓冲区比对 */</span>
+</span></span><span class="line"><span class="cl"><span class="n">error_status</span> <span class="nf">buffer_compare</span><span class="p">(</span><span class="kt">uint16_t</span><span class="o">*</span> <span class="n">buf1</span><span class="p">,</span> <span class="kt">uint16_t</span><span class="o">*</span> <span class="n">buf2</span><span class="p">,</span> <span class="kt">uint16_t</span> <span class="n">len</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span><span class="p">(</span><span class="n">len</span><span class="o">--</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span><span class="p">(</span><span class="o">*</span><span class="n">buf1</span> <span class="o">!=</span> <span class="o">*</span><span class="n">buf2</span><span class="p">)</span> <span class="k">return</span> <span class="n">ERROR</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">buf1</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">buf2</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">SUCCESS</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">uint32_t</span> <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">error_status</span> <span class="n">err_status</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nf">system_clock_config</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">at32_board_init</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 第一步：填充测试数据 */</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span><span class="p">(</span><span class="n">index</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="n">TEST_BUFFER_SIZE</span><span class="p">;</span> <span class="n">index</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">buffer_write</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">index</span><span class="p">;</span>  <span class="c1">// 0, 1, 2, 3, ...
+</span></span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 第二步：写入 Flash */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">err_status</span> <span class="o">=</span> <span class="nf">flash_write</span><span class="p">(</span><span class="n">TEST_FLASH_ADDRESS</span><span class="p">,</span> <span class="n">buffer_write</span><span class="p">,</span> <span class="n">TEST_BUFFER_SIZE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 第三步：从 Flash 读回 */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">flash_read</span><span class="p">(</span><span class="n">TEST_FLASH_ADDRESS</span><span class="p">,</span> <span class="n">buffer_read</span><span class="p">,</span> <span class="n">TEST_BUFFER_SIZE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 第四步：比对验证 */</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span><span class="p">(</span><span class="nf">buffer_compare</span><span class="p">(</span><span class="n">buffer_write</span><span class="p">,</span> <span class="n">buffer_read</span><span class="p">,</span> <span class="n">TEST_BUFFER_SIZE</span><span class="p">)</span> <span class="o">==</span> <span class="n">SUCCESS</span> <span class="o">&amp;&amp;</span>
+</span></span><span class="line"><span class="cl">     <span class="n">err_status</span> <span class="o">==</span> <span class="n">SUCCESS</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">at32_led_on</span><span class="p">(</span><span class="n">LED2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">at32_led_on</span><span class="p">(</span><span class="n">LED3</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">at32_led_on</span><span class="p">(</span><span class="n">LED4</span><span class="p">);</span>  <span class="c1">// 3 个 LED 全亮 = 成功
+</span></span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">while</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="代码分段讲解">代码分段讲解
+</h2><h3 id="1-写入地址选择">1. 写入地址选择
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#define TEST_FLASH_ADDRESS  (0x08000000 + 1024 * 10)  </span><span class="c1">// 偏移 10KB
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><code>0x08000000</code> 是 Flash 的起始地址</li>
+<li>偏移 10KB 是为了避开程序代码区</li>
+<li><strong>你必须确保这个地址不和程序代码重叠！</strong></li>
+</ul>
+<p>如何确认？看 Keil 编译后的 <code>.map</code> 文件，找到程序占用的最大地址，写入地址必须大于它。</p>
+<h3 id="2-flash_write-内部做了什么">2. flash_write 内部做了什么
+</h3><p><code>flash_write()</code> 函数内部的流程：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">1. 解锁 Flash（Flash 默认是写保护的）
+</span></span><span class="line"><span class="cl">2. 擦除目标扇区（把所有位变成 0xFF）
+</span></span><span class="line"><span class="cl">3. 逐个半字写入数据
+</span></span><span class="line"><span class="cl">4. 锁定 Flash（恢复写保护）
+</span></span><span class="line"><span class="cl">5. 比对验证
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="3-flash_read-做了什么">3. flash_read 做了什么
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">flash_read</span><span class="p">(</span><span class="n">TEST_FLASH_ADDRESS</span><span class="p">,</span> <span class="n">buffer_read</span><span class="p">,</span> <span class="n">TEST_BUFFER_SIZE</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Flash 读取非常简单——直接从内存地址读就行。Flash 就是内存映射的，读取和读 RAM 一样。</p>
+<h3 id="4-为什么用-uint16_t">4. 为什么用 uint16_t？
+</h3><p>AT32F403A 的 Flash 最小写入单位是<strong>半字</strong>（16 位）。所以数据类型用 <code>uint16_t</code>，不是 <code>uint8_t</code>。</p>
+<hr>
+<h2 id="实验现象">实验现象
+</h2><ul>
+<li>3 个 LED 全部亮起 → Flash 读写成功</li>
+<li>LED 不亮 → 写入失败或数据不一致</li>
+</ul>
+<hr>
+<h2 id="实际应用存储校准参数">实际应用：存储校准参数
+</h2><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="c1">// 定义数据结构
+</span></span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">uint16_t</span> <span class="n">adc_offset</span><span class="p">;</span>     <span class="c1">// ADC 偏移校准值
+</span></span></span><span class="line"><span class="cl">  <span class="kt">uint16_t</span> <span class="n">temp_coeff</span><span class="p">;</span>     <span class="c1">// 温度补偿系数
+</span></span></span><span class="line"><span class="cl">  <span class="kt">uint32_t</span> <span class="n">boot_count</span><span class="p">;</span>     <span class="c1">// 开机次数
+</span></span></span><span class="line"><span class="cl">  <span class="kt">uint32_t</span> <span class="n">crc</span><span class="p">;</span>            <span class="c1">// 数据校验
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">CalData</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 保存到 Flash
+</span></span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">save_calibration</span><span class="p">(</span><span class="n">CalData</span><span class="o">*</span> <span class="n">data</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">flash_write</span><span class="p">(</span><span class="n">FLASH_CAL_ADDR</span><span class="p">,</span> <span class="p">(</span><span class="kt">uint16_t</span><span class="o">*</span><span class="p">)</span><span class="n">data</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">CalData</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 从 Flash 读取
+</span></span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">load_calibration</span><span class="p">(</span><span class="n">CalData</span><span class="o">*</span> <span class="n">data</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">flash_read</span><span class="p">(</span><span class="n">FLASH_CAL_ADDR</span><span class="p">,</span> <span class="p">(</span><span class="kt">uint16_t</span><span class="o">*</span><span class="p">)</span><span class="n">data</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">CalData</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 验证 CRC，如果数据损坏则使用默认值
+</span></span></span><span class="line"><span class="cl">  <span class="k">if</span><span class="p">(</span><span class="nf">calculate_crc</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">!=</span> <span class="n">data</span><span class="o">-&gt;</span><span class="n">crc</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">set_default_calibration</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="常见问题">常见问题
+</h2><h3 id="q-写入后程序跑飞了">Q: 写入后程序跑飞了？
+</h3><ul>
+<li>写入地址和程序代码重叠了！</li>
+<li>检查 <code>.map</code> 文件，确保写入地址在程序占用区域之外</li>
+<li>建议用 Flash 的最后几个扇区存储数据</li>
+</ul>
+<h3 id="q-写入次数有限制吗">Q: 写入次数有限制吗？
+</h3><ul>
+<li>Flash 擦写次数约 1 万~10 万次</li>
+<li>如果需要频繁写入，用 RAM 缓存 + 定期保存策略</li>
+<li>或者用外部 EEPROM（100 万次）</li>
+</ul>
+<h3 id="q-写入速度很慢">Q: 写入速度很慢？
+</h3><ul>
+<li>Flash 写入是 ms 级的（每半字约 10~50us）</li>
+<li>3000 个半字 ≈ 150ms</li>
+<li>写入期间 CPU 会被阻塞（Flash 总线占用）</li>
+</ul>
+<h3 id="q-想存储字符串结构体">Q: 想存储字符串/结构体？
+</h3><ul>
+<li>强制转换为 <code>uint16_t*</code> 指针</li>
+<li>长度要对齐到半字（2 字节）</li>
+<li>建议加 CRC 校验，防止意外断电导致数据损坏</li>
+</ul>
+<hr>
+<h2 id="小结">小结
+</h2><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">概念</th>
+					<th style="text-align: left">说明</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left">内部 Flash</td>
+					<td style="text-align: left">MCU 自带的程序存储器，也能存用户数据</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">先擦后写</td>
+					<td style="text-align: left">Flash 的铁律，只能 1→0</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">扇区擦除</td>
+					<td style="text-align: left">最小擦除单位 2KB</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">半字写入</td>
+					<td style="text-align: left">最小写入单位 16 位</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">地址规划</td>
+					<td style="text-align: left">不能覆盖程序代码！</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">CRC 校验</td>
+					<td style="text-align: left">防止数据损坏</td>
+			</tr>
+	</tbody>
+</table></div>
+<hr>
+<h2 id="学了-flash-读写能做什么">学了 Flash 读写能做什么？
+</h2><p>内部 Flash 是最省钱的&quot;掉电存储方案&quot;：</p>
+<h3 id="数据存储">数据存储
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">项目</th>
+					<th style="text-align: left">原理</th>
+					<th style="text-align: left">难度</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left"><strong>校准参数</strong></td>
+					<td style="text-align: left">出厂校准一次，永久保存</td>
+					<td style="text-align: left">⭐</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>用户设置</strong></td>
+					<td style="text-align: left">亮度、音量、WiFi 密码等</td>
+					<td style="text-align: left">⭐</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>运行日志</strong></td>
+					<td style="text-align: left">开机次数、累计时间、故障记录</td>
+					<td style="text-align: left">⭐⭐</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>数据记录</strong></td>
+					<td style="text-align: left">温度/湿度历史数据（Flash 空间够的话）</td>
+					<td style="text-align: left">⭐⭐</td>
+			</tr>
+	</tbody>
+</table></div>
+<h3 id="固件升级iap">固件升级（IAP）
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">项目</th>
+					<th style="text-align: left">原理</th>
+					<th style="text-align: left">难度</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left"><strong>IAP 自升级</strong></td>
+					<td style="text-align: left">从串口/USB 接收新固件，写入 Flash，跳转执行</td>
+					<td style="text-align: left">⭐⭐⭐⭐</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>A/B 双分区</strong></td>
+					<td style="text-align: left">两个程序分区，一个运行一个升级，防变砖</td>
+					<td style="text-align: left">⭐⭐⭐⭐⭐</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>Bootloader</strong></td>
+					<td style="text-align: left">最小程序，负责加载和跳转应用</td>
+					<td style="text-align: left">⭐⭐⭐</td>
+			</tr>
+	</tbody>
+</table></div>
+<h3 id="与外部-flash-的对比">与外部 Flash 的对比
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">方案</th>
+					<th style="text-align: left">优点</th>
+					<th style="text-align: left">缺点</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left"><strong>内部 Flash</strong></td>
+					<td style="text-align: left">免费、无外部接线、速度快</td>
+					<td style="text-align: left">容量小、擦写次数少、不能边写边读</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>外部 SPI Flash</strong></td>
+					<td style="text-align: left">容量大（几 MB~几百 MB）、擦写次数多</td>
+					<td style="text-align: left">需要 SPI 接线、占引脚</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>外部 EEPROM</strong></td>
+					<td style="text-align: left">逐字节读写、擦写次数多（100 万次）</td>
+					<td style="text-align: left">容量小（几 KB）、需要 I2C 接线</td>
+			</tr>
+	</tbody>
+</table></div>
+<blockquote>
+<p><strong>核心思路</strong>：内部 Flash 是最简单的掉电存储方案——不需要额外硬件，不需要接线，直接写地址就行。适合存储少量关键数据（校准参数、用户设置）。如果数据量大或写入频繁，再考虑外部 Flash 或 EEPROM。</p>
+</blockquote>
+<hr>
+<blockquote>
+<p>🎉 <strong>恭喜！</strong> 你已经完成了 AT32 入门系列的 8 个实验：GPIO → USART → ADC → SPI → I2C → TIM → DMA → FLASH。这些是嵌入式开发最核心的基础，掌握了它们，你就能独立开发各种嵌入式项目了！</p>
+</blockquote>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/flash/">Flash</a>
+        
+            <a href="/tags/%E6%8E%89%E7%94%B5%E5%AD%98%E5%82%A8/">掉电存储</a>
+        
+            <a href="/tags/eeprom%E6%9B%BF%E4%BB%A3/">EEPROM替代</a>
+        
+            <a href="/tags/at32f403a/">AT32F403A</a>
+        
+    </section>
+
+
+    <section class="article-lastmod">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <span>
+            最后更新于 Sep 08, 2026 16:03 &#43;0800
+        </span>
+    </section></footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/at32-spi-%E8%AF%BB%E5%86%99-w25q-flash%E5%A4%96%E9%83%A8%E5%AD%98%E5%82%A8%E8%8A%AF%E7%89%87/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AT32 SPI — 读写 W25Q Flash（外部存储芯片）</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/at32-flash-%E5%9C%A8-spim-%E4%B8%8A%E8%BF%90%E8%A1%8C%E4%BB%A3%E7%A0%81/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AT32 FLASH — 在 SPIM 上运行代码</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/at32-flash-%E6%93%8D%E4%BD%9C-spim-%E5%A4%96%E6%8C%82-flash/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AT32 FLASH — 操作 SPIM 外挂 Flash</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/at32-dma-flash-%E5%88%B0-sram-%E6%95%B0%E6%8D%AE%E6%90%AC%E8%BF%90cpu-%E5%AE%8C%E5%85%A8%E4%B8%8D%E5%8F%82%E4%B8%8E/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AT32 DMA — Flash 到 SRAM 数据搬运（CPU 完全不参与）</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/at32-tim-pwm-%E8%BE%93%E5%87%BAled-%E5%91%BC%E5%90%B8%E7%81%AF--%E7%94%B5%E6%9C%BA%E8%B0%83%E9%80%9F%E7%9A%84%E5%9F%BA%E7%A1%80/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AT32 TIM — PWM 输出（LED 呼吸灯 &#43; 电机调速的基础）</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="ClingYang/ClingYang.github.io"
+        issue-term="pathname"
+        
+        label="💬comment"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2026 CLing
+    </section>
+    
+    <section class="powerby">
+        
+            世界是你们 <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<style>
+    #TableOfContents > ul, ol {
+        ul, ol {
+            display: none;
+        }
+        .open {
+            display: block;
+        }
+    }
+</style>
+
+<script>
+    function initTocHide() {
+        
+        let toc = document.querySelector(".widget--toc");
+        if (!toc) {
+            return;
+        }
+        
+        window.addEventListener('scroll', function() {
+            
+            let currentLi = document.querySelector(".active-class");
+            if (!currentLi) {
+                return
+            }
+            
+            let elementsByClassName = document.querySelectorAll(".open");
+            if (elementsByClassName.length > 0) {
+                elementsByClassName.forEach((ul) => {
+                    ul.classList.remove("open")
+                })
+            }
+            
+            if (currentLi.children.length > 1) {
+                currentLi.children[1].classList.add("open")
+            }
+            
+            let ul = currentLi.parentElement;
+            do {
+                ul.classList.add("open");
+                ul = ul.parentElement.parentElement
+            } while (ul !== undefined && (ul.localName === 'ul' || ul.localName === 'ol'))
+        });
+    }
+    initTocHide()
+</script>
+
+    </body>
+</html>

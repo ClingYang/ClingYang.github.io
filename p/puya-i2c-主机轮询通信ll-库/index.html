@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="PUYA PY32F0xx_Firmware V1.5.0 I2C 主机轮询通信（I2C_TwoBoard_CommunicationMaster_Polling_Init）示例教学（LL 库版本）">
+<title>PUYA I2C — 主机轮询通信（LL 库）</title>
+
+<link rel='canonical' href='https://clingyang.github.io/p/puya-i2c-%E4%B8%BB%E6%9C%BA%E8%BD%AE%E8%AF%A2%E9%80%9A%E4%BF%A1ll-%E5%BA%93/'>
+
+<link rel="stylesheet" href="/scss/style.min.e14f3ba93baae65b2aef2339f32b6f25d7a0184785ebf4f6bd7d3376ae5dc2d4.css"><meta property='og:title' content="PUYA I2C — 主机轮询通信（LL 库）">
+<meta property='og:description' content="PUYA PY32F0xx_Firmware V1.5.0 I2C 主机轮询通信（I2C_TwoBoard_CommunicationMaster_Polling_Init）示例教学（LL 库版本）">
+<meta property='og:url' content='https://clingyang.github.io/p/puya-i2c-%E4%B8%BB%E6%9C%BA%E8%BD%AE%E8%AF%A2%E9%80%9A%E4%BF%A1ll-%E5%BA%93/'>
+<meta property='og:site_name' content='CLing'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='I2C_TwoBoard_CommunicationMaster_Polling_Init' /><meta property='article:tag' content='i2c' /><meta property='article:tag' content='V1.5.0' /><meta property='article:tag' content='PY32F030' /><meta property='article:tag' content='LL' /><meta property='article:published_time' content='2026-09-08T14:52:21&#43;08:00'/><meta property='article:modified_time' content='2026-09-08T16:31:23&#43;08:00'/>
+<meta name="twitter:title" content="PUYA I2C — 主机轮询通信（LL 库）">
+<meta name="twitter:description" content="PUYA PY32F0xx_Firmware V1.5.0 I2C 主机轮询通信（I2C_TwoBoard_CommunicationMaster_Polling_Init）示例教学（LL 库版本）">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                            height="290" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🏀</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">CLing</a></h1>
+            <h2 class="site-description">你好 欢迎来到我的博客</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>档案</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E6%8A%80%E6%9C%AF%E9%93%BE%E6%8E%A5/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>技术链接</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/excel/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+                
+                <span>Excel教程</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#功能简介">功能简介</a></li>
+    <li><a href="#硬件准备">硬件准备</a></li>
+    <li><a href="#完整代码">完整代码</a></li>
+    <li><a href="#代码分段讲解">代码分段讲解</a>
+      <ol>
+        <li><a href="#1-开漏--上拉i2c-物理层铁律">1. 开漏 + 上拉：I2C 物理层铁律</a></li>
+        <li><a href="#2-发送状态机核心">2. 发送状态机（核心）</a></li>
+        <li><a href="#3-接收状态机">3. 接收状态机</a></li>
+        <li><a href="#4-没有超时">4. 没有超时！</a></li>
+      </ol>
+    </li>
+    <li><a href="#实验现象">实验现象</a></li>
+    <li><a href="#常见问题">常见问题</a></li>
+    <li><a href="#小结">小结</a></li>
+    <li><a href="#拓展应用">拓展应用</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/puya/" >
+                PUYA
+            </a>
+        
+            <a href="/categories/i2c/" >
+                I2C
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/puya-i2c-%E4%B8%BB%E6%9C%BA%E8%BD%AE%E8%AF%A2%E9%80%9A%E4%BF%A1ll-%E5%BA%93/">PUYA I2C — 主机轮询通信（LL 库）</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            PUYA PY32F0xx_Firmware V1.5.0 I2C 主机轮询通信（I2C_TwoBoard_CommunicationMaster_Polling_Init）示例教学（LL 库版本）
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2026-09-08</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 4 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="i2c--主机轮询通信ll-库">I2C — 主机轮询通信（LL 库）
+</h1><blockquote>
+<p><strong>HAL vs LL</strong>：PUYA 固件库提供 HAL 和 LL 两套 API。</p>
+<ul>
+<li>HAL 库：封装度高，可移植性强，适合快速开发</li>
+<li>LL 库：接近寄存器操作，代码精简效率高，适合性能敏感场景
+本文使用 LL 库版本。</li>
+</ul>
+</blockquote>
+<blockquote>
+<p><strong>固件库</strong>: PY32F0xx_Firmware V1.5.0<br>
+<strong>芯片</strong>: PY32F030（PY32F002A / F003 同库可参考）<br>
+<strong>源文件</strong>: <code>PUYA/PY32F0xx_Firmware_V1.5.0/Projects/PY32F030-STK/Example_LL/I2C/I2C_TwoBoard_CommunicationMaster_Polling_Init/Src/main.c</code></p>
+</blockquote>
+<hr>
+<h2 id="功能简介">功能简介
+</h2><p>本示例演示 I2C <strong>主机（Master）轮询模式</strong>：按键后，主机先向从机地址 <code>0xA0</code> 发送 15 字节，再从中机读回 15 字节（对端跑 Slave 示例做回环），最后比对收发数据——一致则点亮 LED，不一致则 LED 闪烁报错。</p>
+<p>与 HAL 版（<code>HAL_I2C_Master_Transmit</code> / <code>HAL_I2C_Master_Receive</code> 一行搞定）相比，LL 版把 I2C 的<strong>完整状态机</strong>摊开在你面前：起始条件 → 地址 → 数据 → 停止条件，每一步都靠轮询标志位（<code>SB</code>/<code>ADDR</code>/<code>TXE</code>/<code>BTF</code>/<code>RXNE</code>）推进。代码长，但能让你真正搞懂 I2C“为什么这么写”。</p>
+<h2 id="硬件准备">硬件准备
+</h2><ul>
+<li>两块 PY32F030 开发板（一块作主、一块作从）</li>
+<li>主从板 SCL(PA9) 与 SDA(PA10) 交叉相连，并各自接上拉电阻（示例里已配置内部上拉）</li>
+<li>主机板载按键（KEY）、绿 LED</li>
+<li>串口/LED 用于判断结果</li>
+</ul>
+<h2 id="完整代码">完整代码
+</h2><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span><span class="lnt">113
+</span><span class="lnt">114
+</span><span class="lnt">115
+</span><span class="lnt">116
+</span><span class="lnt">117
+</span><span class="lnt">118
+</span><span class="lnt">119
+</span><span class="lnt">120
+</span><span class="lnt">121
+</span><span class="lnt">122
+</span><span class="lnt">123
+</span><span class="lnt">124
+</span><span class="lnt">125
+</span><span class="lnt">126
+</span><span class="lnt">127
+</span><span class="lnt">128
+</span><span class="lnt">129
+</span><span class="lnt">130
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;main.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;py32f030xx_ll_Start_Kit.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#define I2C_ADDRESS        0xA0     </span><span class="cm">/* 从机地址 */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define I2C_SPEEDCLOCK     100000   </span><span class="cm">/* 100K 标准速率 */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define I2C_STATE_READY    0
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define I2C_STATE_BUSY_TX  1
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define I2C_STATE_BUSY_RX  2
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="n">aTxBuffer</span><span class="p">[</span><span class="mi">15</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">11</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span><span class="mi">13</span><span class="p">,</span><span class="mi">14</span><span class="p">,</span><span class="mi">15</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="n">aRxBuffer</span><span class="p">[</span><span class="mi">15</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">uint8_t</span>         <span class="o">*</span><span class="n">pBuffPtr</span>  <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">__IO</span> <span class="kt">uint16_t</span>   <span class="n">XferCount</span>  <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">__IO</span> <span class="kt">uint32_t</span>   <span class="n">Devaddress</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">__IO</span> <span class="kt">uint32_t</span>   <span class="n">State</span>      <span class="o">=</span> <span class="n">I2C_STATE_READY</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">APP_SystemClockConfig</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">APP_ConfigI2cMaster</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">APP_MasterTransmit</span><span class="p">(</span><span class="kt">uint16_t</span> <span class="n">DevAddress</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">pData</span><span class="p">,</span> <span class="kt">uint16_t</span> <span class="n">Size</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">APP_MasterReceive</span><span class="p">(</span><span class="kt">uint16_t</span> <span class="n">DevAddress</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">pData</span><span class="p">,</span> <span class="kt">uint16_t</span> <span class="n">Size</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">APP_CheckEndOfTransfer</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">uint8_t</span> <span class="nf">APP_Buffercmp8</span><span class="p">(</span><span class="kt">uint8_t</span><span class="o">*</span> <span class="n">pBuffer1</span><span class="p">,</span> <span class="kt">uint8_t</span><span class="o">*</span> <span class="n">pBuffer2</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="n">BufferLength</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">APP_LedBlinking</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">APP_SystemClockConfig</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">BSP_LED_Init</span><span class="p">(</span><span class="n">LED_GREEN</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">BSP_PB_Init</span><span class="p">(</span><span class="n">BUTTON_KEY</span><span class="p">,</span> <span class="n">BUTTON_MODE_GPIO</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nf">APP_ConfigI2cMaster</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="nf">BSP_PB_GetState</span><span class="p">(</span><span class="n">BUTTON_KEY</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">);</span>   <span class="cm">/* 等待按键按下 */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nf">APP_MasterTransmit</span><span class="p">(</span><span class="n">I2C_ADDRESS</span><span class="p">,</span> <span class="p">(</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="p">)</span><span class="n">aTxBuffer</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">aTxBuffer</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="n">State</span> <span class="o">!=</span> <span class="n">I2C_STATE_READY</span><span class="p">);</span>           <span class="cm">/* 等发送完 */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">APP_MasterReceive</span><span class="p">(</span><span class="n">I2C_ADDRESS</span><span class="p">,</span> <span class="p">(</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="p">)</span><span class="n">aRxBuffer</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">aRxBuffer</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="n">State</span> <span class="o">!=</span> <span class="n">I2C_STATE_READY</span><span class="p">);</span>           <span class="cm">/* 等接收完 */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nf">APP_CheckEndOfTransfer</span><span class="p">();</span>                   <span class="cm">/* 比对结果 */</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm">  * @brief  I2C 主机 GPIO + 外设配置
+</span></span></span><span class="line"><span class="cl"><span class="cm">  */</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">APP_ConfigI2cMaster</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">LL_IOP_GRP1_EnableClock</span><span class="p">(</span><span class="n">LL_IOP_GRP1_PERIPH_GPIOA</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">LL_APB1_GRP1_EnableClock</span><span class="p">(</span><span class="n">LL_APB1_GRP1_PERIPH_I2C1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* SCL=PA9, SDA=PA10：复用、开漏、上拉、AF6 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">LL_GPIO_InitTypeDef</span> <span class="n">GPIO_InitStruct</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Pin</span>        <span class="o">=</span> <span class="n">LL_GPIO_PIN_9</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Mode</span>       <span class="o">=</span> <span class="n">LL_GPIO_MODE_ALTERNATE</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Speed</span>      <span class="o">=</span> <span class="n">LL_GPIO_SPEED_FREQ_HIGH</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">OutputType</span> <span class="o">=</span> <span class="n">LL_GPIO_OUTPUT_OPENDRAIN</span><span class="p">;</span>   <span class="cm">/* I2C 必须开漏 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Pull</span>       <span class="o">=</span> <span class="n">LL_GPIO_PULL_UP</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Alternate</span>  <span class="o">=</span> <span class="n">LL_GPIO_AF_6</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">LL_GPIO_Init</span><span class="p">(</span><span class="n">GPIOA</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">GPIO_InitStruct</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Pin</span> <span class="o">=</span> <span class="n">LL_GPIO_PIN_10</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">LL_GPIO_Init</span><span class="p">(</span><span class="n">GPIOA</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">GPIO_InitStruct</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 复位 I2C 外设 */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">LL_APB1_GRP1_ForceReset</span><span class="p">(</span><span class="n">LL_APB1_GRP1_PERIPH_I2C1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">LL_APB1_GRP1_ReleaseReset</span><span class="p">(</span><span class="n">LL_APB1_GRP1_PERIPH_I2C1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">LL_I2C_InitTypeDef</span> <span class="n">I2C_InitStruct</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">  <span class="n">I2C_InitStruct</span><span class="p">.</span><span class="n">ClockSpeed</span>      <span class="o">=</span> <span class="n">I2C_SPEEDCLOCK</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">I2C_InitStruct</span><span class="p">.</span><span class="n">DutyCycle</span>       <span class="o">=</span> <span class="n">LL_I2C_DUTYCYCLE_16_9</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">I2C_InitStruct</span><span class="p">.</span><span class="n">OwnAddress1</span>     <span class="o">=</span> <span class="n">I2C_ADDRESS</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">I2C_InitStruct</span><span class="p">.</span><span class="n">TypeAcknowledge</span> <span class="o">=</span> <span class="n">LL_I2C_NACK</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">LL_I2C_Init</span><span class="p">(</span><span class="n">I2C1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">I2C_InitStruct</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm">  * @brief  LL 主机发送：起始→地址→数据→停止，全程轮询标志
+</span></span></span><span class="line"><span class="cl"><span class="cm">  */</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">APP_MasterTransmit</span><span class="p">(</span><span class="kt">uint16_t</span> <span class="n">DevAddress</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">pData</span><span class="p">,</span> <span class="kt">uint16_t</span> <span class="n">Size</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">pBuffPtr</span> <span class="o">=</span> <span class="n">pData</span><span class="p">;</span> <span class="n">XferCount</span> <span class="o">=</span> <span class="n">Size</span><span class="p">;</span> <span class="n">Devaddress</span> <span class="o">=</span> <span class="n">DevAddress</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">State</span> <span class="o">=</span> <span class="n">I2C_STATE_BUSY_TX</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nf">LL_I2C_GenerateStartCondition</span><span class="p">(</span><span class="n">I2C1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="nf">LL_I2C_IsActiveFlag_SB</span><span class="p">(</span><span class="n">I2C1</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">);</span>           <span class="cm">/* 等起始条件发送完 */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nf">LL_I2C_TransmitData8</span><span class="p">(</span><span class="n">I2C1</span><span class="p">,</span> <span class="p">(</span><span class="n">Devaddress</span> <span class="o">&amp;</span> <span class="p">(</span><span class="kt">uint8_t</span><span class="p">)(</span><span class="o">~</span><span class="mh">0x01</span><span class="p">)));</span>  <span class="cm">/* 发写地址(末位0) */</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="nf">LL_I2C_IsActiveFlag_ADDR</span><span class="p">(</span><span class="n">I2C1</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">LL_I2C_ClearFlag_ADDR</span><span class="p">(</span><span class="n">I2C1</span><span class="p">);</span>                          <span class="cm">/* 清地址标志 */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="n">XferCount</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="nf">LL_I2C_IsActiveFlag_TXE</span><span class="p">(</span><span class="n">I2C1</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">);</span>         <span class="cm">/* 等发送寄存器空 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">LL_I2C_TransmitData8</span><span class="p">(</span><span class="n">I2C1</span><span class="p">,</span> <span class="o">*</span><span class="n">pBuffPtr</span><span class="p">);</span>              <span class="cm">/* 发一字节 */</span>
+</span></span><span class="line"><span class="cl">    <span class="n">pBuffPtr</span><span class="o">++</span><span class="p">;</span> <span class="n">XferCount</span><span class="o">--</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="nf">LL_I2C_IsActiveFlag_BTF</span><span class="p">(</span><span class="n">I2C1</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">);</span>         <span class="cm">/* 等字节发完(BTF) */</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nf">LL_I2C_GenerateStopCondition</span><span class="p">(</span><span class="n">I2C1</span><span class="p">);</span>                   <span class="cm">/* 发停止条件 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">State</span> <span class="o">=</span> <span class="n">I2C_STATE_READY</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm">  * @brief  LL 主机接收：起始→地址(读)→接收 N 字节→停止
+</span></span></span><span class="line"><span class="cl"><span class="cm">  */</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">APP_MasterReceive</span><span class="p">(</span><span class="kt">uint16_t</span> <span class="n">DevAddress</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">pData</span><span class="p">,</span> <span class="kt">uint16_t</span> <span class="n">Size</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">pBuffPtr</span> <span class="o">=</span> <span class="n">pData</span><span class="p">;</span> <span class="n">XferCount</span> <span class="o">=</span> <span class="n">Size</span><span class="p">;</span> <span class="n">Devaddress</span> <span class="o">=</span> <span class="n">DevAddress</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">State</span> <span class="o">=</span> <span class="n">I2C_STATE_BUSY_RX</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nf">LL_I2C_AcknowledgeNextData</span><span class="p">(</span><span class="n">I2C1</span><span class="p">,</span> <span class="n">LL_I2C_ACK</span><span class="p">);</span>        <span class="cm">/* 先允许 ACK */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">LL_I2C_GenerateStartCondition</span><span class="p">(</span><span class="n">I2C1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="nf">LL_I2C_IsActiveFlag_SB</span><span class="p">(</span><span class="n">I2C1</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">LL_I2C_TransmitData8</span><span class="p">(</span><span class="n">I2C1</span><span class="p">,</span> <span class="p">(</span><span class="n">Devaddress</span> <span class="o">|</span> <span class="mh">0x1</span><span class="p">));</span>      <span class="cm">/* 发读地址(末位1) */</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="nf">LL_I2C_IsActiveFlag_ADDR</span><span class="p">(</span><span class="n">I2C1</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">LL_I2C_ClearFlag_ADDR</span><span class="p">(</span><span class="n">I2C1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="n">XferCount</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="nf">LL_I2C_IsActiveFlag_RXNE</span><span class="p">(</span><span class="n">I2C1</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">);</span>        <span class="cm">/* 等收到一字节 */</span>
+</span></span><span class="line"><span class="cl">    <span class="o">*</span><span class="n">pBuffPtr</span> <span class="o">=</span> <span class="nf">LL_I2C_ReceiveData8</span><span class="p">(</span><span class="n">I2C1</span><span class="p">);</span>              <span class="cm">/* 读一字节 */</span>
+</span></span><span class="line"><span class="cl">    <span class="n">pBuffPtr</span><span class="o">++</span><span class="p">;</span> <span class="n">XferCount</span><span class="o">--</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="n">State</span> <span class="o">=</span> <span class="n">I2C_STATE_READY</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* APP_CheckEndOfTransfer / APP_Buffercmp8 / APP_LedBlinking / 时钟与错误处理
+</span></span></span><span class="line"><span class="cl"><span class="cm">   与前述示例同构，略 */</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="代码分段讲解">代码分段讲解
+</h2><h3 id="1-开漏--上拉i2c-物理层铁律">1. 开漏 + 上拉：I2C 物理层铁律
+</h3><p>I2C 总线靠“线与”工作，SCL/SDA <strong>必须开漏</strong>（<code>LL_GPIO_OUTPUT_OPENDRAIN</code>）+ 外部/内部上拉。示例用内部上拉（<code>LL_GPIO_PULL_UP</code>）。HAL 版在 <code>HAL_I2C_Init</code> 里通过 <code>I2C_HandleTypeDef</code> 同样隐含了这些设置，但 LL 让你看得一清二楚。</p>
+<h3 id="2-发送状态机核心">2. 发送状态机（核心）
+</h3><p>LL 的发送就是“手搓 I2C 协议帧”：</p>
+<ol>
+<li><code>LL_I2C_GenerateStartCondition()</code> 拉出 START；</li>
+<li>等 <code>SB</code> 标志 → 写从机地址（写=地址&amp;0xFE）；</li>
+<li>等 <code>ADDR</code> 标志并清除 → 进入数据传输；</li>
+<li>每字节等 <code>TXE</code>（发送寄存器空）写数据，再等 <code>BTF</code>（字节传输完）；</li>
+<li>最后 <code>LL_I2C_GenerateStopCondition()</code> 发 STOP。</li>
+</ol>
+<p>对比 HAL：<code>HAL_I2C_Master_Transmit()</code> 把以上 5 步全藏在库里，你只传“地址+缓冲区+长度”。</p>
+<h3 id="3-接收状态机">3. 接收状态机
+</h3><p>接收时地址末位置 1（读=<code>地址|0x01</code>），之后轮询 <code>RXNE</code> 逐字节读取。示例为简化只演示了“固定长度、一直 ACK”的情形；HAL 内部还处理了“最后一字节发 NACK + STOP”的时序细节（源码里那些 <code>XferCount&lt;=3</code> 的分支就是干这个的）。</p>
+<h3 id="4-没有超时">4. 没有超时！
+</h3><p>注意这些 <code>while(标志 != 1);</code> 都是<strong>死等</strong>。真实总线若从机无响应（地址错、没接上拉、线断），程序会卡死。真实项目务必加超时或改用中断（<code>I2C_TwoBoard_CommunicationMaster_IT_Init</code>）。</p>
+<h2 id="实验现象">实验现象
+</h2><ol>
+<li>主从两块板 SCL/SDA 连接好，从机先跑 Slave 示例。</li>
+<li>主机按下 KEY，先向 <code>0xA0</code> 发 15 字节。</li>
+<li>主机再读回 15 字节，与发送缓冲比对。</li>
+<li>一致 → 绿 LED 常亮；不一致 → 绿 LED 闪烁。</li>
+</ol>
+<h2 id="常见问题">常见问题
+</h2><ol>
+<li>
+<p><strong>卡在等 ADDR / 一直不进数据？</strong></p>
+<ul>
+<li>最常见：从机地址不对、SCL/SDA 没接上拉、主从没共地。</li>
+<li>确认从机确实在跑对应的 Slave 示例并监听 <code>0xA0</code>。</li>
+</ul>
+</li>
+<li>
+<p><strong>死等卡死？</strong></p>
+<ul>
+<li>LL 轮询无超时。用逻辑分析仪看波形，确认 START/地址是否真的出现在总线上。</li>
+</ul>
+</li>
+<li>
+<p><strong>想用中断而不是轮询？</strong></p>
+<ul>
+<li>参考 <code>I2C_TwoBoard_CommunicationMaster_IT_Init</code>，用 <code>LL_I2C_EnableIT_xxx</code> + 回调处理。</li>
+</ul>
+</li>
+</ol>
+<h2 id="小结">小结
+</h2><ul>
+<li>LL 的 I2C 主机 = <strong>手搓协议帧</strong>：START → 地址 → 数据 → STOP，每步轮询标志。</li>
+<li>相比 HAL 的“一行收发”，LL 代码长但完全透明，没有隐藏时序。</li>
+<li>物理层（开漏+上拉）和“无超时死等”是两个最需要警惕的点。</li>
+</ul>
+<h2 id="拓展应用">拓展应用
+</h2><ul>
+<li>把轮询改成中断/IT 版本，避免阻塞主循环。</li>
+<li>接入真实传感器（如 EEPROM、温湿度芯片），把 <code>0xA0</code> 换成器件真实地址。</li>
+<li>用 DMA 搬运长数据（参考 <code>I2C_TwoBoard_CommunicationMaster_DMA_Init</code>）。</li>
+<li>增加超时退出，提升总线异常时的鲁棒性。</li>
+</ul>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/i2c_twoboard_communicationmaster_polling_init/">I2C_TwoBoard_CommunicationMaster_Polling_Init</a>
+        
+            <a href="/tags/i2c/">I2C</a>
+        
+            <a href="/tags/v1.5.0/">V1.5.0</a>
+        
+            <a href="/tags/py32f030/">PY32F030</a>
+        
+            <a href="/tags/ll/">LL</a>
+        
+    </section>
+
+
+    <section class="article-lastmod">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <span>
+            最后更新于 Sep 08, 2026 16:31 &#43;0800
+        </span>
+    </section></footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/puya-i2c-%E4%B8%BB%E6%9C%BA%E8%BD%AE%E8%AF%A2%E9%80%9A%E4%BF%A1hal-%E5%BA%93/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA I2C — 主机轮询通信（HAL 库）</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/puya-i2c-i2c-%E4%B8%BB%E6%9C%BA-dma-%E9%80%9A%E4%BF%A1/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA I2C — I2C 主机 DMA 通信</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/puya-i2c-i2c-%E4%B8%BB%E6%9C%BA-dma-%E9%80%9A%E4%BF%A1-%E5%86%85%E5%AD%98%E5%9C%B0%E5%9D%80/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA I2C — I2C 主机 DMA 通信 (内存地址)</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/puya-i2c-i2c-%E4%B8%BB%E6%9C%BA%E4%B8%AD%E6%96%AD%E9%80%9A%E4%BF%A1/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA I2C — I2C 主机中断通信</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/puya-i2c-i2c-%E4%BB%8E%E6%9C%BA-dma-%E9%80%9A%E4%BF%A1/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA I2C — I2C 从机 DMA 通信</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="ClingYang/ClingYang.github.io"
+        issue-term="pathname"
+        
+        label="💬comment"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2026 CLing
+    </section>
+    
+    <section class="powerby">
+        
+            世界是你们 <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<style>
+    #TableOfContents > ul, ol {
+        ul, ol {
+            display: none;
+        }
+        .open {
+            display: block;
+        }
+    }
+</style>
+
+<script>
+    function initTocHide() {
+        
+        let toc = document.querySelector(".widget--toc");
+        if (!toc) {
+            return;
+        }
+        
+        window.addEventListener('scroll', function() {
+            
+            let currentLi = document.querySelector(".active-class");
+            if (!currentLi) {
+                return
+            }
+            
+            let elementsByClassName = document.querySelectorAll(".open");
+            if (elementsByClassName.length > 0) {
+                elementsByClassName.forEach((ul) => {
+                    ul.classList.remove("open")
+                })
+            }
+            
+            if (currentLi.children.length > 1) {
+                currentLi.children[1].classList.add("open")
+            }
+            
+            let ul = currentLi.parentElement;
+            do {
+                ul.classList.add("open");
+                ul = ul.parentElement.parentElement
+            } while (ul !== undefined && (ul.localName === 'ul' || ul.localName === 'ol'))
+        });
+    }
+    initTocHide()
+</script>
+
+    </body>
+</html>

@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="AT32F403A ADC 读取内部 Vrefint 参考电压，配合 DMA 自动搬运，反算实际 VDDA 供电电压">
+<title>AT32 ADC — 读取内部参考电压，反算供电电压（ADC&#43;DMA 入门）</title>
+
+<link rel='canonical' href='https://clingyang.github.io/p/at32-adc-%E8%AF%BB%E5%8F%96%E5%86%85%E9%83%A8%E5%8F%82%E8%80%83%E7%94%B5%E5%8E%8B%E5%8F%8D%E7%AE%97%E4%BE%9B%E7%94%B5%E7%94%B5%E5%8E%8Badc-dma-%E5%85%A5%E9%97%A8/'>
+
+<link rel="stylesheet" href="/scss/style.min.e14f3ba93baae65b2aef2339f32b6f25d7a0184785ebf4f6bd7d3376ae5dc2d4.css"><meta property='og:title' content="AT32 ADC — 读取内部参考电压，反算供电电压（ADC+DMA 入门）">
+<meta property='og:description' content="AT32F403A ADC 读取内部 Vrefint 参考电压，配合 DMA 自动搬运，反算实际 VDDA 供电电压">
+<meta property='og:url' content='https://clingyang.github.io/p/at32-adc-%E8%AF%BB%E5%8F%96%E5%86%85%E9%83%A8%E5%8F%82%E8%80%83%E7%94%B5%E5%8E%8B%E5%8F%8D%E7%AE%97%E4%BE%9B%E7%94%B5%E7%94%B5%E5%8E%8Badc-dma-%E5%85%A5%E9%97%A8/'>
+<meta property='og:site_name' content='CLing'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='ADC' /><meta property='article:tag' content='DMA' /><meta property='article:tag' content='Vrefint' /><meta property='article:tag' content='内部参考电压' /><meta property='article:tag' content='AT32F403A' /><meta property='article:published_time' content='2026-09-08T14:56:00&#43;08:00'/><meta property='article:modified_time' content='2026-09-08T16:03:27&#43;08:00'/>
+<meta name="twitter:title" content="AT32 ADC — 读取内部参考电压，反算供电电压（ADC+DMA 入门）">
+<meta name="twitter:description" content="AT32F403A ADC 读取内部 Vrefint 参考电压，配合 DMA 自动搬运，反算实际 VDDA 供电电压">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                            height="290" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🏀</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">CLing</a></h1>
+            <h2 class="site-description">你好 欢迎来到我的博客</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>档案</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E6%8A%80%E6%9C%AF%E9%93%BE%E6%8E%A5/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>技术链接</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/excel/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+                
+                <span>Excel教程</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#这个实验是干嘛的">这个实验是干嘛的？</a></li>
+    <li><a href="#硬件准备">硬件准备</a></li>
+    <li><a href="#涉及的知识点">涉及的知识点</a>
+      <ol>
+        <li><a href="#adc模数转换器">ADC（模数转换器）</a></li>
+        <li><a href="#dma直接存储器访问">DMA（直接存储器访问）</a></li>
+      </ol>
+    </li>
+    <li><a href="#完整代码">完整代码</a></li>
+    <li><a href="#代码分段讲解">代码分段讲解</a>
+      <ol>
+        <li><a href="#dma-配置详解">DMA 配置详解</a></li>
+        <li><a href="#adc-配置详解">ADC 配置详解</a></li>
+        <li><a href="#主循环">主循环</a></li>
+      </ol>
+    </li>
+    <li><a href="#实验现象">实验现象</a></li>
+    <li><a href="#常见问题">常见问题</a>
+      <ol>
+        <li><a href="#q-读到的电压是-0-或者不对">Q: 读到的电压是 0 或者不对？</a></li>
+        <li><a href="#q-数值跳动很大">Q: 数值跳动很大？</a></li>
+        <li><a href="#q-想读取外部引脚的电压">Q: 想读取外部引脚的电压？</a></li>
+      </ol>
+    </li>
+    <li><a href="#小结">小结</a></li>
+    <li><a href="#学了-adcdma-能做什么">学了 ADC+DMA 能做什么？</a>
+      <ol>
+        <li><a href="#传感器数据采集">传感器数据采集</a></li>
+        <li><a href="#控制与调节">控制与调节</a></li>
+        <li><a href="#dma-的重要性">DMA 的重要性</a></li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/at32/" >
+                AT32
+            </a>
+        
+            <a href="/categories/adc/" >
+                ADC
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/at32-adc-%E8%AF%BB%E5%8F%96%E5%86%85%E9%83%A8%E5%8F%82%E8%80%83%E7%94%B5%E5%8E%8B%E5%8F%8D%E7%AE%97%E4%BE%9B%E7%94%B5%E7%94%B5%E5%8E%8Badc-dma-%E5%85%A5%E9%97%A8/">AT32 ADC — 读取内部参考电压，反算供电电压（ADC&#43;DMA 入门）</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            AT32F403A ADC 读取内部 Vrefint 参考电压，配合 DMA 自动搬运，反算实际 VDDA 供电电压
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2026-09-08</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 5 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="adc--读取内部参考电压">ADC — 读取内部参考电压
+</h1><blockquote>
+<p><strong>难度</strong>: ⭐⭐（需要了解 ADC 和 DMA 概念）<br>
+<strong>固件库</strong>: AT32F403A_407_Firmware_Library V2.2.2<br>
+<strong>源文件</strong>: <code>project/at_start_f403a/examples/adc/current_vref_value_check/src/main.c</code></p>
+</blockquote>
+<hr>
+<h2 id="这个实验是干嘛的">这个实验是干嘛的？
+</h2><p>每个 MCU 芯片内部都有一个<strong>精确的参考电压源</strong>（Vrefint），典型值 1.2V。这个电压不随外部供电变化，是芯片出厂时校准好的。</p>
+<p><strong>本实验的思路</strong>：</p>
+<ol>
+<li>用 ADC 采集这个内部 1.2V 参考电压</li>
+<li>ADC 采样值会随实际供电电压（VDDA）变化</li>
+<li>反过来，知道了 ADC 采样值和参考电压，就能算出实际 VDDA</li>
+</ol>
+<p><strong>公式</strong>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">VDDA = 1.2V × 4095 / ADC采样值
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>有什么用？</strong></p>
+<ul>
+<li>电池供电的设备：不用外部电压表就能监测电池电量</li>
+<li>电源质量检测：发现供电不稳</li>
+<li>ADC 精度校准：知道实际 VDDA 后，其他 ADC 测量更准</li>
+</ul>
+<hr>
+<h2 id="硬件准备">硬件准备
+</h2><p><strong>不需要任何外部硬件！</strong> 内部参考电压是芯片自带的。</p>
+<p>你只需要：</p>
+<ul>
+<li>AT32F403A 开发板</li>
+<li>USB 转串口模块（查看 printf 输出）</li>
+</ul>
+<hr>
+<h2 id="涉及的知识点">涉及的知识点
+</h2><p>这个实验比较&quot;硬核&quot;，同时用到了 ADC 和 DMA 两个外设。先搞懂概念：</p>
+<h3 id="adc模数转换器">ADC（模数转换器）
+</h3><p>ADC 把模拟电压转换成数字值。AT32F403A 的 ADC 是 12 位的，意味着：</p>
+<ul>
+<li>输入 0V → 输出 0</li>
+<li>输入 VDDA（3.3V）→ 输出 4095（2^12 - 1）</li>
+<li>输入 1.2V → 输出约 1489（1.2 / 3.3 × 4095）</li>
+</ul>
+<h3 id="dma直接存储器访问">DMA（直接存储器访问）
+</h3><p>ADC 采样完成后，数据存在 ADC 寄存器里。你可以：</p>
+<ul>
+<li><strong>不用 DMA</strong>：CPU 自己去读寄存器（轮询或中断）</li>
+<li><strong>用 DMA</strong>：DMA 硬件自动把数据搬到内存变量，CPU 完全不参与</li>
+</ul>
+<p>本实验用 DMA，因为更高效——ADC 每次采样完，DMA 自动把结果搬到 <code>adc1_ordinary_value</code> 变量里。</p>
+<hr>
+<h2 id="完整代码">完整代码
+</h2><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span><span class="lnt">113
+</span><span class="lnt">114
+</span><span class="lnt">115
+</span><span class="lnt">116
+</span><span class="lnt">117
+</span><span class="lnt">118
+</span><span class="lnt">119
+</span><span class="lnt">120
+</span><span class="lnt">121
+</span><span class="lnt">122
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;at32f403a_407_board.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;at32f403a_407_clock.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* DMA 搬运的目标变量，ADC 采样结果会自动存到这里 */</span>
+</span></span><span class="line"><span class="cl"><span class="n">__IO</span> <span class="kt">uint16_t</span> <span class="n">adc1_ordinary_value</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* ========== DMA 配置 ========== */</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">dma_config</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">dma_init_type</span> <span class="n">dma_init_struct</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 使能 DMA1 时钟 */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">crm_periph_clock_enable</span><span class="p">(</span><span class="n">CRM_DMA1_PERIPH_CLOCK</span><span class="p">,</span> <span class="n">TRUE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">dma_reset</span><span class="p">(</span><span class="n">DMA1_CHANNEL1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">dma_default_para_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">dma_init_struct</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 数据搬运方向：从外设（ADC）到内存 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">dma_init_struct</span><span class="p">.</span><span class="n">direction</span> <span class="o">=</span> <span class="n">DMA_DIR_PERIPHERAL_TO_MEMORY</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 源地址：ADC 数据寄存器 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">dma_init_struct</span><span class="p">.</span><span class="n">peripheral_base_addr</span> <span class="o">=</span> <span class="p">(</span><span class="kt">uint32_t</span><span class="p">)</span><span class="o">&amp;</span><span class="p">(</span><span class="n">ADC1</span><span class="o">-&gt;</span><span class="n">odt</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">dma_init_struct</span><span class="p">.</span><span class="n">peripheral_data_width</span> <span class="o">=</span> <span class="n">DMA_PERIPHERAL_DATA_WIDTH_HALFWORD</span><span class="p">;</span> <span class="c1">// 16位
+</span></span></span><span class="line"><span class="cl">  <span class="n">dma_init_struct</span><span class="p">.</span><span class="n">peripheral_inc_enable</span> <span class="o">=</span> <span class="n">FALSE</span><span class="p">;</span>  <span class="c1">// 源地址不递增（始终读同一个寄存器）
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 目标地址：我们的变量 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">dma_init_struct</span><span class="p">.</span><span class="n">memory_base_addr</span> <span class="o">=</span> <span class="p">(</span><span class="kt">uint32_t</span><span class="p">)</span><span class="o">&amp;</span><span class="n">adc1_ordinary_value</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">dma_init_struct</span><span class="p">.</span><span class="n">memory_data_width</span> <span class="o">=</span> <span class="n">DMA_MEMORY_DATA_WIDTH_HALFWORD</span><span class="p">;</span> <span class="c1">// 16位
+</span></span></span><span class="line"><span class="cl">  <span class="n">dma_init_struct</span><span class="p">.</span><span class="n">memory_inc_enable</span> <span class="o">=</span> <span class="n">FALSE</span><span class="p">;</span>  <span class="c1">// 目标地址不递增（只存一个值）
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">dma_init_struct</span><span class="p">.</span><span class="n">buffer_size</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>              <span class="c1">// 每次搬运 1 个数据
+</span></span></span><span class="line"><span class="cl">  <span class="n">dma_init_struct</span><span class="p">.</span><span class="n">priority</span> <span class="o">=</span> <span class="n">DMA_PRIORITY_HIGH</span><span class="p">;</span> <span class="c1">// 高优先级
+</span></span></span><span class="line"><span class="cl">  <span class="n">dma_init_struct</span><span class="p">.</span><span class="n">loop_mode_enable</span> <span class="o">=</span> <span class="n">TRUE</span><span class="p">;</span>      <span class="c1">// 循环模式（反复搬运）
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nf">dma_init</span><span class="p">(</span><span class="n">DMA1_CHANNEL1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">dma_init_struct</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* ========== ADC 配置 ========== */</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">adc_config</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">adc_base_config_type</span> <span class="n">adc_base_struct</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 使能 ADC1 时钟 */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">crm_periph_clock_enable</span><span class="p">(</span><span class="n">CRM_ADC1_PERIPH_CLOCK</span><span class="p">,</span> <span class="n">TRUE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">adc_reset</span><span class="p">(</span><span class="n">ADC1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* ADC 时钟分频：系统时钟 / 4 */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">crm_adc_clock_div_set</span><span class="p">(</span><span class="n">CRM_ADC_DIV_4</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nf">adc_base_default_para_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">adc_base_struct</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 独立模式（不与其他 ADC 联动） */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">adc_combine_mode_select</span><span class="p">(</span><span class="n">ADC_INDEPENDENT_MODE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* ADC 基础配置 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">adc_base_struct</span><span class="p">.</span><span class="n">sequence_mode</span> <span class="o">=</span> <span class="n">FALSE</span><span class="p">;</span>           <span class="c1">// 非序列模式（只采一个通道）
+</span></span></span><span class="line"><span class="cl">  <span class="n">adc_base_struct</span><span class="p">.</span><span class="n">repeat_mode</span> <span class="o">=</span> <span class="n">FALSE</span><span class="p">;</span>             <span class="c1">// 不重复
+</span></span></span><span class="line"><span class="cl">  <span class="n">adc_base_struct</span><span class="p">.</span><span class="n">data_align</span> <span class="o">=</span> <span class="n">ADC_RIGHT_ALIGNMENT</span><span class="p">;</span> <span class="c1">// 右对齐
+</span></span></span><span class="line"><span class="cl">  <span class="n">adc_base_struct</span><span class="p">.</span><span class="n">ordinary_channel_length</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>     <span class="c1">// 只采 1 个通道
+</span></span></span><span class="line"><span class="cl">  <span class="nf">adc_base_config</span><span class="p">(</span><span class="n">ADC1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">adc_base_struct</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 选择通道 17 = 内部参考电压 Vrefint */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">adc_ordinary_channel_set</span><span class="p">(</span><span class="n">ADC1</span><span class="p">,</span> <span class="n">ADC_CHANNEL_17</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">ADC_SAMPLETIME_239_5</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 软件触发（不用外部触发源） */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">adc_ordinary_conversion_trigger_set</span><span class="p">(</span><span class="n">ADC1</span><span class="p">,</span> <span class="n">ADC12_ORDINARY_TRIG_SOFTWARE</span><span class="p">,</span> <span class="n">TRUE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 使能 ADC 的 DMA 请求 */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">adc_dma_mode_enable</span><span class="p">(</span><span class="n">ADC1</span><span class="p">,</span> <span class="n">TRUE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 使能内部温度传感器和参考电压 */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">adc_tempersensor_vintrv_enable</span><span class="p">(</span><span class="n">TRUE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 使能 ADC */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">adc_enable</span><span class="p">(</span><span class="n">ADC1</span><span class="p">,</span> <span class="n">TRUE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* ADC 校准（必须！消除工艺偏差） */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">adc_calibration_init</span><span class="p">(</span><span class="n">ADC1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span><span class="p">(</span><span class="nf">adc_calibration_init_status_get</span><span class="p">(</span><span class="n">ADC1</span><span class="p">));</span>  <span class="c1">// 等待校准初始化完成
+</span></span></span><span class="line"><span class="cl">  <span class="nf">adc_calibration_start</span><span class="p">(</span><span class="n">ADC1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span><span class="p">(</span><span class="nf">adc_calibration_status_get</span><span class="p">(</span><span class="n">ADC1</span><span class="p">));</span>        <span class="c1">// 等待校准完成
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* ========== 主函数 ========== */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">nvic_priority_group_config</span><span class="p">(</span><span class="n">NVIC_PRIORITY_GROUP_4</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">system_clock_config</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">at32_board_init</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 关闭所有 LED */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">at32_led_off</span><span class="p">(</span><span class="n">LED2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">at32_led_off</span><span class="p">(</span><span class="n">LED3</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">at32_led_off</span><span class="p">(</span><span class="n">LED4</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 初始化串口（用于 printf 输出） */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">uart_print_init</span><span class="p">(</span><span class="mi">115200</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 初始化 DMA 和 ADC */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">dma_config</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">adc_config</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 使能 DMA 通道（必须在 ADC 使能之后！） */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">dma_channel_enable</span><span class="p">(</span><span class="n">DMA1_CHANNEL1</span><span class="p">,</span> <span class="n">TRUE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;adc1_vref_check </span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">while</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">at32_led_toggle</span><span class="p">(</span><span class="n">LED2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">delay_sec</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 软件触发一次 ADC 转换 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">adc_ordinary_software_trigger_enable</span><span class="p">(</span><span class="n">ADC1</span><span class="p">,</span> <span class="n">TRUE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 等待 DMA 搬运完成（转换结束标志） */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span><span class="p">(</span><span class="nf">dma_flag_get</span><span class="p">(</span><span class="n">DMA1_FDT1_FLAG</span><span class="p">)</span> <span class="o">==</span> <span class="n">RESET</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">dma_flag_clear</span><span class="p">(</span><span class="n">DMA1_FDT1_FLAG</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 计算并打印 VDDA 电压 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;vref_value = %f V</span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="p">((</span><span class="kt">double</span><span class="p">)</span><span class="mf">1.2</span> <span class="o">*</span> <span class="mi">4095</span><span class="p">)</span> <span class="o">/</span> <span class="n">adc1_ordinary_value</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="代码分段讲解">代码分段讲解
+</h2><h3 id="dma-配置详解">DMA 配置详解
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">dma_init_struct</span><span class="p">.</span><span class="n">direction</span> <span class="o">=</span> <span class="n">DMA_DIR_PERIPHERAL_TO_MEMORY</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>DMA 有 3 种方向：</p>
+<ul>
+<li><code>PERIPHERAL_TO_MEMORY</code> — 外设→内存（读取外设数据，本实验用这个）</li>
+<li><code>MEMORY_TO_PERIPHERAL</code> — 内存→外设（发送数据到外设）</li>
+<li><code>MEMORY_TO_MEMORY</code> — 内存→内存（数据搬运）</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">dma_init_struct</span><span class="p">.</span><span class="n">peripheral_base_addr</span> <span class="o">=</span> <span class="p">(</span><span class="kt">uint32_t</span><span class="p">)</span><span class="o">&amp;</span><span class="p">(</span><span class="n">ADC1</span><span class="o">-&gt;</span><span class="n">odt</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>源地址是 ADC1 的数据输出寄存器（ODT），ADC 每次采样的结果存在这里。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">dma_init_struct</span><span class="p">.</span><span class="n">loop_mode_enable</span> <span class="o">=</span> <span class="n">TRUE</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>循环模式：DMA 搬完一次后自动重新开始。这样每次 ADC 转换完，DMA 都会自动把新数据搬过来。</p>
+<h3 id="adc-配置详解">ADC 配置详解
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">adc_ordinary_channel_set</span><span class="p">(</span><span class="n">ADC1</span><span class="p">,</span> <span class="n">ADC_CHANNEL_17</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">ADC_SAMPLETIME_239_5</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这行配置了 3 个东西：</p>
+<ul>
+<li><strong>通道 17</strong> — 内部参考电压（Vrefint）固定映射到通道 17</li>
+<li><strong>序号 1</strong> — 在序列中的位置（这里只采一个通道，所以是 1）</li>
+<li><strong>采样时间 239.5 个时钟周期</strong> — 采样时间越长精度越高，但速度越慢</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">adc_tempersensor_vintrv_enable</span><span class="p">(</span><span class="n">TRUE</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>这行很重要！</strong> 必须使能内部参考电压，否则通道 17 读到的是 0。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">adc_calibration_init</span><span class="p">(</span><span class="n">ADC1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">adc_calibration_start</span><span class="p">(</span><span class="n">ADC1</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>ADC 校准是必须的步骤。芯片制造有工艺偏差，校准可以消除这个偏差。<strong>不校准的话，采样值可能偏差几百 LSB。</strong></p>
+<h3 id="主循环">主循环
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">adc_ordinary_software_trigger_enable</span><span class="p">(</span><span class="n">ADC1</span><span class="p">,</span> <span class="n">TRUE</span><span class="p">);</span>  <span class="c1">// 触发一次转换
+</span></span></span><span class="line"><span class="cl"><span class="k">while</span><span class="p">(</span><span class="nf">dma_flag_get</span><span class="p">(</span><span class="n">DMA1_FDT1_FLAG</span><span class="p">)</span> <span class="o">==</span> <span class="n">RESET</span><span class="p">);</span>       <span class="c1">// 等 DMA 搬完
+</span></span></span><span class="line"><span class="cl"><span class="nf">dma_flag_clear</span><span class="p">(</span><span class="n">DMA1_FDT1_FLAG</span><span class="p">);</span>                      <span class="c1">// 清标志位
+</span></span></span><span class="line"><span class="cl"><span class="nf">printf</span><span class="p">(</span><span class="s">&#34;vref_value = %f V</span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="p">((</span><span class="kt">double</span><span class="p">)</span><span class="mf">1.2</span> <span class="o">*</span> <span class="mi">4095</span><span class="p">)</span> <span class="o">/</span> <span class="n">adc1_ordinary_value</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>公式：<code>VDDA = 1.2V × 4095 / ADC采样值</code></p>
+<p>举例：如果 ADC 读到 1489，那么 VDDA = 1.2 × 4095 / 1489 ≈ 3.30V</p>
+<hr>
+<h2 id="实验现象">实验现象
+</h2><p>串口助手每秒打印一行：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">adc1_vref_check
+</span></span><span class="line"><span class="cl">vref_value = 3.302500 V
+</span></span><span class="line"><span class="cl">vref_value = 3.301800 V
+</span></span><span class="line"><span class="cl">vref_value = 3.303200 V
+</span></span><span class="line"><span class="cl">...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>如果供电是 3.3V，读数应该在 3.28~3.32V 附近</li>
+<li>如果用 USB 供电，可能会看到 3.25~3.35V 的波动（USB 供电不太稳）</li>
+<li>如果用电池供电，电压会随电量慢慢下降</li>
+</ul>
+<hr>
+<h2 id="常见问题">常见问题
+</h2><h3 id="q-读到的电压是-0-或者不对">Q: 读到的电压是 0 或者不对？
+</h3><ul>
+<li>检查是否调用了 <code>adc_tempersensor_vintrv_enable(TRUE)</code> — 不开这个，Vrefint 通道没连接</li>
+<li>检查是否做了 ADC 校准</li>
+<li>检查 DMA 是否在 ADC 使能之后才使能</li>
+</ul>
+<h3 id="q-数值跳动很大">Q: 数值跳动很大？
+</h3><ul>
+<li>增加采样时间（已经用了 239.5，比较长了）</li>
+<li>可以做多次采样取平均值</li>
+<li>检查电源是否稳定</li>
+</ul>
+<h3 id="q-想读取外部引脚的电压">Q: 想读取外部引脚的电压？
+</h3><ul>
+<li>把 <code>ADC_CHANNEL_17</code> 换成对应的外部通道号（如 <code>ADC_CHANNEL_0</code> 对应 PA0）</li>
+<li>去掉 <code>adc_tempersensor_vintrv_enable()</code> — 这个只用于内部通道</li>
+</ul>
+<hr>
+<h2 id="小结">小结
+</h2><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">概念</th>
+					<th style="text-align: left">说明</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left">Vrefint</td>
+					<td style="text-align: left">芯片内部 1.2V 精密参考电压</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">12 位 ADC</td>
+					<td style="text-align: left">输出范围 0<del>4095，对应 0V</del>VDDA</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">DMA</td>
+					<td style="text-align: left">硬件自动搬运数据，不占 CPU</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">ADC 校准</td>
+					<td style="text-align: left">必须做，消除工艺偏差</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">采样时间</td>
+					<td style="text-align: left">越长精度越高，速度越慢</td>
+			</tr>
+	</tbody>
+</table></div>
+<hr>
+<h2 id="学了-adcdma-能做什么">学了 ADC+DMA 能做什么？
+</h2><p>ADC 是连接&quot;物理世界&quot;和&quot;数字世界&quot;的桥梁。温度、光照、电压、声音……所有模拟信号都要靠 ADC 来采集：</p>
+<h3 id="传感器数据采集">传感器数据采集
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">项目</th>
+					<th style="text-align: left">原理</th>
+					<th style="text-align: left">难度</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left"><strong>温度检测</strong></td>
+					<td style="text-align: left">NTC 热敏电阻 + ADC → 查表得温度</td>
+					<td style="text-align: left">⭐⭐</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>光照检测</strong></td>
+					<td style="text-align: left">光敏电阻 + ADC → 判断亮暗</td>
+					<td style="text-align: left">⭐</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>电池电量</strong></td>
+					<td style="text-align: left">分压电阻 + ADC → 读电池电压</td>
+					<td style="text-align: left">⭐⭐</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>电流检测</strong></td>
+					<td style="text-align: left">采样电阻 + 运放 + ADC → 读电流</td>
+					<td style="text-align: left">⭐⭐⭐</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>声音采集</strong></td>
+					<td style="text-align: left">MEMS 麦克风 + ADC → 录音/声控</td>
+					<td style="text-align: left">⭐⭐⭐</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>心率检测</strong></td>
+					<td style="text-align: left">光电传感器 + ADC → 心跳波形</td>
+					<td style="text-align: left">⭐⭐⭐</td>
+			</tr>
+	</tbody>
+</table></div>
+<h3 id="控制与调节">控制与调节
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">项目</th>
+					<th style="text-align: left">原理</th>
+					<th style="text-align: left">难度</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left"><strong>恒温控制</strong></td>
+					<td style="text-align: left">温度传感器 + ADC + PID + 加热器</td>
+					<td style="text-align: left">⭐⭐⭐</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>光控灯</strong></td>
+					<td style="text-align: left">光敏电阻 + ADC + 继电器 → 天黑自动开灯</td>
+					<td style="text-align: left">⭐⭐</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>可调电源</strong></td>
+					<td style="text-align: left">电位器 + ADC → 设定输出电压</td>
+					<td style="text-align: left">⭐⭐⭐</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>示波器</strong></td>
+					<td style="text-align: left">高速 ADC + DMA + 显示屏 → 简易示波器</td>
+					<td style="text-align: left">⭐⭐⭐⭐</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><strong>功率计</strong></td>
+					<td style="text-align: left">电压 ADC + 电流 ADC → 计算功率（你正在做的 2UUL！）</td>
+					<td style="text-align: left">⭐⭐⭐</td>
+			</tr>
+	</tbody>
+</table></div>
+<h3 id="dma-的重要性">DMA 的重要性
+</h3><p>不用 DMA 也能读 ADC，但 DMA 有这些优势：</p>
+<ul>
+<li><strong>不占 CPU</strong>：ADC 采样 100 万次/秒，CPU 完全不用管</li>
+<li><strong>不丢数据</strong>：轮询方式可能来不及读就被覆盖了</li>
+<li><strong>配合定时器</strong>：定时器触发 ADC，DMA 自动搬运，实现精确采样率</li>
+</ul>
+<blockquote>
+<p><strong>核心思路</strong>：ADC + DMA = &ldquo;自动采集系统&rdquo;。ADC 负责把模拟信号变成数字，DMA 负责搬运数据，CPU 只需要在数据准备好后处理结果。这是所有数据采集系统的基础架构。</p>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>下一步</strong>：学会了 ADC，可以学 <a class="link" href="/p/at32-spi-w25q-flash/" >SPI 读写 Flash</a>，用 SPI 接口读写外部 W25Q Flash 芯片。</p>
+</blockquote>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/adc/">Adc</a>
+        
+            <a href="/tags/dma/">DMA</a>
+        
+            <a href="/tags/vrefint/">Vrefint</a>
+        
+            <a href="/tags/%E5%86%85%E9%83%A8%E5%8F%82%E8%80%83%E7%94%B5%E5%8E%8B/">内部参考电压</a>
+        
+            <a href="/tags/at32f403a/">AT32F403A</a>
+        
+    </section>
+
+
+    <section class="article-lastmod">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <span>
+            最后更新于 Sep 08, 2026 16:03 &#43;0800
+        </span>
+    </section></footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/at32-dma-flash-%E5%88%B0-sram-%E6%95%B0%E6%8D%AE%E6%90%AC%E8%BF%90cpu-%E5%AE%8C%E5%85%A8%E4%B8%8D%E5%8F%82%E4%B8%8E/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AT32 DMA — Flash 到 SRAM 数据搬运（CPU 完全不参与）</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/at32-i2c-%E8%AF%BB%E5%86%99-eeprom%E6%9C%80%E5%B8%B8%E7%94%A8%E7%9A%84-i2c-%E4%BB%8E%E8%AE%BE%E5%A4%87/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AT32 I2C — 读写 EEPROM（最常用的 I2C 从设备）</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/at32-adc-%E4%B8%89-adc-%E5%90%8C%E6%AD%A5%E8%A7%A6%E5%8F%91/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AT32 ADC — 三 ADC 同步触发</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/at32-adc-%E5%86%85%E9%83%A8%E6%B8%A9%E5%BA%A6%E4%BC%A0%E6%84%9F%E5%99%A8%E8%AF%BB%E5%8F%96/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AT32 ADC — 内部温度传感器读取</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/at32-adc-%E5%8F%8C-adc-%E8%81%94%E5%90%88%E8%A7%84%E5%88%99%E5%90%8C%E6%AD%A5%E6%A8%A1%E5%BC%8F/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AT32 ADC — 双 ADC 联合规则同步模式</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="ClingYang/ClingYang.github.io"
+        issue-term="pathname"
+        
+        label="💬comment"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2026 CLing
+    </section>
+    
+    <section class="powerby">
+        
+            世界是你们 <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<style>
+    #TableOfContents > ul, ol {
+        ul, ol {
+            display: none;
+        }
+        .open {
+            display: block;
+        }
+    }
+</style>
+
+<script>
+    function initTocHide() {
+        
+        let toc = document.querySelector(".widget--toc");
+        if (!toc) {
+            return;
+        }
+        
+        window.addEventListener('scroll', function() {
+            
+            let currentLi = document.querySelector(".active-class");
+            if (!currentLi) {
+                return
+            }
+            
+            let elementsByClassName = document.querySelectorAll(".open");
+            if (elementsByClassName.length > 0) {
+                elementsByClassName.forEach((ul) => {
+                    ul.classList.remove("open")
+                })
+            }
+            
+            if (currentLi.children.length > 1) {
+                currentLi.children[1].classList.add("open")
+            }
+            
+            let ul = currentLi.parentElement;
+            do {
+                ul.classList.add("open");
+                ul = ul.parentElement.parentElement
+            } while (ul !== undefined && (ul.localName === 'ul' || ul.localName === 'ol'))
+        });
+    }
+    initTocHide()
+</script>
+
+    </body>
+</html>

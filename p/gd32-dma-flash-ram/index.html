@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="GD32 GD32F30x_Firmware_Library V3.0.3 DMA Flash → RAM 示例教学">
+<title>GD32 DMA — Flash → RAM</title>
+
+<link rel='canonical' href='https://clingyang.github.io/p/gd32-dma-flash-ram/'>
+
+<link rel="stylesheet" href="/scss/style.min.e14f3ba93baae65b2aef2339f32b6f25d7a0184785ebf4f6bd7d3376ae5dc2d4.css"><meta property='og:title' content="GD32 DMA — Flash → RAM">
+<meta property='og:description' content="GD32 GD32F30x_Firmware_Library V3.0.3 DMA Flash → RAM 示例教学">
+<meta property='og:url' content='https://clingyang.github.io/p/gd32-dma-flash-ram/'>
+<meta property='og:site_name' content='CLing'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Flash_to_ram' /><meta property='article:tag' content='dma' /><meta property='article:tag' content='V3.0.3' /><meta property='article:published_time' content='2026-09-08T14:52:21&#43;08:00'/><meta property='article:modified_time' content='2026-09-08T16:03:27&#43;08:00'/>
+<meta name="twitter:title" content="GD32 DMA — Flash → RAM">
+<meta name="twitter:description" content="GD32 GD32F30x_Firmware_Library V3.0.3 DMA Flash → RAM 示例教学">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                            height="290" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🏀</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">CLing</a></h1>
+            <h2 class="site-description">你好 欢迎来到我的博客</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>档案</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E6%8A%80%E6%9C%AF%E9%93%BE%E6%8E%A5/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>技术链接</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/excel/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+                
+                <span>Excel教程</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#功能简介">功能简介</a></li>
+    <li><a href="#硬件准备">硬件准备</a></li>
+    <li><a href="#完整代码带中文注释">完整代码（带中文注释）</a></li>
+    <li><a href="#代码分段讲解">代码分段讲解</a>
+      <ol>
+        <li><a href="#1-flash-操作先擦再写再读">1. Flash 操作：先擦、再写、再读</a></li>
+        <li><a href="#2-dma-配置告诉它从哪搬搬到哪搬多少">2. DMA 配置：告诉它&quot;从哪搬、搬到哪、搬多少&quot;</a></li>
+        <li><a href="#3-三种关键开关">3. 三种关键&quot;开关&quot;</a></li>
+        <li><a href="#4-启动与等通知">4. 启动与&quot;等通知&quot;</a></li>
+        <li><a href="#5-完成中断里做了什么">5. 完成中断里做了什么？</a></li>
+        <li><a href="#6-结果比对与-led-指示">6. 结果比对与 LED 指示</a></li>
+      </ol>
+    </li>
+    <li><a href="#实验现象">实验现象</a></li>
+    <li><a href="#常见问题">常见问题</a></li>
+    <li><a href="#小结">小结</a></li>
+    <li><a href="#拓展应用">拓展应用</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/gd32/" >
+                GD32
+            </a>
+        
+            <a href="/categories/dma/" >
+                DMA
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/gd32-dma-flash-ram/">GD32 DMA — Flash → RAM</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            GD32 GD32F30x_Firmware_Library V3.0.3 DMA Flash → RAM 示例教学
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2026-09-08</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 6 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="dma--flash--ram">DMA — Flash → RAM
+</h1><blockquote>
+<p><strong>固件库</strong>: GD32F30x_Firmware_Library V3.0.3<br>
+<strong>芯片</strong>: GD32F30x（以 GD32F307 评估板为例）<br>
+<strong>源文件</strong>: <code>GD32F30x_Firmware_Library_V3.0.3/Examples/DMA/Flash_to_ram/main.c</code><br>
+<strong>配套</strong>: <code>gd32f30x_it.c</code> 中的 <code>DMA0_Channel0_IRQHandler</code>（置完成标志）</p>
+</blockquote>
+<hr>
+<h2 id="功能简介">功能简介
+</h2><p>本示例演示 DMA 最纯粹的用途：<strong>把一块 Flash 上的数据，自动搬到 RAM 数组里</strong>。为了&quot;造出&quot;可搬运的 Flash 内容，例程先做了三件事：</p>
+<ol>
+<li><strong>擦除</strong> Flash 的 <code>0x08004000</code> 起始处的若干页（擦成全 <code>0xFF</code>）。</li>
+<li><strong>编程</strong> 这些 Flash 页，每 4 字节写一个固定值 <code>0x3210ABCD</code>。</li>
+<li>用 <strong>DMA0 通道0</strong>（内存到内存模式）把这 <code>0x400</code>（1024）字节从 Flash 自动<strong>搬进 RAM 数组 <code>g_destbuf[]</code></strong>。</li>
+</ol>
+<p>搬运结束后，在 DMA 完成中断里把 <code>g_dmacomplete_flag</code> 置 1，主循环解除等待，再逐字节比对：如果 <code>g_destbuf</code> 里全是 <code>0x3210ABCD</code>，说明 DMA 搬运成功 → <strong>4 颗 LED 全亮</strong>；否则只亮 LED2、LED4 表示出错。</p>
+<blockquote>
+<p><strong>为什么搬 Flash 还要先擦再写？</strong> 因为 Flash 只能把 1 写成 0、不能把 0 直接写成 1，所以写入前必须整页擦除（擦除后全为 1，即 <code>0xFF</code>）。这是 Flash 的物理特性，和前面 FMC 例程一致。本例的重点其实不是 Flash 操作，而是&quot;DMA 怎么搬&quot;——Flash 那部分只是给 DMA 准备一个数据源。</p>
+</blockquote>
+<hr>
+<h2 id="硬件准备">硬件准备
+</h2><ul>
+<li>GD32F30x 评估板一块（LED2/LED3/LED4/LED5 由 <code>gd_eval_led_init</code> 初始化）。</li>
+<li><strong>无需任何外部接线</strong>。本例完全是片内 Flash ↔ RAM 的搬运，下载程序即可观察 LED。</li>
+<li>若用调试器（如 J-Link / DAP），可在搬运前后观察 <code>g_destbuf[]</code> 和 <code>0x08004000</code> 处的内容，验证搬运正确性。</li>
+</ul>
+<blockquote>
+<p>⚠️ <strong>地址安全提醒</strong>：<code>BANK0_WRITE_START_ADDR = 0x08004000</code>。这个地址在 Flash 靠前的&quot;用户区&quot;，<strong>务必确认它不在你的程序代码区</strong>，否则擦写会破坏正在运行的代码。评估板例程默认这里空闲；你自己移植时请选程序末尾之后的空闲页。</p>
+</blockquote>
+<hr>
+<h2 id="完整代码带中文注释">完整代码（带中文注释）
+</h2><blockquote>
+<p>注：<code>DMA0_Channel0_IRQHandler</code> 在 <code>gd32f30x_it.c</code> 里，搬运完成后被调用，把标志位置 1。此处一并列出。</p>
+</blockquote>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span><span class="lnt">113
+</span><span class="lnt">114
+</span><span class="lnt">115
+</span><span class="lnt">116
+</span><span class="lnt">117
+</span><span class="lnt">118
+</span><span class="lnt">119
+</span><span class="lnt">120
+</span><span class="lnt">121
+</span><span class="lnt">122
+</span><span class="lnt">123
+</span><span class="lnt">124
+</span><span class="lnt">125
+</span><span class="lnt">126
+</span><span class="lnt">127
+</span><span class="lnt">128
+</span><span class="lnt">129
+</span><span class="lnt">130
+</span><span class="lnt">131
+</span><span class="lnt">132
+</span><span class="lnt">133
+</span><span class="lnt">134
+</span><span class="lnt">135
+</span><span class="lnt">136
+</span><span class="lnt">137
+</span><span class="lnt">138
+</span><span class="lnt">139
+</span><span class="lnt">140
+</span><span class="lnt">141
+</span><span class="lnt">142
+</span><span class="lnt">143
+</span><span class="lnt">144
+</span><span class="lnt">145
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;gd32f30x.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;string.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;gd32f307c_eval.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#define TRANSFER_NUM           0x400    </span><span class="cm">/* 搬运总字节数：1024 字节 */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define FMC_PAGE_SIZE          ((uint16_t)0x800)        </span><span class="cm">/* Flash 每页 2KB */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define BANK0_WRITE_START_ADDR ((uint32_t)0x08004000)   </span><span class="cm">/* 被读/写的 Flash 起始地址 */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">rcu_config</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">nvic_config</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">led_config</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* DMA 完成标志：中断里置 1，主循环里等待它 */</span>
+</span></span><span class="line"><span class="cl"><span class="n">__IO</span> <span class="kt">uint32_t</span> <span class="n">g_dmacomplete_flag</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="cm">/* DMA 的目标缓冲区（在 RAM 里） */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="n">g_destbuf</span><span class="p">[</span><span class="n">TRANSFER_NUM</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl"><span class="cm">/* 要写进 Flash 的固定数据 */</span>
+</span></span><span class="line"><span class="cl"><span class="k">const</span> <span class="kt">uint32_t</span> <span class="n">transdata</span> <span class="o">=</span> <span class="mh">0x3210ABCD</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">fmc_state_enum</span> <span class="n">fmcstatus</span> <span class="o">=</span> <span class="n">FMC_READY</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint32_t</span> <span class="n">i</span><span class="p">,</span> <span class="n">count</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint32_t</span> <span class="o">*</span><span class="n">ptrd</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint32_t</span> <span class="n">address</span> <span class="o">=</span> <span class="mh">0x00</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ErrStatus</span> <span class="n">access_flag</span> <span class="o">=</span> <span class="n">SUCCESS</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">dma_parameter_struct</span> <span class="n">dma_init_struct</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint32_t</span> <span class="n">wperror</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">rcu_config</span><span class="p">();</span>        <span class="cm">/* 开 DMA0 时钟 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">nvic_config</span><span class="p">();</span>       <span class="cm">/* 配置 DMA0 通道0 中断 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">led_config</span><span class="p">();</span>        <span class="cm">/* LED 初始化 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">fmc_unlock</span><span class="p">();</span>        <span class="cm">/* 解锁 Flash 控制器（写 Flash 前必须） */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* ---- 第 1 步：擦除 Flash 页（擦成 0xFF）---- */</span>
+</span></span><span class="line"><span class="cl">    <span class="n">count</span> <span class="o">=</span> <span class="n">TRANSFER_NUM</span> <span class="o">/</span> <span class="n">FMC_PAGE_SIZE</span><span class="p">;</span>   <span class="cm">/* 1024/2048 = 0，循环会擦 2 页(0,1) */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">fmc_flag_clear</span><span class="p">(</span><span class="n">FMC_FLAG_BANK0_PGERR</span> <span class="o">|</span> <span class="n">FMC_FLAG_BANK0_WPERR</span> <span class="o">|</span> <span class="n">FMC_FLAG_BANK0_END</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span><span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">count</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">        <span class="n">fmcstatus</span> <span class="o">=</span> <span class="nf">fmc_page_erase</span><span class="p">(</span><span class="n">BANK0_WRITE_START_ADDR</span> <span class="o">+</span> <span class="p">(</span><span class="n">FMC_PAGE_SIZE</span> <span class="o">*</span> <span class="n">i</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">        <span class="n">wperror</span> <span class="o">+=</span> <span class="p">(</span><span class="n">fmcstatus</span> <span class="o">==</span> <span class="n">FMC_WPERR</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">fmc_flag_clear</span><span class="p">(</span><span class="n">FMC_FLAG_BANK0_PGERR</span> <span class="o">|</span> <span class="n">FMC_FLAG_BANK0_WPERR</span> <span class="o">|</span> <span class="n">FMC_FLAG_BANK0_END</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span><span class="p">(</span><span class="n">wperror</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">){</span> <span class="k">while</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span> <span class="p">}</span>   <span class="cm">/* 擦除出错就卡死 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">fmc_lock</span><span class="p">();</span>                      <span class="cm">/* 擦完先上锁 */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 校验：擦除后读出来应该全是 0xFFFFFFFF */</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ptrd</span> <span class="o">=</span> <span class="p">(</span><span class="kt">uint32_t</span><span class="o">*</span><span class="p">)</span><span class="n">BANK0_WRITE_START_ADDR</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">count</span> <span class="o">=</span> <span class="n">TRANSFER_NUM</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="o">*</span><span class="n">ptrd</span><span class="p">);</span>   <span class="cm">/* 按 32 位（4字节）算个数 */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span><span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">count</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span><span class="p">(</span><span class="mh">0xFFFFFFFF</span> <span class="o">!=</span> <span class="o">*</span><span class="n">ptrd</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">            <span class="n">access_flag</span> <span class="o">=</span> <span class="n">ERROR</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="n">ptrd</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span><span class="p">(</span><span class="n">ERROR</span> <span class="o">==</span> <span class="n">access_flag</span><span class="p">){</span> <span class="k">while</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* ---- 第 2 步：编程 Flash，每 4 字节写 0x3210ABCD ---- */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">fmc_unlock</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">fmc_flag_clear</span><span class="p">(</span><span class="n">FMC_FLAG_BANK0_PGERR</span> <span class="o">|</span> <span class="n">FMC_FLAG_BANK0_WPERR</span> <span class="o">|</span> <span class="n">FMC_FLAG_BANK0_END</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">address</span> <span class="o">=</span> <span class="n">BANK0_WRITE_START_ADDR</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">wperror</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">count</span> <span class="o">=</span> <span class="n">BANK0_WRITE_START_ADDR</span> <span class="o">+</span> <span class="n">TRANSFER_NUM</span><span class="p">;</span>   <span class="cm">/* 结束地址 */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span><span class="p">(</span><span class="n">address</span> <span class="o">&lt;</span> <span class="n">count</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">        <span class="n">fmcstatus</span> <span class="o">=</span> <span class="nf">fmc_word_program</span><span class="p">(</span><span class="n">address</span><span class="p">,</span> <span class="n">transdata</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">address</span> <span class="o">=</span> <span class="n">address</span> <span class="o">+</span> <span class="mi">4</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">wperror</span> <span class="o">+=</span> <span class="p">(</span><span class="n">FMC_WPERR</span> <span class="o">==</span> <span class="n">fmcstatus</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">fmc_flag_clear</span><span class="p">(</span><span class="n">FMC_FLAG_BANK0_PGERR</span> <span class="o">|</span> <span class="n">FMC_FLAG_BANK0_WPERR</span> <span class="o">|</span> <span class="n">FMC_FLAG_BANK0_END</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span><span class="p">(</span><span class="n">wperror</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">){</span> <span class="k">while</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">fmc_lock</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 先把 RAM 目标缓冲清零，方便后面比对 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">memset</span><span class="p">(</span><span class="n">g_destbuf</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">TRANSFER_NUM</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* ---- 第 3 步：配置并启动 DMA，把 Flash 搬到 RAM ---- */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">dma_deinit</span><span class="p">(</span><span class="n">DMA0</span><span class="p">,</span> <span class="n">DMA_CH0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">dma_init_struct</span><span class="p">.</span><span class="n">direction</span>    <span class="o">=</span> <span class="n">DMA_PERIPHERAL_TO_MEMORY</span><span class="p">;</span>  <span class="cm">/* 方向：外设(Flash)→内存(RAM) */</span>
+</span></span><span class="line"><span class="cl">    <span class="n">dma_init_struct</span><span class="p">.</span><span class="n">memory_addr</span>  <span class="o">=</span> <span class="p">(</span><span class="kt">uint32_t</span><span class="p">)</span><span class="n">g_destbuf</span><span class="p">;</span>       <span class="cm">/* 目标：RAM 数组 */</span>
+</span></span><span class="line"><span class="cl">    <span class="n">dma_init_struct</span><span class="p">.</span><span class="n">memory_inc</span>   <span class="o">=</span> <span class="n">DMA_MEMORY_INCREASE_ENABLE</span><span class="p">;</span><span class="cm">/* 目标地址自增 */</span>
+</span></span><span class="line"><span class="cl">    <span class="n">dma_init_struct</span><span class="p">.</span><span class="n">memory_width</span> <span class="o">=</span> <span class="n">DMA_MEMORY_WIDTH_8BIT</span><span class="p">;</span>     <span class="cm">/* 每次搬 8 位 */</span>
+</span></span><span class="line"><span class="cl">    <span class="n">dma_init_struct</span><span class="p">.</span><span class="n">number</span>       <span class="o">=</span> <span class="n">TRANSFER_NUM</span><span class="p">;</span>              <span class="cm">/* 共搬 1024 次 */</span>
+</span></span><span class="line"><span class="cl">    <span class="n">dma_init_struct</span><span class="p">.</span><span class="n">periph_addr</span>  <span class="o">=</span> <span class="p">(</span><span class="kt">uint32_t</span><span class="p">)</span><span class="n">BANK0_WRITE_START_ADDR</span><span class="p">;</span> <span class="cm">/* 源：Flash 地址 */</span>
+</span></span><span class="line"><span class="cl">    <span class="n">dma_init_struct</span><span class="p">.</span><span class="n">periph_inc</span>   <span class="o">=</span> <span class="n">DMA_PERIPH_INCREASE_ENABLE</span><span class="p">;</span><span class="cm">/* 源地址自增 */</span>
+</span></span><span class="line"><span class="cl">    <span class="n">dma_init_struct</span><span class="p">.</span><span class="n">periph_width</span> <span class="o">=</span> <span class="n">DMA_PERIPHERAL_WIDTH_8BIT</span><span class="p">;</span> <span class="cm">/* 每次搬 8 位 */</span>
+</span></span><span class="line"><span class="cl">    <span class="n">dma_init_struct</span><span class="p">.</span><span class="n">priority</span>     <span class="o">=</span> <span class="n">DMA_PRIORITY_ULTRA_HIGH</span><span class="p">;</span>   <span class="cm">/* 最高优先级 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">dma_init</span><span class="p">(</span><span class="n">DMA0</span><span class="p">,</span> <span class="n">DMA_CH0</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">dma_init_struct</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">dma_circulation_disable</span><span class="p">(</span><span class="n">DMA0</span><span class="p">,</span> <span class="n">DMA_CH0</span><span class="p">);</span>          <span class="cm">/* 不循环，只搬一次 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">dma_memory_to_memory_enable</span><span class="p">(</span><span class="n">DMA0</span><span class="p">,</span> <span class="n">DMA_CH0</span><span class="p">);</span>      <span class="cm">/* 开启内存到内存模式（仅 DMA0 支持） */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">dma_interrupt_enable</span><span class="p">(</span><span class="n">DMA0</span><span class="p">,</span> <span class="n">DMA_CH0</span><span class="p">,</span> <span class="n">DMA_INT_FTF</span><span class="p">);</span><span class="cm">/* 搬运完成(FTF)时进中断 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">dma_channel_enable</span><span class="p">(</span><span class="n">DMA0</span><span class="p">,</span> <span class="n">DMA_CH0</span><span class="p">);</span>               <span class="cm">/* 启动！DMA 开始自动搬运 */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 主循环在此等待 DMA 完成中断置位标志（CPU 此时是&#34;被通知&#34;而非死等外设） */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span><span class="p">(</span><span class="mi">0</span> <span class="o">==</span> <span class="n">g_dmacomplete_flag</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* ---- 第 4 步：比对搬运结果 ---- */</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ptrd</span> <span class="o">=</span> <span class="p">(</span><span class="kt">uint32_t</span> <span class="o">*</span><span class="p">)</span><span class="n">g_destbuf</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">count</span> <span class="o">=</span> <span class="n">TRANSFER_NUM</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="o">*</span><span class="n">ptrd</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span><span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">count</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span><span class="p">(</span><span class="n">transdata</span> <span class="o">!=</span> <span class="o">*</span><span class="n">ptrd</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">            <span class="n">access_flag</span> <span class="o">=</span> <span class="n">ERROR</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="n">ptrd</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 搬运成功 → 4 颗 LED 全亮；失败 → 只亮 LED2、LED4 */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span><span class="p">(</span><span class="n">access_flag</span> <span class="o">!=</span> <span class="n">ERROR</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">gd_eval_led_on</span><span class="p">(</span><span class="n">LED2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">gd_eval_led_on</span><span class="p">(</span><span class="n">LED3</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">gd_eval_led_on</span><span class="p">(</span><span class="n">LED4</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">gd_eval_led_on</span><span class="p">(</span><span class="n">LED5</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">gd_eval_led_on</span><span class="p">(</span><span class="n">LED2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">gd_eval_led_on</span><span class="p">(</span><span class="n">LED4</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">while</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* LED 初始化 */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">led_config</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gd_eval_led_init</span><span class="p">(</span><span class="n">LED2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gd_eval_led_init</span><span class="p">(</span><span class="n">LED3</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gd_eval_led_init</span><span class="p">(</span><span class="n">LED4</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gd_eval_led_init</span><span class="p">(</span><span class="n">LED5</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gd_eval_led_off</span><span class="p">(</span><span class="n">LED2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gd_eval_led_off</span><span class="p">(</span><span class="n">LED3</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gd_eval_led_off</span><span class="p">(</span><span class="n">LED4</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gd_eval_led_init</span><span class="p">(</span><span class="n">LED5</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 开 DMA0 时钟 */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">rcu_config</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">rcu_periph_clock_enable</span><span class="p">(</span><span class="n">RCU_DMA0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 使能 DMA0 通道0 中断 */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">nvic_config</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">nvic_irq_enable</span><span class="p">(</span><span class="n">DMA0_Channel0_IRQn</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong><code>gd32f30x_it.c</code> 中的 DMA 完成中断（搬运结束后自动调用）：</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">DMA0_Channel0_IRQHandler</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span><span class="p">(</span><span class="nf">dma_interrupt_flag_get</span><span class="p">(</span><span class="n">DMA0</span><span class="p">,</span> <span class="n">DMA_CH0</span><span class="p">,</span> <span class="n">DMA_INT_FLAG_FTF</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">dma_interrupt_flag_clear</span><span class="p">(</span><span class="n">DMA0</span><span class="p">,</span> <span class="n">DMA_CH0</span><span class="p">,</span> <span class="n">DMA_INT_FLAG_FTF</span><span class="p">);</span>  <span class="cm">/* 清中断标志 */</span>
+</span></span><span class="line"><span class="cl">        <span class="n">g_dmacomplete_flag</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>   <span class="cm">/* 通知主循环：搬运完成！ */</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="代码分段讲解">代码分段讲解
+</h2><h3 id="1-flash-操作先擦再写再读">1. Flash 操作：先擦、再写、再读
+</h3><p>DMA 之前那一长串其实是&quot;给 DMA 准备数据源&quot;：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">fmc_unlock</span><span class="p">();</span>                       <span class="c1">// 写 Flash 前必须解锁
+</span></span></span><span class="line"><span class="cl"><span class="nf">fmc_page_erase</span><span class="p">(</span><span class="mh">0x08004000</span> <span class="o">+</span> <span class="n">i</span><span class="o">*</span><span class="mh">0x800</span><span class="p">);</span>  <span class="c1">// 按页擦除（2048 字节/页）
+</span></span></span><span class="line"><span class="cl"><span class="p">...</span>
+</span></span><span class="line"><span class="cl"><span class="nf">fmc_word_program</span><span class="p">(</span><span class="n">address</span><span class="p">,</span> <span class="mh">0x3210ABCD</span><span class="p">);</span> <span class="c1">// 每 4 字节写固定值
+</span></span></span><span class="line"><span class="cl"><span class="nf">fmc_lock</span><span class="p">();</span>                         <span class="c1">// 写完上锁
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><code>TRANSFER_NUM = 0x400 = 1024</code> 字节，每页 <code>0x800 = 2048</code> 字节，所以 <code>count = 0</code>，<code>for(i=0; i&lt;=0; i++)</code> 实际擦了 <strong>2 页</strong>（i=0 和 i=1，地址 <code>0x08004000</code> 与 <code>0x08004800</code>），足够覆盖 1024 字节。</li>
+<li>擦除后先校验是否全 <code>0xFFFFFFFF</code>，写之前再校验，是为了<strong>提前发现 Flash 操作异常</strong>，避免&quot;脏数据&quot;被 DMA 搬走。</li>
+</ul>
+<blockquote>
+<p>这一部分本质就是 FMC（Flash 控制器）的用法，详见同模块的 <code>Erase_Program</code> 例程。本例的重点始终是 <strong>DMA</strong>，Flash 只是&quot;造数据&quot;。</p>
+</blockquote>
+<h3 id="2-dma-配置告诉它从哪搬搬到哪搬多少">2. DMA 配置：告诉它&quot;从哪搬、搬到哪、搬多少&quot;
+</h3><p>这是全例的灵魂，对应 <code>dma_init_struct</code> 的字段：</p>
+<div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>字段</th>
+					<th>取值</th>
+					<th>含义</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>direction</code></td>
+					<td><code>DMA_PERIPHERAL_TO_MEMORY</code></td>
+					<td>源是&quot;外设侧&quot;，目标是&quot;内存侧&quot;（内存到内存也用这个枚举）</td>
+			</tr>
+			<tr>
+					<td><code>periph_addr</code></td>
+					<td><code>0x08004000</code></td>
+					<td>源地址 = Flash 起始</td>
+			</tr>
+			<tr>
+					<td><code>periph_inc</code></td>
+					<td><code>ENABLE</code></td>
+					<td>搬完一个字节，源地址 +1</td>
+			</tr>
+			<tr>
+					<td><code>periph_width</code></td>
+					<td><code>8BIT</code></td>
+					<td>每次搬 1 字节</td>
+			</tr>
+			<tr>
+					<td><code>memory_addr</code></td>
+					<td><code>g_destbuf</code></td>
+					<td>目标地址 = RAM 数组</td>
+			</tr>
+			<tr>
+					<td><code>memory_inc</code></td>
+					<td><code>ENABLE</code></td>
+					<td>搬完一个字节，目标地址 +1</td>
+			</tr>
+			<tr>
+					<td><code>memory_width</code></td>
+					<td><code>8BIT</code></td>
+					<td>每次搬 1 字节</td>
+			</tr>
+			<tr>
+					<td><code>number</code></td>
+					<td><code>0x400</code></td>
+					<td>一共搬 1024 次（共 1024 字节）</td>
+			</tr>
+			<tr>
+					<td><code>priority</code></td>
+					<td><code>ULTRA_HIGH</code></td>
+					<td>总线仲裁优先级最高</td>
+			</tr>
+	</tbody>
+</table></div>
+<blockquote>
+<p><strong><code>number</code> 的&quot;单位&quot;容易踩坑</strong>：它是&quot;传输次数&quot;，每次搬运的字节数由 <code>width</code> 决定。这里 width=8bit、number=1024，所以总共搬 1024 字节。若 width 改成 32bit，则 1024 次会搬 4096 字节——要和你的缓冲区大小匹配。</p>
+</blockquote>
+<h3 id="3-三种关键开关">3. 三种关键&quot;开关&quot;
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">dma_circulation_disable</span><span class="p">(</span><span class="n">DMA0</span><span class="p">,</span> <span class="n">DMA_CH0</span><span class="p">);</span>       <span class="c1">// 普通模式：搬完一次就停
+</span></span></span><span class="line"><span class="cl"><span class="nf">dma_memory_to_memory_enable</span><span class="p">(</span><span class="n">DMA0</span><span class="p">,</span> <span class="n">DMA_CH0</span><span class="p">);</span>   <span class="c1">// 内存到内存模式（仅 DMA0 支持！）
+</span></span></span><span class="line"><span class="cl"><span class="nf">dma_interrupt_enable</span><span class="p">(</span><span class="n">DMA0</span><span class="p">,</span> <span class="n">DMA_CH0</span><span class="p">,</span> <span class="n">DMA_INT_FTF</span><span class="p">);</span>  <span class="c1">// 搬完触发&#34;全传输完成&#34;中断
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><strong>循环模式关</strong>：本例只搬一次。若开循环（如 ADC 连续采样），搬完会自动从头再来。</li>
+<li><strong>内存到内存开</strong>：Flash→RAM 本质是&quot;内存到内存&quot;。注意这是 DMA0 的专属能力，DMA1 不支持。</li>
+<li><strong>FTF 中断开</strong>：搬完 1024 字节后硬件自动进 <code>DMA0_Channel0_IRQHandler</code>。</li>
+</ul>
+<h3 id="4-启动与等通知">4. 启动与&quot;等通知&quot;
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">dma_channel_enable</span><span class="p">(</span><span class="n">DMA0</span><span class="p">,</span> <span class="n">DMA_CH0</span><span class="p">);</span>   <span class="c1">// 发令枪：DMA 开始自动搬运
+</span></span></span><span class="line"><span class="cl"><span class="k">while</span><span class="p">(</span><span class="mi">0</span> <span class="o">==</span> <span class="n">g_dmacomplete_flag</span><span class="p">);</span>      <span class="c1">// 等中断把标志置 1
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>DMA 一旦使能，硬件就在后台把 Flash 的 1024 字节逐字节搬进 <code>g_destbuf</code>，<strong>CPU 不用参与搬运</strong>。主循环这句 <code>while(0 == g_dmacomplete_flag)</code> 看起来像&quot;死等&quot;，但和&quot;CPU 一个个字节轮询读 Flash&quot;不同——这里是<strong>等中断通知</strong>，DMA 在搬的时候 CPU 本可以去干别的事（本例只是简单等待）。</p>
+<h3 id="5-完成中断里做了什么">5. 完成中断里做了什么？
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">DMA0_Channel0_IRQHandler</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">dma_interrupt_flag_clear</span><span class="p">(</span><span class="n">DMA0</span><span class="p">,</span> <span class="n">DMA_CH0</span><span class="p">,</span> <span class="n">DMA_INT_FLAG_FTF</span><span class="p">);</span> <span class="c1">// 必须清中断标志
+</span></span></span><span class="line"><span class="cl">    <span class="n">g_dmacomplete_flag</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>进中断第一件事<strong>清标志</strong>，否则会反复进中断。</li>
+<li>置 <code>g_dmacomplete_flag = 1</code>，主循环随即跳出 <code>while</code>，进入最后的&quot;比对&quot;环节。</li>
+</ul>
+<h3 id="6-结果比对与-led-指示">6. 结果比对与 LED 指示
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">if</span><span class="p">(</span><span class="n">transdata</span> <span class="o">!=</span> <span class="o">*</span><span class="n">ptrd</span><span class="p">)</span> <span class="n">access_flag</span> <span class="o">=</span> <span class="n">ERROR</span><span class="p">;</span>  <span class="c1">// 任一字不等于 0x3210ABCD 即判失败
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>成功：4 颗 LED 全亮。</li>
+<li>失败：只亮 LED2 + LED4（方便肉眼区分）。</li>
+</ul>
+<hr>
+<h2 id="实验现象">实验现象
+</h2><ol>
+<li>下载程序并复位后，DMA 自动把 Flash 内容搬到 RAM。</li>
+<li>搬运成功（绝大多数情况）：<strong>LED2、LED3、LED4、LED5 全部常亮</strong>。</li>
+<li>若失败（如 Flash 地址被程序占用、擦写异常）：仅 LED2、LED4 亮起。</li>
+<li>用调试器查看：<code>g_destbuf[0..1023]</code> 全部为 <code>0xCD 0xAB 0x10 0x32</code>（小端，对应 <code>0x3210ABCD</code>）；<code>0x08004000</code> 处 Flash 内容与之一致。</li>
+</ol>
+<hr>
+<h2 id="常见问题">常见问题
+</h2><p><strong>Q1：为什么我的板子烧进去后不亮灯 / 程序跑飞？</strong><br>
+最可能是 <code>0x08004000</code> 这个 Flash 地址<strong>落在了你的代码区</strong>。擦写代码所在页会破坏正在运行的程序。请改 <code>BANK0_WRITE_START_ADDR</code> 到程序之后的空闲页（可用链接脚本/map 文件确认空闲区），或确认评估板例程默认该地址空闲。</p>
+<p><strong>Q2：<code>DMA_PERIPHERAL_TO_MEMORY</code> 方向用在 Flash→RAM，名字是不是搞反了？</strong><br>
+没有反。GD32 的 DMA 结构体里&quot;peripheral&quot;侧和&quot;memory&quot;侧是<strong>逻辑角色</strong>：这里把 Flash 当作&quot;源（peripheral 侧）&quot;、RAM 数组当&quot;目标（memory 侧）&quot;，所以方向是 peripheral→memory。内存到内存搬运也复用这个枚举，关键是 <code>dma_memory_to_memory_enable</code> 开了。理解&quot;谁源谁目标&quot;即可，名字不必纠结。</p>
+<p><strong>Q3：内存到内存模式为什么只能用 DMA0？</strong><br>
+这是 GD32 硬件设计限制：内存到内存的传输请求只能由 DMA0 产生。若你用 DMA1 开 <code>dma_memory_to_memory_enable</code> 是不会工作的。</p>
+<p><strong>Q4：想搬 32 位数据（比如整型数组）怎么改？</strong><br>
+把 <code>periph_width</code> / <code>memory_width</code> 都改成 <code>DMA_xxx_WIDTH_32BIT</code>，同时 <code>number</code> 相应减半（字节数 / 4）。注意源/目标地址都要 4 字节对齐，否则可能出错。</p>
+<p><strong>Q5：搬运过程中 CPU 真的空闲吗？<code>while(0==flag)</code> 不是占着 CPU 吗？</strong><br>
+DMA 搬运本身不占 CPU，全是硬件在做。本例主循环只是&quot;等通知&quot;，没干别的；真实项目里你可以把这段等待换成&quot;去做其他任务 / 进低功耗&quot;，等中断来了再回来处理数据，这正是 DMA 的价值。</p>
+<p><strong>Q6：和直接 <code>memcpy</code> 有什么区别？</strong><br>
+<code>memcpy</code> 是 CPU 一条条指令搬，占满 CPU；DMA 是独立硬件搬，CPU 可并行。数据量越大、越频繁，DMA 优势越明显（如音频流、LCD 刷屏、ADC 连续采样）。</p>
+<hr>
+<h2 id="小结">小结
+</h2><p>本示例把 DMA 的&quot;三要素 + 启动 + 中断&quot;主线讲透：</p>
+<ol>
+<li><strong>准备数据</strong>：先用 FMC 擦除并编程 Flash，造出可被搬运的固定内容（重点在 DMA，Flash 只是数据源）。</li>
+<li><strong>开时钟 + 配中断</strong>：<code>RCU_DMA0</code> + <code>nvic_irq_enable(DMA0_Channel0_IRQn)</code>。</li>
+<li><strong>填 DMA 三要素</strong>：源地址（Flash）、目标地址（RAM）、次数/宽度/自增。</li>
+<li><strong>开开关</strong>：关循环、开内存到内存、开 FTF 中断。</li>
+<li><strong>启动 + 等通知</strong>：<code>dma_channel_enable</code> 后靠中断置标志，主循环解除等待。</li>
+<li><strong>校验结果</strong>：比对 RAM 内容，用 LED 给出成功/失败指示。</li>
+</ol>
+<p>记住 <strong>DMA = 不占 CPU 的搬运工</strong>，凡是&quot;大块数据搬来搬去&quot;的地方，都该想到它。</p>
+<hr>
+<h2 id="拓展应用">拓展应用
+</h2><p>掌握基础 DMA 后，可以把它用到大量&quot;数据搬运&quot;场景：</p>
+<ul>
+<li><strong>RAM → USART（串口）</strong>：同目录 <code>Ram_to_usart</code> 例程，把发送数组交给 DMA 自动发出，CPU 不用死等 TBE。适合长文本/日志输出。</li>
+<li><strong>ADC → RAM（连续采样）</strong>：开启 ADC 的 DMA 请求 + 循环模式，ADC 每转换完一个点 DMA 自动搬进数组，实现&quot;无 CPU 干预&quot;的高速采样（如示波器、音频采集）。</li>
+<li><strong>内存 → SPI（刷屏）</strong>：驱动 SPI LCD 时，把显存数组用 DMA 发往 SPI，刷屏不再卡 CPU。</li>
+<li><strong>双缓冲（Ping-Pong）</strong>：配合半传输(HTF) + 全传输(FTF)中断，一块在 DMA 搬、一块 CPU 处理，实现流水线式数据流（音频、图像）。</li>
+<li><strong>与大数组拷贝结合</strong>：任何 <code>for</code> 循环批量拷贝，都可考虑用 DMA0 内存到内存替代以释放 CPU。</li>
+</ul>
+<blockquote>
+<p>想把 DMA 接到&quot;真外设&quot;上，建议直接看同目录 <code>Ram_to_usart</code>，体会&quot;内存 → 外设&quot;方向和&quot;减轻串口发送负担&quot;的效果。</p>
+</blockquote>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/flash_to_ram/">Flash_to_ram</a>
+        
+            <a href="/tags/dma/">DMA</a>
+        
+            <a href="/tags/v3.0.3/">V3.0.3</a>
+        
+    </section>
+
+
+    <section class="article-lastmod">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <span>
+            最后更新于 Sep 08, 2026 16:03 &#43;0800
+        </span>
+    </section></footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/gd32-dma-ram-ram/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">GD32 DMA — RAM → RAM</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/gd32-dma-ram-usart/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">GD32 DMA — RAM → USART</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/at32-dma-dma-%E7%81%B5%E6%B4%BB%E8%BE%93%E5%87%BA%E5%88%B0-gpio/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">AT32 DMA — DMA 灵活输出到 GPIO</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/gd32-adc-adc--dma-%E9%87%87%E9%9B%86/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">GD32 ADC — ADC &#43; DMA 采集</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/gd32-adc-adc-%E4%B8%8D%E8%BF%9E%E7%BB%AD%E6%A8%A1%E5%BC%8F/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">GD32 ADC — ADC 不连续模式</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="ClingYang/ClingYang.github.io"
+        issue-term="pathname"
+        
+        label="💬comment"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2026 CLing
+    </section>
+    
+    <section class="powerby">
+        
+            世界是你们 <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<style>
+    #TableOfContents > ul, ol {
+        ul, ol {
+            display: none;
+        }
+        .open {
+            display: block;
+        }
+    }
+</style>
+
+<script>
+    function initTocHide() {
+        
+        let toc = document.querySelector(".widget--toc");
+        if (!toc) {
+            return;
+        }
+        
+        window.addEventListener('scroll', function() {
+            
+            let currentLi = document.querySelector(".active-class");
+            if (!currentLi) {
+                return
+            }
+            
+            let elementsByClassName = document.querySelectorAll(".open");
+            if (elementsByClassName.length > 0) {
+                elementsByClassName.forEach((ul) => {
+                    ul.classList.remove("open")
+                })
+            }
+            
+            if (currentLi.children.length > 1) {
+                currentLi.children[1].classList.add("open")
+            }
+            
+            let ul = currentLi.parentElement;
+            do {
+                ul.classList.add("open");
+                ul = ul.parentElement.parentElement
+            } while (ul !== undefined && (ul.localName === 'ul' || ul.localName === 'ol'))
+        });
+    }
+    initTocHide()
+</script>
+
+    </body>
+</html>

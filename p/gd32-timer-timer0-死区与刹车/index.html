@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="GD32 GD32F30x_Firmware_Library V3.0.3 TIMER TIMER0 死区与刹车 示例教学">
+<title>GD32 TIMER — TIMER0 死区与刹车</title>
+
+<link rel='canonical' href='https://clingyang.github.io/p/gd32-timer-timer0-%E6%AD%BB%E5%8C%BA%E4%B8%8E%E5%88%B9%E8%BD%A6/'>
+
+<link rel="stylesheet" href="/scss/style.min.e14f3ba93baae65b2aef2339f32b6f25d7a0184785ebf4f6bd7d3376ae5dc2d4.css"><meta property='og:title' content="GD32 TIMER — TIMER0 死区与刹车">
+<meta property='og:description' content="GD32 GD32F30x_Firmware_Library V3.0.3 TIMER TIMER0 死区与刹车 示例教学">
+<meta property='og:url' content='https://clingyang.github.io/p/gd32-timer-timer0-%E6%AD%BB%E5%8C%BA%E4%B8%8E%E5%88%B9%E8%BD%A6/'>
+<meta property='og:site_name' content='CLing'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='TIMER0_deadtime_break' /><meta property='article:tag' content='timer' /><meta property='article:tag' content='V3.0.3' /><meta property='article:published_time' content='2026-09-08T14:52:21&#43;08:00'/><meta property='article:modified_time' content='2026-09-08T16:03:27&#43;08:00'/>
+<meta name="twitter:title" content="GD32 TIMER — TIMER0 死区与刹车">
+<meta name="twitter:description" content="GD32 GD32F30x_Firmware_Library V3.0.3 TIMER TIMER0 死区与刹车 示例教学">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                            height="290" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🏀</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">CLing</a></h1>
+            <h2 class="site-description">你好 欢迎来到我的博客</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>档案</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E6%8A%80%E6%9C%AF%E9%93%BE%E6%8E%A5/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>技术链接</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/excel/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+                
+                <span>Excel教程</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#功能简介">功能简介</a></li>
+    <li><a href="#完整代码">完整代码</a></li>
+    <li><a href="#代码讲解">代码讲解</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/gd32/" >
+                GD32
+            </a>
+        
+            <a href="/categories/timer/" >
+                TIMER
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/gd32-timer-timer0-%E6%AD%BB%E5%8C%BA%E4%B8%8E%E5%88%B9%E8%BD%A6/">GD32 TIMER — TIMER0 死区与刹车</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            GD32 GD32F30x_Firmware_Library V3.0.3 TIMER TIMER0 死区与刹车 示例教学
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2026-09-08</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 2 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="timer--timer0-死区与刹车">TIMER — TIMER0 死区与刹车
+</h1><blockquote>
+<p><strong>固件库</strong>: GD32F30x_Firmware_Library V3.0.3<br>
+<strong>芯片</strong>: GD32<br>
+<strong>源文件</strong>: <code>GD32F30x_Firmware_Library_V3.0.3/Examples/TIMER/TIMER0_deadtime_break/main.c</code></p>
+</blockquote>
+<hr>
+<h2 id="功能简介">功能简介
+</h2><p>本示例演示互补输出和死区控制。用于驱动半桥/全桥电路，上下管交替导通，死区时间防止上下管同时导通（直通）。</p>
+<h2 id="完整代码">完整代码
+</h2><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;gd32f30x.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;gd32f307c_eval.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">gpio_config</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">timer_config</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/*!
+</span></span></span><span class="line"><span class="cl"><span class="cm">    \brief      configure the GPIO ports
+</span></span></span><span class="line"><span class="cl"><span class="cm">    \param[in]  none
+</span></span></span><span class="line"><span class="cl"><span class="cm">    \param[out] none
+</span></span></span><span class="line"><span class="cl"><span class="cm">    \retval     none
+</span></span></span><span class="line"><span class="cl"><span class="cm">*/</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">gpio_config</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">rcu_periph_clock_enable</span><span class="p">(</span><span class="n">RCU_GPIOA</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">rcu_periph_clock_enable</span><span class="p">(</span><span class="n">RCU_GPIOB</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">rcu_periph_clock_enable</span><span class="p">(</span><span class="n">RCU_AF</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/*configure PA8(TIMER0 CH0) as alternate function*/</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gpio_init</span><span class="p">(</span><span class="n">GPIOA</span><span class="p">,</span><span class="n">GPIO_MODE_AF_PP</span><span class="p">,</span><span class="n">GPIO_OSPEED_50MHZ</span><span class="p">,</span><span class="n">GPIO_PIN_8</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/*configure PB13(TIMER0 CH0N) as alternate function*/</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gpio_init</span><span class="p">(</span><span class="n">GPIOB</span><span class="p">,</span><span class="n">GPIO_MODE_AF_PP</span><span class="p">,</span><span class="n">GPIO_OSPEED_50MHZ</span><span class="p">,</span><span class="n">GPIO_PIN_13</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/*configure PB12(TIMER0 BKIN) as alternate function*/</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gpio_init</span><span class="p">(</span><span class="n">GPIOB</span><span class="p">,</span><span class="n">GPIO_MODE_IN_FLOATING</span><span class="p">,</span><span class="n">GPIO_OSPEED_50MHZ</span><span class="p">,</span><span class="n">GPIO_PIN_12</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">timer_config</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* -----------------------------------------------------------------------
+</span></span></span><span class="line"><span class="cl"><span class="cm">    TIMER0 configuration:
+</span></span></span><span class="line"><span class="cl"><span class="cm">    generate 1 complementary PWM signal.
+</span></span></span><span class="line"><span class="cl"><span class="cm">    TIMER0CLK is fixed to systemcoreclock, the TIMER0 prescaler is equal to 120 so the
+</span></span></span><span class="line"><span class="cl"><span class="cm">    TIMER0 counter clock used is 1MHz.
+</span></span></span><span class="line"><span class="cl"><span class="cm">    the duty cycle is computed as the following description:
+</span></span></span><span class="line"><span class="cl"><span class="cm">    the channel 0 duty cycle is set to 25% so channel 0N is set to 75%.
+</span></span></span><span class="line"><span class="cl"><span class="cm">
+</span></span></span><span class="line"><span class="cl"><span class="cm">    insert a dead time equal to ((32+31)*16*4)/systemcoreclock = 33.6us
+</span></span></span><span class="line"><span class="cl"><span class="cm">
+</span></span></span><span class="line"><span class="cl"><span class="cm">    configure the break feature, active at high level, and using the automatic
+</span></span></span><span class="line"><span class="cl"><span class="cm">    output enable feature.
+</span></span></span><span class="line"><span class="cl"><span class="cm">
+</span></span></span><span class="line"><span class="cl"><span class="cm">    use the locking parameters level1.
+</span></span></span><span class="line"><span class="cl"><span class="cm">    ----------------------------------------------------------------------- */</span>
+</span></span><span class="line"><span class="cl">    <span class="n">timer_oc_parameter_struct</span> <span class="n">timer_ocintpara</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">timer_parameter_struct</span> <span class="n">timer_initpara</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">timer_break_parameter_struct</span> <span class="n">timer_breakpara</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">rcu_periph_clock_enable</span><span class="p">(</span><span class="n">RCU_TIMER0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">timer_deinit</span><span class="p">(</span><span class="n">TIMER0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* TIMER0 configuration */</span>
+</span></span><span class="line"><span class="cl">    <span class="n">timer_initpara</span><span class="p">.</span><span class="n">prescaler</span>         <span class="o">=</span> <span class="mi">119</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">timer_initpara</span><span class="p">.</span><span class="n">alignedmode</span>       <span class="o">=</span> <span class="n">TIMER_COUNTER_EDGE</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">timer_initpara</span><span class="p">.</span><span class="n">counterdirection</span>  <span class="o">=</span> <span class="n">TIMER_COUNTER_UP</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">timer_initpara</span><span class="p">.</span><span class="n">period</span>            <span class="o">=</span> <span class="mi">1599</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">timer_initpara</span><span class="p">.</span><span class="n">clockdivision</span>     <span class="o">=</span> <span class="n">TIMER_CKDIV_DIV4</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">timer_initpara</span><span class="p">.</span><span class="n">repetitioncounter</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">timer_init</span><span class="p">(</span><span class="n">TIMER0</span><span class="p">,</span><span class="o">&amp;</span><span class="n">timer_initpara</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* CH0/CH0N configuration in PWM mode0 */</span>
+</span></span><span class="line"><span class="cl">    <span class="n">timer_ocintpara</span><span class="p">.</span><span class="n">outputstate</span>  <span class="o">=</span> <span class="n">TIMER_CCX_ENABLE</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">timer_ocintpara</span><span class="p">.</span><span class="n">outputnstate</span> <span class="o">=</span> <span class="n">TIMER_CCXN_ENABLE</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">timer_ocintpara</span><span class="p">.</span><span class="n">ocpolarity</span>   <span class="o">=</span> <span class="n">TIMER_OC_POLARITY_HIGH</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">timer_ocintpara</span><span class="p">.</span><span class="n">ocnpolarity</span>  <span class="o">=</span> <span class="n">TIMER_OCN_POLARITY_HIGH</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">timer_ocintpara</span><span class="p">.</span><span class="n">ocidlestate</span>  <span class="o">=</span> <span class="n">TIMER_OC_IDLE_STATE_HIGH</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">timer_ocintpara</span><span class="p">.</span><span class="n">ocnidlestate</span> <span class="o">=</span> <span class="n">TIMER_OCN_IDLE_STATE_LOW</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">timer_channel_output_config</span><span class="p">(</span><span class="n">TIMER0</span><span class="p">,</span><span class="n">TIMER_CH_0</span><span class="p">,</span><span class="o">&amp;</span><span class="n">timer_ocintpara</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">timer_channel_output_pulse_value_config</span><span class="p">(</span><span class="n">TIMER0</span><span class="p">,</span><span class="n">TIMER_CH_0</span><span class="p">,</span><span class="mi">399</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">timer_channel_output_mode_config</span><span class="p">(</span><span class="n">TIMER0</span><span class="p">,</span><span class="n">TIMER_CH_0</span><span class="p">,</span><span class="n">TIMER_OC_MODE_PWM0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">timer_channel_output_shadow_config</span><span class="p">(</span><span class="n">TIMER0</span><span class="p">,</span><span class="n">TIMER_CH_0</span><span class="p">,</span><span class="n">TIMER_OC_SHADOW_DISABLE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* automatic output enable, break, dead time and lock configuration*/</span>
+</span></span><span class="line"><span class="cl">    <span class="n">timer_breakpara</span><span class="p">.</span><span class="n">runoffstate</span>      <span class="o">=</span> <span class="n">TIMER_ROS_STATE_DISABLE</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">timer_breakpara</span><span class="p">.</span><span class="n">ideloffstate</span>     <span class="o">=</span> <span class="n">TIMER_IOS_STATE_DISABLE</span> <span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">timer_breakpara</span><span class="p">.</span><span class="n">deadtime</span>         <span class="o">=</span> <span class="mi">255</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">timer_breakpara</span><span class="p">.</span><span class="n">breakpolarity</span>    <span class="o">=</span> <span class="n">TIMER_BREAK_POLARITY_LOW</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">timer_breakpara</span><span class="p">.</span><span class="n">outputautostate</span>  <span class="o">=</span> <span class="n">TIMER_OUTAUTO_ENABLE</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">timer_breakpara</span><span class="p">.</span><span class="n">protectmode</span>      <span class="o">=</span> <span class="n">TIMER_CCHP_PROT_0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">timer_breakpara</span><span class="p">.</span><span class="n">breakstate</span>       <span class="o">=</span> <span class="n">TIMER_BREAK_ENABLE</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">timer_break_config</span><span class="p">(</span><span class="n">TIMER0</span><span class="p">,</span><span class="o">&amp;</span><span class="n">timer_breakpara</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* TIMER0 primary output function enable */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">timer_primary_output_config</span><span class="p">(</span><span class="n">TIMER0</span><span class="p">,</span><span class="n">ENABLE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* auto-reload preload enable */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">timer_auto_reload_shadow_enable</span><span class="p">(</span><span class="n">TIMER0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* TIMER0 counter enable */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">timer_enable</span><span class="p">(</span><span class="n">TIMER0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gpio_config</span><span class="p">();</span> 
+</span></span><span class="line"><span class="cl">    <span class="nf">timer_config</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="代码讲解">代码讲解
+</h2><p><strong>GPIO 配置</strong>：设置引脚为输出/输入模式，选择推挽/开漏输出，配置上拉/下拉。</p>
+<p><strong>定时器配置</strong>：设置预分频器（PSC）和重装载值（ARR），定时时间 = (PSC+1) × (ARR+1) / 时钟频率。</p>
+<p><strong>PWM 配置</strong>：在定时器基础上设置比较值（CCR），占空比 = CCR / (ARR+1)。CCR 越大占空比越高。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/timer0_deadtime_break/">TIMER0_deadtime_break</a>
+        
+            <a href="/tags/timer/">Timer</a>
+        
+            <a href="/tags/v3.0.3/">V3.0.3</a>
+        
+    </section>
+
+
+    <section class="article-lastmod">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <span>
+            最后更新于 Sep 08, 2026 16:03 &#43;0800
+        </span>
+    </section></footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/gd32-timer-timer0-6-%E6%AD%A5%E6%8D%A2%E7%9B%B8/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">GD32 TIMER — TIMER0 6 步换相</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/gd32-timer-timer0-dma/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">GD32 TIMER — TIMER0 DMA</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/gd32-timer-timer0-dma-%E7%AA%81%E5%8F%91/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">GD32 TIMER — TIMER0 DMA 突发</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/gd32-timer-timer0-%E4%BA%92%E8%A1%A5%E4%BF%A1%E5%8F%B7/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">GD32 TIMER — TIMER0 互补信号</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/gd32-timer-timer1-pwm-%E8%BE%93%E5%87%BA/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">GD32 TIMER — TIMER1 PWM 输出</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="ClingYang/ClingYang.github.io"
+        issue-term="pathname"
+        
+        label="💬comment"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2026 CLing
+    </section>
+    
+    <section class="powerby">
+        
+            世界是你们 <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<style>
+    #TableOfContents > ul, ol {
+        ul, ol {
+            display: none;
+        }
+        .open {
+            display: block;
+        }
+    }
+</style>
+
+<script>
+    function initTocHide() {
+        
+        let toc = document.querySelector(".widget--toc");
+        if (!toc) {
+            return;
+        }
+        
+        window.addEventListener('scroll', function() {
+            
+            let currentLi = document.querySelector(".active-class");
+            if (!currentLi) {
+                return
+            }
+            
+            let elementsByClassName = document.querySelectorAll(".open");
+            if (elementsByClassName.length > 0) {
+                elementsByClassName.forEach((ul) => {
+                    ul.classList.remove("open")
+                })
+            }
+            
+            if (currentLi.children.length > 1) {
+                currentLi.children[1].classList.add("open")
+            }
+            
+            let ul = currentLi.parentElement;
+            do {
+                ul.classList.add("open");
+                ul = ul.parentElement.parentElement
+            } while (ul !== undefined && (ul.localName === 'ul' || ul.localName === 'ol'))
+        });
+    }
+    initTocHide()
+</script>
+
+    </body>
+</html>

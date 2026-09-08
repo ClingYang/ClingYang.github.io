@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="PUYA PY32F0xx_Firmware V1.5.0 I2C 主机轮询通信（I2C_TwoBoard_CommunicationMaster_Polling）示例教学">
+<title>PUYA I2C — 主机轮询通信（HAL 库）</title>
+
+<link rel='canonical' href='https://clingyang.github.io/p/puya-i2c-%E4%B8%BB%E6%9C%BA%E8%BD%AE%E8%AF%A2%E9%80%9A%E4%BF%A1hal-%E5%BA%93/'>
+
+<link rel="stylesheet" href="/scss/style.min.e14f3ba93baae65b2aef2339f32b6f25d7a0184785ebf4f6bd7d3376ae5dc2d4.css"><meta property='og:title' content="PUYA I2C — 主机轮询通信（HAL 库）">
+<meta property='og:description' content="PUYA PY32F0xx_Firmware V1.5.0 I2C 主机轮询通信（I2C_TwoBoard_CommunicationMaster_Polling）示例教学">
+<meta property='og:url' content='https://clingyang.github.io/p/puya-i2c-%E4%B8%BB%E6%9C%BA%E8%BD%AE%E8%AF%A2%E9%80%9A%E4%BF%A1hal-%E5%BA%93/'>
+<meta property='og:site_name' content='CLing'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='I2C_TwoBoard_CommunicationMaster_Polling' /><meta property='article:tag' content='i2c' /><meta property='article:tag' content='V1.5.0' /><meta property='article:tag' content='PY32F030' /><meta property='article:tag' content='HAL' /><meta property='article:published_time' content='2026-09-08T14:52:21&#43;08:00'/><meta property='article:modified_time' content='2026-09-08T16:31:23&#43;08:00'/>
+<meta name="twitter:title" content="PUYA I2C — 主机轮询通信（HAL 库）">
+<meta name="twitter:description" content="PUYA PY32F0xx_Firmware V1.5.0 I2C 主机轮询通信（I2C_TwoBoard_CommunicationMaster_Polling）示例教学">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                            height="290" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🏀</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">CLing</a></h1>
+            <h2 class="site-description">你好 欢迎来到我的博客</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>档案</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E6%8A%80%E6%9C%AF%E9%93%BE%E6%8E%A5/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>技术链接</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/excel/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+                
+                <span>Excel教程</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#功能简介">功能简介</a></li>
+    <li><a href="#硬件准备">硬件准备</a></li>
+    <li><a href="#完整代码主机部分">完整代码（主机部分）</a></li>
+    <li><a href="#代码分段讲解">代码分段讲解</a>
+      <ol>
+        <li><a href="#1-地址说明">1. 地址说明</a></li>
+        <li><a href="#2-速率与占空比">2. 速率与占空比</a></li>
+        <li><a href="#3-轮询方式">3. 轮询方式</a></li>
+        <li><a href="#4-时钟拉伸">4. 时钟拉伸</a></li>
+      </ol>
+    </li>
+    <li><a href="#实验现象">实验现象</a></li>
+    <li><a href="#常见问题">常见问题</a></li>
+    <li><a href="#小结">小结</a></li>
+    <li><a href="#拓展应用">拓展应用</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/puya/" >
+                PUYA
+            </a>
+        
+            <a href="/categories/i2c/" >
+                I2C
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/puya-i2c-%E4%B8%BB%E6%9C%BA%E8%BD%AE%E8%AF%A2%E9%80%9A%E4%BF%A1hal-%E5%BA%93/">PUYA I2C — 主机轮询通信（HAL 库）</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            PUYA PY32F0xx_Firmware V1.5.0 I2C 主机轮询通信（I2C_TwoBoard_CommunicationMaster_Polling）示例教学
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2026-09-08</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 3 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="i2c--主机轮询通信hal-库">I2C — 主机轮询通信（HAL 库）
+</h1><blockquote>
+<p><strong>固件库</strong>: PY32F0xx_Firmware V1.5.0<br>
+<strong>芯片</strong>: PY32F030<br>
+<strong>源文件</strong>: <code>PUYA/PY32F0xx_Firmware_V1.5.0/Projects/PY32F030-STK/Example/I2C/I2C_TwoBoard_CommunicationMaster_Polling/Src/main.c</code></p>
+</blockquote>
+<hr>
+<h2 id="功能简介">功能简介
+</h2><p>I2C（Inter-Integrated Circuit）是一种两线制（SCL 时钟 + SDA 数据）、半双工、一主多从的串行总线，常用于连接 EEPROM、传感器、OLED 屏等。</p>
+<p>本示例演示<strong>主机（Master）工作方式</strong>：</p>
+<ul>
+<li>主机先向从机地址 <code>0xA0</code> <strong>发送</strong> 15 字节；</li>
+<li>再向同一地址 <strong>接收</strong> 15 字节（示例用两块板回环对接，从机把收到的数据原样发回）；</li>
+<li>CPU 用<strong>轮询</strong>方式等待每笔传输完成（<code>HAL_I2C_Master_Transmit/Receive</code> 内部即轮询）；</li>
+<li>收发一致则点亮绿灯，不一致则闪烁报警。</li>
+</ul>
+<blockquote>
+<p>虽然工程里函数名带 <code>Master</code>，实际传输由 <code>HAL_I2C_Master_Transmit/Receive</code> 完成，内部是<strong>轮询</strong>等待，符合“主机轮询通信”的教学目标。</p>
+</blockquote>
+<h2 id="硬件准备">硬件准备
+</h2><ul>
+<li>两块 PY32F030 开发板（一主一从），或用一块板把 SDA/SCL 自连做回环</li>
+<li>SCL、SDA 各接 <strong>4.7kΩ 上拉电阻</strong>到 VDD（I2C 开漏总线必须上拉）</li>
+<li>交叉连接：主 SCL↔从 SCL，主 SDA↔从 SDA，共地</li>
+<li>串口/LED 用于观察结果</li>
+</ul>
+<h2 id="完整代码主机部分">完整代码（主机部分）
+</h2><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;main.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#define DATA_LENGTH      15                </span><span class="cm">/* 数据长度 */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define I2C_ADDRESS      0xA0              </span><span class="cm">/* 从机地址（7 位地址左移后的写地址） */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define I2C_SPEEDCLOCK   100000           </span><span class="cm">/* 通信速率 100K */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define I2C_DUTYCYCLE    I2C_DUTYCYCLE_16_9 </span><span class="cm">/* 快速模式占空比 */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">I2C_HandleTypeDef</span> <span class="n">I2cHandle</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="n">aTxBuffer</span><span class="p">[</span><span class="mi">15</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">11</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span><span class="mi">13</span><span class="p">,</span><span class="mi">14</span><span class="p">,</span><span class="mi">15</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="n">aRxBuffer</span><span class="p">[</span><span class="mi">15</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">HAL_Init</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 初始化 LED 与按键 */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">BSP_LED_Init</span><span class="p">(</span><span class="n">LED_GREEN</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">BSP_PB_Init</span><span class="p">(</span><span class="n">BUTTON_KEY</span><span class="p">,</span> <span class="n">BUTTON_MODE_GPIO</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* I2C 参数配置 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">I2cHandle</span><span class="p">.</span><span class="n">Instance</span>           <span class="o">=</span> <span class="n">I2C</span><span class="p">;</span>             <span class="cm">/* PY32F0xx 的 I2C 外设名 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">I2cHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">ClockSpeed</span>    <span class="o">=</span> <span class="n">I2C_SPEEDCLOCK</span><span class="p">;</span>   <span class="cm">/* 100K */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">I2cHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">DutyCycle</span>     <span class="o">=</span> <span class="n">I2C_DUTYCYCLE</span><span class="p">;</span>    <span class="cm">/* 快速模式占空比 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">I2cHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">OwnAddress1</span>   <span class="o">=</span> <span class="n">I2C_ADDRESS</span><span class="p">;</span>      <span class="cm">/* 自身地址（主模式可不严格） */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">I2cHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">GeneralCallMode</span> <span class="o">=</span> <span class="n">I2C_GENERALCALL_DISABLE</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">I2cHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">NoStretchMode</span>   <span class="o">=</span> <span class="n">I2C_NOSTRETCH_DISABLE</span><span class="p">;</span> <span class="cm">/* 允许时钟拉伸 */</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="nf">HAL_I2C_Init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">I2cHandle</span><span class="p">)</span> <span class="o">!=</span> <span class="n">HAL_OK</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">APP_ErrorHandler</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 等待用户按键按下，再开始通信（避免一上电就发） */</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="nf">BSP_PB_GetState</span><span class="p">(</span><span class="n">BUTTON_KEY</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 主机发送 15 字节，超时 5000ms */</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="nf">HAL_I2C_Master_Transmit</span><span class="p">(</span><span class="o">&amp;</span><span class="n">I2cHandle</span><span class="p">,</span> <span class="n">I2C_ADDRESS</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                                 <span class="p">(</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="p">)</span><span class="n">aTxBuffer</span><span class="p">,</span> <span class="n">DATA_LENGTH</span><span class="p">,</span> <span class="mi">5000</span><span class="p">)</span> <span class="o">!=</span> <span class="n">HAL_OK</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">APP_ErrorHandler</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="nf">HAL_I2C_GetState</span><span class="p">(</span><span class="o">&amp;</span><span class="n">I2cHandle</span><span class="p">)</span> <span class="o">!=</span> <span class="n">HAL_I2C_STATE_READY</span><span class="p">);</span> <span class="cm">/* 等发送完成 */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 主机接收 15 字节 */</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="nf">HAL_I2C_Master_Receive</span><span class="p">(</span><span class="o">&amp;</span><span class="n">I2cHandle</span><span class="p">,</span> <span class="n">I2C_ADDRESS</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                                <span class="p">(</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="p">)</span><span class="n">aRxBuffer</span><span class="p">,</span> <span class="n">DATA_LENGTH</span><span class="p">,</span> <span class="mi">5000</span><span class="p">)</span> <span class="o">!=</span> <span class="n">HAL_OK</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">APP_ErrorHandler</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="nf">HAL_I2C_GetState</span><span class="p">(</span><span class="o">&amp;</span><span class="n">I2cHandle</span><span class="p">)</span> <span class="o">!=</span> <span class="n">HAL_I2C_STATE_READY</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 校验收发数据 */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">APP_CheckEndOfTransfer</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 比较发送与接收缓冲；一致亮灯，否则闪烁 */</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">APP_CheckEndOfTransfer</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="nf">APP_Buffercmp8</span><span class="p">((</span><span class="kt">uint8_t</span><span class="o">*</span><span class="p">)</span><span class="n">aTxBuffer</span><span class="p">,</span> <span class="p">(</span><span class="kt">uint8_t</span><span class="o">*</span><span class="p">)</span><span class="n">aRxBuffer</span><span class="p">,</span> <span class="n">DATA_LENGTH</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">APP_LedBlinking</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="k">else</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">BSP_LED_On</span><span class="p">(</span><span class="n">LED_GREEN</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="代码分段讲解">代码分段讲解
+</h2><h3 id="1-地址说明">1. 地址说明
+</h3><p><code>I2C_ADDRESS = 0xA0</code> 是<strong>含读写位的 8 位地址</strong>（即 7 位地址 <code>0x50</code> 左移 1 位）。HAL 的 <code>HAL_I2C_Master_Transmit/Receive</code> 内部会自动根据读/写把最低位置 0/1，调用时直接传 <code>0xA0</code> 即可（底层会有兼容处理）。实际对接外部芯片时，请以其数据手册给出的 7 位地址为准。</p>
+<h3 id="2-速率与占空比">2. 速率与占空比
+</h3><ul>
+<li><code>ClockSpeed = 100000</code>：标准模式 100kbps；可改 <code>400000</code> 进入快速模式。</li>
+<li>快速模式下 <code>DutyCycle</code> 控制 SCL 高低电平比（<code>16_9</code> 或 <code>2</code>）。</li>
+</ul>
+<h3 id="3-轮询方式">3. 轮询方式
+</h3><p><code>HAL_I2C_Master_Transmit(..., Timeout)</code> 内部不断查询状态寄存器直到完成或超时，期间 CPU 被占用，简单但效率低。对性能敏感的场景可改用 <code>IT</code>（中断）或 <code>DMA</code> 版本（同目录有 <code>I2C_TwoBoard_CommunicationMaster_IT</code> / <code>_DMA</code>）。</p>
+<h3 id="4-时钟拉伸">4. 时钟拉伸
+</h3><p><code>NoStretchMode = DISABLE</code> 表示允许从机在忙时拉低 SCL（时钟拉伸），这是 I2C 规范允许的流控机制，绝大多数从机需要。</p>
+<h2 id="实验现象">实验现象
+</h2><ul>
+<li>按下用户键后，主机发送 <code>1~15</code>；</li>
+<li>若从机把数据原样返回，主机收到一致数据，<strong>绿灯常亮</strong>；</li>
+<li>若数据不一致或总线异常，绿灯以 500ms 周期<strong>闪烁</strong>报警。</li>
+</ul>
+<h2 id="常见问题">常见问题
+</h2><ol>
+<li>
+<p><strong>总线卡死 / 收不到数据？</strong></p>
+<ul>
+<li>SCL、SDA 必须有上拉电阻（4.7kΩ 到 VDD），开漏总线无上拉无法拉高。</li>
+<li>检查接线：SCL↔SCL、SDA↔SDA、主从<strong>共地</strong>。</li>
+<li>确认从机地址与数据手册一致（区分 7 位 / 8 位地址）。</li>
+</ul>
+</li>
+<li>
+<p><strong><code>HAL_I2C_Master_Transmit</code> 返回 <code>HAL_BUSY</code>/<code>HAL_TIMEOUT</code>？</strong></p>
+<ul>
+<li>总线可能被某次异常拉低（SDA 卡在低）。可尝试复位或从机重新上电。</li>
+<li>适当增大 <code>Timeout</code>（如 5000ms）。</li>
+</ul>
+</li>
+<li>
+<p><strong>写 EEPROM 后马上读不到？</strong></p>
+<ul>
+<li>EEPROM 写周期约 5ms，需在写后延时再读。</li>
+</ul>
+</li>
+<li>
+<p><strong>如何只读单字节传感器（如温湿度）？</strong></p>
+<ul>
+<li>先 <code>HAL_I2C_Master_Transmit</code> 发寄存器地址，再 <code>HAL_I2C_Master_Receive</code> 读数据（即“写寄存器指针 + 读数据”组合）。</li>
+</ul>
+</li>
+</ol>
+<h2 id="小结">小结
+</h2><ul>
+<li>I2C 主机轮询三步：<strong>初始化 <code>HAL_I2C_Init</code> → <code>Master_Transmit</code> 发 → <code>Master_Receive</code> 收</strong>。</li>
+<li>总线必须上拉，地址要与从机匹配，主从共地。</li>
+<li>轮询版代码最简单，适合初学；追求效率改用 IT/DMA 版。</li>
+</ul>
+<h2 id="拓展应用">拓展应用
+</h2><ul>
+<li>驱动 OLED（SSD1306）、AT24Cxx EEPROM、各类 I2C 传感器（BMP280、SHT30）。</li>
+<li>一主多从：用不同从机地址挂多个设备，轮流访问。</li>
+<li>用 <code>HAL_I2C_Mem_Write/Read</code> 直接读写带寄存器的器件（如 <code>I2C_MEMADD_SIZE_8BIT</code>）。</li>
+<li>把轮询升级为中断/DMA，释放 CPU。</li>
+</ul>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/i2c_twoboard_communicationmaster_polling/">I2C_TwoBoard_CommunicationMaster_Polling</a>
+        
+            <a href="/tags/i2c/">I2C</a>
+        
+            <a href="/tags/v1.5.0/">V1.5.0</a>
+        
+            <a href="/tags/py32f030/">PY32F030</a>
+        
+            <a href="/tags/hal/">HAL</a>
+        
+    </section>
+
+
+    <section class="article-lastmod">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <span>
+            最后更新于 Sep 08, 2026 16:31 &#43;0800
+        </span>
+    </section></footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/puya-i2c-%E4%B8%BB%E6%9C%BA%E8%BD%AE%E8%AF%A2%E9%80%9A%E4%BF%A1ll-%E5%BA%93/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA I2C — 主机轮询通信（LL 库）</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/puya-i2c-i2c-%E4%B8%BB%E6%9C%BA-dma-%E9%80%9A%E4%BF%A1/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA I2C — I2C 主机 DMA 通信</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/puya-i2c-i2c-%E4%B8%BB%E6%9C%BA-dma-%E9%80%9A%E4%BF%A1-%E5%86%85%E5%AD%98%E5%9C%B0%E5%9D%80/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA I2C — I2C 主机 DMA 通信 (内存地址)</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/puya-i2c-i2c-%E4%B8%BB%E6%9C%BA%E4%B8%AD%E6%96%AD%E9%80%9A%E4%BF%A1/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA I2C — I2C 主机中断通信</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/puya-i2c-i2c-%E4%B8%BB%E6%9C%BA%E8%BD%AE%E8%AF%A2%E9%80%9A%E4%BF%A1/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA I2C — I2C 主机轮询通信</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="ClingYang/ClingYang.github.io"
+        issue-term="pathname"
+        
+        label="💬comment"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2026 CLing
+    </section>
+    
+    <section class="powerby">
+        
+            世界是你们 <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<style>
+    #TableOfContents > ul, ol {
+        ul, ol {
+            display: none;
+        }
+        .open {
+            display: block;
+        }
+    }
+</style>
+
+<script>
+    function initTocHide() {
+        
+        let toc = document.querySelector(".widget--toc");
+        if (!toc) {
+            return;
+        }
+        
+        window.addEventListener('scroll', function() {
+            
+            let currentLi = document.querySelector(".active-class");
+            if (!currentLi) {
+                return
+            }
+            
+            let elementsByClassName = document.querySelectorAll(".open");
+            if (elementsByClassName.length > 0) {
+                elementsByClassName.forEach((ul) => {
+                    ul.classList.remove("open")
+                })
+            }
+            
+            if (currentLi.children.length > 1) {
+                currentLi.children[1].classList.add("open")
+            }
+            
+            let ul = currentLi.parentElement;
+            do {
+                ul.classList.add("open");
+                ul = ul.parentElement.parentElement
+            } while (ul !== undefined && (ul.localName === 'ul' || ul.localName === 'ol'))
+        });
+    }
+    initTocHide()
+</script>
+
+    </body>
+</html>
