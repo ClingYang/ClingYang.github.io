@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="HC32F460 SPI LCD 实验：用 SPI3 驱动 ST7789 1.14 寸彩屏，显示四行文字信息，主循环里黑青两色交替全屏刷新并翻转 LED。">
+<title>HC32 SPI LCD 显示 — 文字输出与全屏刷色</title>
+
+<link rel='canonical' href='https://clingyang.github.io/p/hc32-spi-lcd-%E6%98%BE%E7%A4%BA-%E6%96%87%E5%AD%97%E8%BE%93%E5%87%BA%E4%B8%8E%E5%85%A8%E5%B1%8F%E5%88%B7%E8%89%B2/'>
+
+<link rel="stylesheet" href="/scss/style.min.e14f3ba93baae65b2aef2339f32b6f25d7a0184785ebf4f6bd7d3376ae5dc2d4.css"><meta property='og:title' content="HC32 SPI LCD 显示 — 文字输出与全屏刷色">
+<meta property='og:description' content="HC32F460 SPI LCD 实验：用 SPI3 驱动 ST7789 1.14 寸彩屏，显示四行文字信息，主循环里黑青两色交替全屏刷新并翻转 LED。">
+<meta property='og:url' content='https://clingyang.github.io/p/hc32-spi-lcd-%E6%98%BE%E7%A4%BA-%E6%96%87%E5%AD%97%E8%BE%93%E5%87%BA%E4%B8%8E%E5%85%A8%E5%B1%8F%E5%88%B7%E8%89%B2/'>
+<meta property='og:site_name' content='CLing'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='HC32F460' /><meta property='article:tag' content='SPI' /><meta property='article:tag' content='LCD' /><meta property='article:tag' content='ST7789' /><meta property='article:tag' content='RGB565' /><meta property='article:tag' content='显示' /><meta property='article:tag' content='ddl' /><meta property='article:published_time' content='2026-09-09T09:00:00&#43;08:00'/><meta property='article:modified_time' content='2026-09-09T09:51:13&#43;08:00'/>
+<meta name="twitter:title" content="HC32 SPI LCD 显示 — 文字输出与全屏刷色">
+<meta name="twitter:description" content="HC32F460 SPI LCD 实验：用 SPI3 驱动 ST7789 1.14 寸彩屏，显示四行文字信息，主循环里黑青两色交替全屏刷新并翻转 LED。">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                            height="290" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🏀</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">CLing</a></h1>
+            <h2 class="site-description">你好 欢迎来到我的博客</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>档案</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E6%8A%80%E6%9C%AF%E9%93%BE%E6%8E%A5/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>技术链接</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/excel/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+                
+                <span>Excel教程</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#1-功能简介">1. 功能简介</a></li>
+    <li><a href="#2-硬件准备">2. 硬件准备</a></li>
+    <li><a href="#3-完整代码">3. 完整代码</a></li>
+    <li><a href="#4-代码分段讲解">4. 代码分段讲解</a>
+      <ol>
+        <li><a href="#41-lcd_init-一句话干了一大堆事">4.1 <code>LCD_Init()</code> 一句话干了一大堆事</a></li>
+        <li><a href="#42-颜色变量一次设置全局生效">4.2 颜色变量：一次设置，全局生效</a></li>
+        <li><a href="#43-lcd_showstring-的五个参数">4.3 <code>LCD_ShowString</code> 的五个参数</a></li>
+        <li><a href="#44-lcd_fill-全屏刷色">4.4 <code>LCD_Fill</code> 全屏刷色</a></li>
+        <li><a href="#45-注意文字会被覆盖">4.5 注意：文字会被覆盖</a></li>
+        <li><a href="#46-只刷了一次却看到交替">4.6 只刷了一次却看到交替？</a></li>
+      </ol>
+    </li>
+    <li><a href="#5-实验现象">5. 实验现象</a></li>
+    <li><a href="#6-常见问题">6. 常见问题</a></li>
+    <li><a href="#7-小结">7. 小结</a></li>
+    <li><a href="#8-拓展应用">8. 拓展应用</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/hc32/" >
+                HC32
+            </a>
+        
+            <a href="/categories/spi_lcd/" >
+                Spi_lcd
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/hc32-spi-lcd-%E6%98%BE%E7%A4%BA-%E6%96%87%E5%AD%97%E8%BE%93%E5%87%BA%E4%B8%8E%E5%85%A8%E5%B1%8F%E5%88%B7%E8%89%B2/">HC32 SPI LCD 显示 — 文字输出与全屏刷色</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            HC32F460 SPI LCD 实验：用 SPI3 驱动 ST7789 1.14 寸彩屏，显示四行文字信息，主循环里黑青两色交替全屏刷新并翻转 LED。
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2026-09-09</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 5 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="spi-lcd-显示文字输出与全屏刷色">SPI LCD 显示：文字输出与全屏刷色
+</h1><blockquote>
+<p>源码路径：<code>example/HC32F460JEUA/7.spi LCD/LCD 1.14inch/source/main.c</code>
+驱动库：<code>midware/ST7789 1.14inch/tftlcd.c</code> / <code>tftlcd.h</code></p>
+</blockquote>
+<h2 id="1-功能简介">1. 功能简介
+</h2><p>这个例子让单片机在彩屏上「说话」，分两部分：</p>
+<p><strong>开机时显示四行文字信息</strong>（相当于一个开机画面）：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Boring_TECH
+</span></span><span class="line"><span class="cl">TFTLCD TEST 240*135
+</span></span><span class="line"><span class="cl">HC32F460
+</span></span><span class="line"><span class="cl">2022/6/20
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>然后进入主循环，做两件事循环往复</strong>：</p>
+<ol>
+<li>三颗 LED 一起翻转</li>
+<li><strong>全屏刷成黑色 → 等 500ms → 全屏刷成青色</strong>，不断交替</li>
+</ol>
+<p>全屏刷色看起来简单，其实是个很有用的<strong>性能测试</strong>：屏幕能多快刷完一整屏，直接决定了你以后做动画、做实时曲线会不会卡。240×240 个像素 = 57600 个像素 × 2 字节 = 115KB 数据，全靠 SPI 一个字节一个字节送过去。</p>
+<p>学会这个例子，你就有了「显示」这个能力——之后所有的数据、菜单、曲线都能画到屏上。</p>
+<hr>
+<h2 id="2-硬件准备">2. 硬件准备
+</h2><p>需要一块 <strong>ST7789 驱动的 1.14 寸 TFT 彩屏</strong>（240×135 分辨率），共 8 根线。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">      HC32F460                        ST7789 LCD 模块
+</span></span><span class="line"><span class="cl">    ┌───────────┐                   ┌──────────────────┐
+</span></span><span class="line"><span class="cl">    │ PB6  SCK  ├──────────────────▶│ SCL / SCK  时钟   │
+</span></span><span class="line"><span class="cl">    │ PB7  MOSI ├──────────────────▶│ SDA / MOSI 数据   │
+</span></span><span class="line"><span class="cl">    │ PB8  DC   ├──────────────────▶│ DC   命令/数据选择 │
+</span></span><span class="line"><span class="cl">    │ PB9  RST  ├──────────────────▶│ RES  复位         │
+</span></span><span class="line"><span class="cl">    │ PB3  PWR  ├──────────────────▶│ BLK  背光         │
+</span></span><span class="line"><span class="cl">    │      3.3V ├──────────────────▶│ VCC              │
+</span></span><span class="line"><span class="cl">    │      GND  ├──────────────────▶│ GND              │
+</span></span><span class="line"><span class="cl">    └───────────┘                   └──────────────────┘
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>接线要点：</p>
+<div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">线</th>
+					<th style="text-align: left">类型</th>
+					<th style="text-align: left">注意</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left">SCK (PB6)</td>
+					<td style="text-align: left">SPI3 复用</td>
+					<td style="text-align: left">时钟</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">MOSI (PB7)</td>
+					<td style="text-align: left">SPI3 复用</td>
+					<td style="text-align: left">只发不收，所以不用接 MISO</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">DC (PB8)</td>
+					<td style="text-align: left">普通 GPIO</td>
+					<td style="text-align: left"><strong>接错必花屏</strong>，最关键的一根</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">RST (PB9)</td>
+					<td style="text-align: left">普通 GPIO</td>
+					<td style="text-align: left">不接屏可能初始化不了</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">PWR/BLK (PB3)</td>
+					<td style="text-align: left">普通 GPIO</td>
+					<td style="text-align: left"><strong>不接屏是黑的</strong>，你会以为程序坏了</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">VCC</td>
+					<td style="text-align: left">电源</td>
+					<td style="text-align: left"><strong>必须 3.3V！接 5V 会烧屏</strong></td>
+			</tr>
+			<tr>
+					<td style="text-align: left">GND</td>
+					<td style="text-align: left">地</td>
+					<td style="text-align: left">必须共地</td>
+			</tr>
+	</tbody>
+</table></div>
+<blockquote>
+<p>⚠️ <strong>三个必踩的坑</strong></p>
+<ol>
+<li><strong>VCC 一定接 3.3V</strong>，绝不能接 5V。这类小屏没有电平转换和稳压，5V 直接烧。</li>
+<li><strong>背光（BLK/PWR）没接或没点亮 → 屏一片漆黑</strong>。很多人以为程序没跑起来，其实内容画上去了只是看不见。</li>
+<li><strong>杜邦线要短</strong>。SPI 跑得快，线长了信号劣化会花屏。10cm 以内为宜。</li>
+</ol>
+</blockquote>
+<p>板载 LED（PA0/PA1/PA2）用来指示程序在运行。</p>
+<hr>
+<h2 id="3-完整代码">3. 完整代码
+</h2><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;hc32_ddl.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;tftlcd.h&#34;                 // LCD 驱动库头文件</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">char</span> <span class="n">str</span><span class="p">[</span><span class="mi">50</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">};</span>                 <span class="c1">// 备用字符串缓冲区（本例未使用）
+</span></span></span><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="n">t</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int32_t</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* ===== BSP 初始化 ===== */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">BSP_CLK_Init</span><span class="p">();</span>                 <span class="c1">// 系统时钟
+</span></span></span><span class="line"><span class="cl">    <span class="nf">BSP_LED_Init</span><span class="p">();</span>                 <span class="c1">// LED
+</span></span></span><span class="line"><span class="cl">    <span class="nf">BSP_KEY_Init</span><span class="p">();</span>                 <span class="c1">// 按键
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* ===== LCD 初始化 ===== */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">LCD_Init</span><span class="p">();</span>                     <span class="c1">// 一句搞定：SPI 初始化 + 屏复位 + 寄存器配置 + 开背光
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">LCD_Clear</span><span class="p">(</span><span class="n">BLACK</span><span class="p">);</span>               <span class="c1">// 整屏清成黑色
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* ===== 设置画笔和背景色 ===== */</span>
+</span></span><span class="line"><span class="cl">    <span class="n">BACK_COLOR</span>  <span class="o">=</span> <span class="n">BLACK</span><span class="p">;</span>            <span class="c1">// 背景色：黑
+</span></span></span><span class="line"><span class="cl">    <span class="n">POINT_COLOR</span> <span class="o">=</span> <span class="n">CYAN</span><span class="p">;</span>             <span class="c1">// 画笔色：青（文字就是这个颜色）
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* ===== 显示四行文字 =====
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * 参数：(x起点, y起点, 显示区宽, 显示区高, 字体大小, 字符串)
+</span></span></span><span class="line"><span class="cl"><span class="cm">     */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">LCD_ShowString</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span>  <span class="mi">0</span><span class="p">,</span>  <span class="mi">160</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="s">&#34;Boring_TECH&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">LCD_ShowString</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span>  <span class="mi">15</span><span class="p">,</span> <span class="mi">160</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="s">&#34;TFTLCD TEST 240*135&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">LCD_ShowString</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span>  <span class="mi">30</span><span class="p">,</span> <span class="mi">160</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="s">&#34;HC32F460&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">LCD_ShowString</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span>  <span class="mi">45</span><span class="p">,</span> <span class="mi">160</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="s">&#34;2022/6/20&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="cm">/* 三颗 LED 一起翻转，指示程序在跑 */</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">BSP_LED_Toggle</span><span class="p">(</span><span class="n">LED_RED</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">BSP_LED_Toggle</span><span class="p">(</span><span class="n">LED_GREEN</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">BSP_LED_Toggle</span><span class="p">(</span><span class="n">LED_BLUE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="cm">/* 全屏刷成黑色（会把上面的文字覆盖掉）*/</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">LCD_Fill</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">240</span><span class="p">,</span> <span class="mi">240</span><span class="p">,</span> <span class="n">BLACK</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="nf">Ddl_Delay1ms</span><span class="p">(</span><span class="mi">500</span><span class="p">);</span>          <span class="c1">// 等 500 毫秒
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="cm">/* 全屏刷成青色 */</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">LCD_Fill</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">240</span><span class="p">,</span> <span class="mi">240</span><span class="p">,</span> <span class="n">CYAN</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="4-代码分段讲解">4. 代码分段讲解
+</h2><h3 id="41-lcd_init-一句话干了一大堆事">4.1 <code>LCD_Init()</code> 一句话干了一大堆事
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">LCD_Init</span><span class="p">();</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这一行是驱动库封装的成果。它内部依次完成了：</p>
+<ol>
+<li><strong>开 SPI3 外设时钟</strong>：<code>PWC_Fcg1PeriphClockCmd(PWC_FCG1_PERIPH_SPI3, Enable)</code></li>
+<li><strong>配置 SCK/MOSI 引脚复用</strong>为 <code>Func_Spi3_Sck</code> / <code>Func_Spi3_Mosi</code></li>
+<li><strong>配置 DC/RST/PWR 三个引脚</strong>为普通 GPIO 输出</li>
+<li><strong>初始化 SPI3</strong>：三线模式、主机模式、时钟极性/相位、速度</li>
+<li><strong>硬件复位屏幕</strong>：<code>LCD_RST(0)</code> → 延时 → <code>LCD_RST(1)</code> → 延时</li>
+<li><strong>发送一长串 ST7789 初始化命令</strong>：设置像素格式（RGB565）、显示方向、伽马校正、电压参数、退出睡眠、开显示……</li>
+<li><strong>打开背光</strong>：<code>LCD_PWR(1)</code></li>
+</ol>
+<p>第 6 步那一串命令有几十行，都是 ST7789 数据手册里规定的固定套路。<strong>这也是为什么大家都用现成驱动库</strong>——这些寄存器值抄手册/例程就行，自己推没有意义。</p>
+<p>想看细节就去读 <code>midware/ST7789 1.14inch/tftlcd.c</code>。</p>
+<h3 id="42-颜色变量一次设置全局生效">4.2 颜色变量：一次设置，全局生效
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">BACK_COLOR</span>  <span class="o">=</span> <span class="n">BLACK</span><span class="p">;</span>    <span class="c1">// 背景色
+</span></span></span><span class="line"><span class="cl"><span class="n">POINT_COLOR</span> <span class="o">=</span> <span class="n">CYAN</span><span class="p">;</span>     <span class="c1">// 前景色（画笔）
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>这是两个<strong>全局变量</strong>，在 <code>tftlcd.h</code> 里 <code>extern</code> 声明。</p>
+<p><code>LCD_ShowString</code>、<code>LCD_ShowChar</code>、<code>LCD_Draw_Point</code>、<code>LCD_DrawLine</code> 这些函数<strong>内部会读这两个变量</strong>来决定用什么颜色。所以你不用给每个函数传颜色参数——设一次，后面画的东西都是这个色。</p>
+<p>想换颜色就直接改：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">POINT_COLOR</span> <span class="o">=</span> <span class="n">RED</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="nf">LCD_ShowString</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">160</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="s">&#34;Warning!&#34;</span><span class="p">);</span>   <span class="c1">// 这行就是红字了
+</span></span></span><span class="line"><span class="cl"><span class="n">POINT_COLOR</span> <span class="o">=</span> <span class="n">GREEN</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="nf">LCD_ShowString</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">75</span><span class="p">,</span> <span class="mi">160</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="s">&#34;OK&#34;</span><span class="p">);</span>         <span class="c1">// 这行是绿字
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>BACK_COLOR</code> 的作用是<strong>文字的背景</strong>——显示字符时，字的笔画用 <code>POINT_COLOR</code>，笔画之外的空白填 <code>BACK_COLOR</code>。设成和屏幕底色一致，字看起来就是「透明背景」的。</p>
+<h3 id="43-lcd_showstring-的五个参数">4.3 <code>LCD_ShowString</code> 的五个参数
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">LCD_ShowString</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">160</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="s">&#34;TFTLCD TEST 240*135&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="c1">//             │  │   │    │   │   └── 要显示的字符串
+</span></span></span><span class="line"><span class="cl"><span class="c1">//             │  │   │    │   └────── 字体大小（12 = 12 号字，还可选 16、24）
+</span></span></span><span class="line"><span class="cl"><span class="c1">//             │  │   │    └────────── 显示区域高度
+</span></span></span><span class="line"><span class="cl"><span class="c1">//             │  │   └─────────────── 显示区域宽度（超过就自动换行）
+</span></span></span><span class="line"><span class="cl"><span class="c1">//             │  └─────────────────── 起点 y 坐标（第 15 行像素）
+</span></span></span><span class="line"><span class="cl"><span class="c1">//             └────────────────────── 起点 x 坐标（第 0 列像素）
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>坐标原点 (0,0) 在屏幕左上角</strong>，x 向右增大，y 向下增大。这和数学里的坐标系 y 轴方向相反，是所有显示设备的惯例。</p>
+<p>四行文字的 y 坐标是 0、15、30、45，间隔 15 像素——正好比 12 号字高一点，行与行之间有 3 像素间隙，不会挤在一起。<strong>这就是「行距」的手工计算</strong>。</p>
+<p>字体大小可选 <strong>12 / 16 / 24</strong>，取决于驱动库里存了哪几套字模。字号越大越清晰但占屏幕越多。</p>
+<h3 id="44-lcd_fill-全屏刷色">4.4 <code>LCD_Fill</code> 全屏刷色
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">LCD_Fill</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">240</span><span class="p">,</span> <span class="mi">240</span><span class="p">,</span> <span class="n">BLACK</span><span class="p">);</span>   <span class="c1">// (左上x, 左上y, 右下x, 右下y, 颜色)
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>把一个矩形区域填成纯色。这里给的是 (0,0) 到 (240,240)，也就是<strong>整屏</strong>。</p>
+<p><code>LCD_Fill</code> 的内部实现值得了解：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">① LCD_Address_Set(x1, y1, x2, y2)   ← 先告诉屏「接下来写的像素填到这个矩形里」
+</span></span><span class="line"><span class="cl">② 循环 (x2-x1)×(y2-y1) 次，每次发 2 字节颜色值
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>关键在第①步：ST7789 有个<strong>窗口机制</strong>。你设好窗口后，连续发像素数据，屏会自动从窗口左上角开始逐行填，填满自动换行，不需要你每个像素都指定坐标。这让批量刷屏效率很高。</p>
+<p><strong>为什么全屏刷色是性能测试？</strong> 240×240 = 57600 个像素，每个 2 字节，共 <strong>115200 字节</strong>要通过 SPI 送出去。如果 SPI 跑 20MHz，理论上要 115200×8/20000000 ≈ <strong>46ms</strong>。你能明显看到刷屏的过程（尤其从上往下扫的感觉），这就是刷新率的直观体现。</p>
+<p>想让它快起来，就要用 <strong>DMA</strong>——驱动库已经预留了 DMA 配置（<code>M4_DMA1</code>、<code>DmaCh1</code>），开启后 CPU 只需要启动传输，剩下的搬运硬件自己干。</p>
+<h3 id="45-注意文字会被覆盖">4.5 注意：文字会被覆盖
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">LCD_ShowString</span><span class="p">(...);</span>          <span class="c1">// 开机显示的四行文字
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">LCD_Fill</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">240</span><span class="p">,</span> <span class="mi">240</span><span class="p">,</span> <span class="n">BLACK</span><span class="p">);</span>   <span class="c1">// ← 全屏刷黑，文字被盖掉了！
+</span></span></span><span class="line"><span class="cl">    <span class="p">...</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>主循环第一次 <code>LCD_Fill</code> 就把开机文字全覆盖了。所以你<strong>只能在上电瞬间看到那四行字</strong>，之后就是纯粹的黑青交替。</p>
+<p>如果想让文字一直留着，把 <code>LCD_ShowString</code> 也搬进循环里，在每次 Fill 之后重画：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">LCD_Fill</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">240</span><span class="p">,</span> <span class="mi">240</span><span class="p">,</span> <span class="n">BLACK</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">LCD_ShowString</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">160</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="s">&#34;HC32F460&#34;</span><span class="p">);</span>   <span class="c1">// 刷完重画文字
+</span></span></span><span class="line"><span class="cl">    <span class="nf">Ddl_Delay1ms</span><span class="p">(</span><span class="mi">500</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">LCD_Fill</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">240</span><span class="p">,</span> <span class="mi">240</span><span class="p">,</span> <span class="n">CYAN</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">LCD_ShowString</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">160</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="s">&#34;HC32F460&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">Ddl_Delay1ms</span><span class="p">(</span><span class="mi">500</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p><strong>顺便提一个显示编程的经典问题：闪烁（Flicker）</strong>。
+「全屏擦掉 → 重画」这种做法，如果刷新频繁，人眼会看到明显闪烁。
+专业做法是<strong>只重画变化的区域</strong>（比如只擦掉数字那一小块再重写），或者用<strong>双缓冲</strong>（在内存里画好整帧再一次性送屏）。做仪表、做动画时这点很重要。</p>
+</blockquote>
+<h3 id="46-只刷了一次却看到交替">4.6 只刷了一次却看到交替？
+</h3><p>细看代码会发现：黑色刷完后 <code>Ddl_Delay1ms(500)</code>，但青色刷完后<strong>没有延时</strong>，直接进入下一轮循环刷黑。</p>
+<p>所以实际节奏是：<strong>黑色停留 500ms，青色只停留一瞬间</strong>（刷屏本身耗时 + 循环开销）。视觉上会是「黑得久、青色一闪」。</p>
+<p>想让两个颜色停留时间一样，在青色后面也补一句延时：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">LCD_Fill</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">240</span><span class="p">,</span> <span class="mi">240</span><span class="p">,</span> <span class="n">CYAN</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">Ddl_Delay1ms</span><span class="p">(</span><span class="mi">500</span><span class="p">);</span>        <span class="c1">// 补上这句
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>这属于原示例的小瑕疵，正好可以拿来当练手的第一个改动。</p>
+<hr>
+<h2 id="5-实验现象">5. 实验现象
+</h2><ol>
+<li><strong>上电瞬间</strong>：屏幕清黑，随后左上角出现四行<strong>青色文字</strong>：
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Boring_TECH
+</span></span><span class="line"><span class="cl">TFTLCD TEST 240*135
+</span></span><span class="line"><span class="cl">HC32F460
+</span></span><span class="line"><span class="cl">2022/6/20
+</span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+<li><strong>紧接着</strong>进入主循环，文字被覆盖，屏幕开始<strong>黑 ↔ 青交替刷新</strong>（黑色停留约 0.5 秒，青色一闪而过）。</li>
+<li><strong>三颗 LED 同步闪烁</strong>。</li>
+</ol>
+<p>如果你想仔细看那四行字，可以在 <code>while(1)</code> 前面加一句 <code>Ddl_Delay1ms(3000);</code> 让它多停 3 秒。</p>
+<hr>
+<h2 id="6-常见问题">6. 常见问题
+</h2><p><strong>Q1：屏幕全黑，什么都没有？</strong>
+按顺序排查（这是最常见的问题）：</p>
+<ul>
+<li><strong>背光接了吗？亮了吗？</strong> PWR/BLK 引脚（PB3）没接或没拉高，屏就是黑的。<strong>先确认背光亮不亮</strong>——用手机摄像头对着屏看，或者在暗处看有没有微光。背光亮但没内容，是另一类问题。</li>
+<li><strong>VCC 是 3.3V 吗？</strong> 电压不对屏不工作（接 5V 还可能烧掉）。</li>
+<li><strong>GND 共地了吗？</strong></li>
+</ul>
+<p><strong>Q2：背光亮了，但屏幕白屏 / 花屏 / 显示乱码条纹？</strong></p>
+<ul>
+<li><strong>DC 脚（PB8）接对了吗？</strong> 这是头号原因。DC 错了，屏会把数据当命令执行，结果完全混乱。</li>
+<li><strong>RST 脚（PB9）接了吗？</strong> 没复位，屏内部寄存器状态不确定。</li>
+<li><strong>SPI 时钟太快？</strong> 试着在 <code>tftlcd.c</code> 里降低 SPI 分频，速度慢下来往往就好了。</li>
+<li><strong>杜邦线太长？</strong> 换短线（10cm 内），或者插紧一点。SPI 高速信号对连线质量很敏感。</li>
+</ul>
+<p><strong>Q3：显示的内容是「躺着」的 / 上下颠倒 / 左右镜像？</strong></p>
+<ul>
+<li>改 <code>tftlcd.h</code> 里的 <code>USE_HORIZONTAL</code> 宏。0、1 是竖屏，2、3 是横屏，四个值对应四个旋转方向，一个个试，总有一个对。</li>
+</ul>
+<p><strong>Q4：文字显示不全，或者跑到屏幕外面了？</strong></p>
+<ul>
+<li>检查坐标和屏幕分辨率。1.14 寸屏横屏是 240×135，<strong>y 坐标超过 135 就看不见了</strong>。</li>
+<li><code>LCD_ShowString</code> 的「宽度」参数决定什么时候换行，给太小会提前换行导致文字断开。</li>
+</ul>
+<p><strong>Q5：屏幕边缘有几像素的杂色/偏移？</strong></p>
+<ul>
+<li>ST7789 屏有「显示偏移」参数需要按具体模块调整。不同厂家的 1.14 寸模块偏移量可能不同（比如需要 x 偏移 40、y 偏移 53）。在 <code>tftlcd.c</code> 的 <code>LCD_Address_Set</code> 里加上偏移量修正。</li>
+</ul>
+<p><strong>Q6：刷屏太慢，做动画很卡？</strong></p>
+<ul>
+<li><strong>提高 SPI 时钟</strong>（在信号质量允许的范围内）。</li>
+<li><strong>用 DMA</strong>：驱动库预留了 DMA 配置，开启后刷屏速度能提升数倍。</li>
+<li><strong>只刷变化区域</strong>，不要整屏重画。比如显示时间只需要重画那几个数字所占的小矩形。</li>
+</ul>
+<p><strong>Q7：想显示中文怎么办？</strong></p>
+<ul>
+<li>驱动库自带的字模只有 ASCII 字符。显示中文需要<strong>汉字字库</strong>。两个方案：
+<ol>
+<li>用取模软件把要用的几个汉字做成数组存进程序（适合固定文字，如「温度」「湿度」）。</li>
+<li>把完整 GB2312 字库（约 260KB）存到<strong>外部 QSPI Flash 或 SD 卡</strong>里，需要时按区位码算出偏移读点阵数据（适合要显示任意汉字的场合）。这就是 QSPI/SD 卡章节和本章的联动应用。</li>
+</ol>
+</li>
+</ul>
+<hr>
+<h2 id="7-小结">7. 小结
+</h2><ul>
+<li><code>LCD_Init()</code> 一句话完成 SPI 配置、屏复位、寄存器初始化、开背光。</li>
+<li><strong>DC 脚区分命令和数据</strong>，是驱动 LCD 的核心；接错必花屏。</li>
+<li><strong>背光不开屏就是黑的</strong>，排查显示问题先看背光。</li>
+<li><strong>VCC 必须 3.3V</strong>，接 5V 烧屏。</li>
+<li><code>POINT_COLOR</code> / <code>BACK_COLOR</code> 是全局颜色变量，设一次全局生效。</li>
+<li>坐标原点在<strong>左上角</strong>，y 向下增大。</li>
+<li><code>USE_HORIZONTAL</code> 宏控制屏幕旋转方向。</li>
+<li>全屏刷色要传 115KB 数据，想快就上 <strong>DMA</strong>；想不闪就<strong>只刷变化区域</strong>。</li>
+</ul>
+<hr>
+<h2 id="8-拓展应用">8. 拓展应用
+</h2><p>有了屏幕，你的项目一下就从「玩具」变成「产品」了：</p>
+<ul>
+<li>
+<p><strong>数字仪表盘</strong>
+显示温度、湿度、电压、电流的实时数值。配合 <code>LCD_ShowNum</code> 和大号字体，做一个电子温湿度计、万用表显示屏。</p>
+</li>
+<li>
+<p><strong>实时波形 / 曲线图</strong>
+每采一个数据点就 <code>LCD_Draw_ColorPoint</code> 画一个点，横轴不断右移——就是简易示波器、心率曲线、温度趋势图。配合 <code>LCD_DrawLine</code> 连线更平滑。</p>
+</li>
+<li>
+<p><strong>菜单界面 + 按键导航</strong>
+结合按键中断章节：上下键移动光标（用 <code>LCD_Fill</code> 画高亮条），确认键进入子菜单。这就是所有带屏设备的操作逻辑，工业仪表、3D 打印机面板都是这么做的。</p>
+</li>
+<li>
+<p><strong>图片 / 开机 Logo 显示</strong>
+用取模软件把 BMP/PNG 转成 RGB565 数组，<code>LCD_Show_Image</code> 显示出来。图片数据大的话存到 <strong>QSPI Flash</strong>（映射地址直接读）或 <strong>SD 卡</strong>里，不占程序空间。</p>
+</li>
+<li>
+<p><strong>中文界面</strong>
+GB2312 字库存外部 Flash / SD 卡，实现任意汉字显示。这是做中文产品界面的必经之路。</p>
+</li>
+<li>
+<p><strong>游戏</strong>
+贪吃蛇、俄罗斯方块、打砖块——240×240 的分辨率玩这些完全够。屏 + 按键就是一台掌机。</p>
+</li>
+<li>
+<p><strong>时钟 / 天气站</strong>
+RTC 提供时间、传感器提供温湿度、WiFi 模块（串口通信）抓天气数据，全显示在屏上。这是最经典的综合练手项目，能把前面所有章节串起来。</p>
+</li>
+<li>
+<p><strong>上移到 GUI 框架</strong>
+掌握了底层画点画线，下一步可以移植 <strong>LVGL</strong>（轻量级图形库）。它能做出带动画、按钮、滑块、图表的现代化界面。LVGL 只需要你提供一个「把一块缓冲区刷到屏上」的回调函数——也就是本章的 <code>LCD_Fill</code> / <code>LCD_Address_Set</code> 能力。<strong>本章学的就是 LVGL 的地基。</strong></p>
+</li>
+</ul>
+<blockquote>
+<p><strong>综合项目建议</strong>：把七章内容串成一个「数据记录仪」——
+<strong>按键</strong>启动/停止记录 → <strong>Timer0</strong> 定时触发采样 → 数据存到 <strong>SD 卡</strong> CSV 文件 → <strong>LCD</strong> 实时显示曲线和状态 → <strong>串口</strong> 输出调试日志 → 字库放 <strong>QSPI Flash</strong> → <strong>GPIO</strong> LED 指示运行状态。
+做完这个，你就是一个能独立开发嵌入式产品的工程师了。</p>
+</blockquote>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/hc32f460/">HC32F460</a>
+        
+            <a href="/tags/spi/">Spi</a>
+        
+            <a href="/tags/lcd/">LCD</a>
+        
+            <a href="/tags/st7789/">ST7789</a>
+        
+            <a href="/tags/rgb565/">RGB565</a>
+        
+            <a href="/tags/%E6%98%BE%E7%A4%BA/">显示</a>
+        
+            <a href="/tags/ddl/">Ddl</a>
+        
+    </section>
+
+
+    <section class="article-lastmod">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <span>
+            最后更新于 Sep 09, 2026 09:51 &#43;0800
+        </span>
+    </section></footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/hc32-gpio-%E8%BE%93%E5%87%BA-%E7%82%B9%E4%BA%AE%E5%B9%B6%E9%97%AA%E7%83%81-led/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HC32 GPIO 输出 — 点亮并闪烁 LED</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/hc32-qspi-flash-%E8%AF%BB%E5%86%99-%E6%93%A6%E9%99%A4%E9%A1%B5%E5%86%99%E4%B8%8E%E6%98%A0%E5%B0%84%E8%AF%BB%E5%9B%9E%E6%A0%A1%E9%AA%8C/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HC32 QSPI Flash 读写 — 擦除、页写与映射读回校验</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/hc32-sd-%E5%8D%A1%E8%AF%BB%E5%86%99-%E6%93%A6%E9%99%A4%E5%86%99%E5%85%A5%E4%B8%8E%E8%AF%BB%E5%9B%9E%E6%A0%A1%E9%AA%8C/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HC32 SD 卡读写 — 擦除、写入与读回校验</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/hc32-timer0-%E5%AE%9A%E6%97%B6%E4%B8%AD%E6%96%AD-%E5%8F%8C%E9%80%9A%E9%81%93%E5%91%A8%E6%9C%9F%E7%BF%BB%E8%BD%AC-led/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HC32 Timer0 定时中断 — 双通道周期翻转 LED</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/hc32-%E4%B8%B2%E5%8F%A3%E8%BD%AE%E8%AF%A2-%E6%94%B6%E5%8F%91%E6%95%B0%E6%8D%AE%E4%B8%8E-printf-%E6%89%93%E5%8D%B0/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HC32 串口轮询 — 收发数据与 printf 打印</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="ClingYang/ClingYang.github.io"
+        issue-term="pathname"
+        
+        label="💬comment"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2026 CLing
+    </section>
+    
+    <section class="powerby">
+        
+            世界是你们 <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<style>
+    #TableOfContents > ul, ol {
+        ul, ol {
+            display: none;
+        }
+        .open {
+            display: block;
+        }
+    }
+</style>
+
+<script>
+    function initTocHide() {
+        
+        let toc = document.querySelector(".widget--toc");
+        if (!toc) {
+            return;
+        }
+        
+        window.addEventListener('scroll', function() {
+            
+            let currentLi = document.querySelector(".active-class");
+            if (!currentLi) {
+                return
+            }
+            
+            let elementsByClassName = document.querySelectorAll(".open");
+            if (elementsByClassName.length > 0) {
+                elementsByClassName.forEach((ul) => {
+                    ul.classList.remove("open")
+                })
+            }
+            
+            if (currentLi.children.length > 1) {
+                currentLi.children[1].classList.add("open")
+            }
+            
+            let ul = currentLi.parentElement;
+            do {
+                ul.classList.add("open");
+                ul = ul.parentElement.parentElement
+            } while (ul !== undefined && (ul.localName === 'ul' || ul.localName === 'ol'))
+        });
+    }
+    initTocHide()
+</script>
+
+    </body>
+</html>

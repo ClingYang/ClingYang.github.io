@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="野火 EBF STM32F103 Mini HAL 库：配置 USART1 为 115200 8-N-1，重定向 printf 到串口，并通过中断接收实现回显。">
+<title>STM32 USART — 串口通信与 printf 重定向</title>
+
+<link rel='canonical' href='https://clingyang.github.io/p/stm32-usart-%E4%B8%B2%E5%8F%A3%E9%80%9A%E4%BF%A1%E4%B8%8E-printf-%E9%87%8D%E5%AE%9A%E5%90%91/'>
+
+<link rel="stylesheet" href="/scss/style.min.e14f3ba93baae65b2aef2339f32b6f25d7a0184785ebf4f6bd7d3376ae5dc2d4.css"><meta property='og:title' content="STM32 USART — 串口通信与 printf 重定向">
+<meta property='og:description' content="野火 EBF STM32F103 Mini HAL 库：配置 USART1 为 115200 8-N-1，重定向 printf 到串口，并通过中断接收实现回显。">
+<meta property='og:url' content='https://clingyang.github.io/p/stm32-usart-%E4%B8%B2%E5%8F%A3%E9%80%9A%E4%BF%A1%E4%B8%8E-printf-%E9%87%8D%E5%AE%9A%E5%90%91/'>
+<meta property='og:site_name' content='CLing'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='STM32F103' /><meta property='article:tag' content='HAL库' /><meta property='article:tag' content='USART' /><meta property='article:tag' content='串口' /><meta property='article:tag' content='printf重定向' /><meta property='article:tag' content='野火' /><meta property='article:published_time' content='2026-09-09T09:20:00&#43;08:00'/><meta property='article:modified_time' content='2026-09-09T09:51:13&#43;08:00'/>
+<meta name="twitter:title" content="STM32 USART — 串口通信与 printf 重定向">
+<meta name="twitter:description" content="野火 EBF STM32F103 Mini HAL 库：配置 USART1 为 115200 8-N-1，重定向 printf 到串口，并通过中断接收实现回显。">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                            height="290" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🏀</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">CLing</a></h1>
+            <h2 class="site-description">你好 欢迎来到我的博客</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>档案</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E6%8A%80%E6%9C%AF%E9%93%BE%E6%8E%A5/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>技术链接</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/excel/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+                
+                <span>Excel教程</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#一功能简介">一、功能简介</a></li>
+    <li><a href="#二硬件准备">二、硬件准备</a></li>
+    <li><a href="#三完整代码带中文注释">三、完整代码（带中文注释）</a>
+      <ol>
+        <li><a href="#1-mainc主程序">1. main.c（主程序）</a></li>
+        <li><a href="#2-bsp_debug_usarth引脚与波特率定义">2. bsp_debug_usart.h（引脚与波特率定义）</a></li>
+        <li><a href="#3-bsp_debug_usartc配置mspprintf-重定向">3. bsp_debug_usart.c（配置、MSP、printf 重定向）</a></li>
+        <li><a href="#4-stm32f1xx_itc中断服务函数节选">4. stm32f1xx_it.c（中断服务函数，节选）</a></li>
+      </ol>
+    </li>
+    <li><a href="#四代码分段讲解">四、代码分段讲解</a>
+      <ol>
+        <li><a href="#1-txrx-为什么要复用">1. TX/RX 为什么要&quot;复用&quot;？</a></li>
+        <li><a href="#2-hal_uart_init-会触发-hal_uart_mspinit">2. <code>HAL_UART_Init</code> 会触发 <code>HAL_UART_MspInit</code></a></li>
+        <li><a href="#3-printf-重定向原理">3. printf 重定向原理</a></li>
+        <li><a href="#4-中断接收-vs-轮询接收">4. 中断接收 vs 轮询接收</a></li>
+      </ol>
+    </li>
+    <li><a href="#五实验现象">五、实验现象</a></li>
+    <li><a href="#六常见问题">六、常见问题</a></li>
+    <li><a href="#七小结">七、小结</a></li>
+    <li><a href="#八拓展应用">八、拓展应用</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/stm32/" >
+                STM32
+            </a>
+        
+            <a href="/categories/usart/" >
+                USART
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/stm32-usart-%E4%B8%B2%E5%8F%A3%E9%80%9A%E4%BF%A1%E4%B8%8E-printf-%E9%87%8D%E5%AE%9A%E5%90%91/">STM32 USART — 串口通信与 printf 重定向</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            野火 EBF STM32F103 Mini HAL 库：配置 USART1 为 115200 8-N-1，重定向 printf 到串口，并通过中断接收实现回显。
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2026-09-09</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 4 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="stm32-usart--串口通信与-printf-重定向">STM32 USART — 串口通信与 printf 重定向
+</h1><blockquote>
+<p><strong>开发板</strong>：野火 EBF STM32F103 Mini<br>
+<strong>固件库</strong>：HAL 库<br>
+<strong>对应例程</strong>：<code>14-USART—串口通信 / USART1回显</code><br>
+<strong>参考源码</strong>：<code>User/main.c</code>、<code>User/usart/bsp_debug_usart.c</code>、<code>User/usart/bsp_debug_usart.h</code>、<code>User/stm32f1xx_it.c</code></p>
+</blockquote>
+<p>串口（UART/USART）是嵌入式开发中<strong>最重要的调试通道</strong>。没有屏幕的开发板，靠串口把运行日志打印到电脑上的串口助手，是定位问题的第一手段。本文带你配好 USART1，并学会用熟悉的 <code>printf</code> 输出信息。</p>
+<hr>
+<h2 id="一功能简介">一、功能简介
+</h2><p>本例把 USART1 配置为 <strong>115200 波特率、8 位数据、无校验、1 位停止位（8-N-1）</strong>，并使能接收中断：</p>
+<ul>
+<li>程序启动后通过 <code>printf</code> 打印欢迎语；</li>
+<li>通过自定义的 <code>Usart_SendString()</code> 发送字符串；</li>
+<li>上位机串口助手发送的数据，会在 <code>USART1_IRQHandler</code> 中进入接收中断，实现&quot;回显&quot;。</li>
+</ul>
+<p>核心知识点：</p>
+<ol>
+<li>USART 外设的 HAL 初始化套路（<code>UART_HandleTypeDef</code>）；</li>
+<li>TX/RX 引脚必须配置为<strong>复用推挽/复用输入</strong>；</li>
+<li>用 <code>fputc</code> 重定向让 <code>printf</code> 走串口；</li>
+<li>中断接收的基本框架。</li>
+</ol>
+<hr>
+<h2 id="二硬件准备">二、硬件准备
+</h2><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">项目</th>
+					<th style="text-align: left">说明</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left">开发板</td>
+					<td style="text-align: left">野火 EBF STM32F103 Mini</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">串口外设</td>
+					<td style="text-align: left">USART1</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">引脚</td>
+					<td style="text-align: left">TX → PA9，RX → PA10（复用功能 AFIO）</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">连接方式</td>
+					<td style="text-align: left">板载/外接 USB-TTL 转串口的 TX、RX 交叉连接</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">上位机</td>
+					<td style="text-align: left">串口调试助手（如 SSCOM、Putty），波特率 115200</td>
+			</tr>
+	</tbody>
+</table></div>
+<hr>
+<h2 id="三完整代码带中文注释">三、完整代码（带中文注释）
+</h2><h3 id="1-mainc主程序">1. main.c（主程序）
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;main.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;stm32f1xx.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;./usart/bsp_debug_usart.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;./led/bsp_led.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">HAL_Init</span><span class="p">();</span>                 <span class="c1">// 初始化 HAL 库（含 SysTick、中断分组）
+</span></span></span><span class="line"><span class="cl">  <span class="cm">/* 配置系统时钟为 72 MHz */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">SystemClock_Config</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 初始化 USART1：115200 8-N-1，中断接收 */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">DEBUG_USART_Config</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 调用 printf（已重定向到串口） */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;欢迎使用野火开发板</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 自定义函数方式发送字符串 */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">Usart_SendString</span><span class="p">(</span> <span class="p">(</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="p">)</span><span class="s">&#34;自定义函数输出：这是一个串口中断接收回显实验</span><span class="se">\n</span><span class="s">&#34;</span> <span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">while</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 主循环空闲，真正的接收工作在中断里完成 */</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="2-bsp_debug_usarth引脚与波特率定义">2. bsp_debug_usart.h（引脚与波特率定义）
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#ifndef __DEBUG_USART_H
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define	__DEBUG_USART_H
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;stm32f1xx.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 串口波特率 */</span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define DEBUG_USART_BAUDRATE      115200
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 引脚定义：USART1，TX=PA9，RX=PA10 */</span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define DEBUG_USART               USART1
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define DEBUG_USART_CLK_ENABLE()  __HAL_RCC_USART1_CLK_ENABLE();
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#define DEBUG_USART_RX_GPIO_PORT  GPIOA
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define DEBUG_USART_RX_GPIO_CLK_ENABLE()  __HAL_RCC_GPIOA_CLK_ENABLE()
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define DEBUG_USART_RX_PIN        GPIO_PIN_10
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#define DEBUG_USART_TX_GPIO_PORT  GPIOA
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define DEBUG_USART_TX_GPIO_CLK_ENABLE()  __HAL_RCC_GPIOA_CLK_ENABLE()
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define DEBUG_USART_TX_PIN        GPIO_PIN_9
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#define DEBUG_USART_IRQ           USART1_IRQn
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">Usart_SendString</span><span class="p">(</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="n">str</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">DEBUG_USART_Config</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">fputc</span><span class="p">(</span><span class="kt">int</span> <span class="n">ch</span><span class="p">,</span> <span class="n">FILE</span> <span class="o">*</span><span class="n">f</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">fgetc</span><span class="p">(</span><span class="n">FILE</span> <span class="o">*</span><span class="n">f</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">extern</span> <span class="n">UART_HandleTypeDef</span> <span class="n">UartHandle</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#endif </span><span class="cm">/* __USART1_H */</span><span class="cp">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="3-bsp_debug_usartc配置mspprintf-重定向">3. bsp_debug_usart.c（配置、MSP、printf 重定向）
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;./usart/bsp_debug_usart.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">UART_HandleTypeDef</span> <span class="n">UartHandle</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm">  * @brief  DEBUG_USART 工作模式配置：115200 8-N-1
+</span></span></span><span class="line"><span class="cl"><span class="cm">  */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">DEBUG_USART_Config</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">UartHandle</span><span class="p">.</span><span class="n">Instance</span>        <span class="o">=</span> <span class="n">DEBUG_USART</span><span class="p">;</span>               <span class="c1">// 选用 USART1
+</span></span></span><span class="line"><span class="cl">  <span class="n">UartHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">BaudRate</span>   <span class="o">=</span> <span class="n">DEBUG_USART_BAUDRATE</span><span class="p">;</span>      <span class="c1">// 波特率 115200
+</span></span></span><span class="line"><span class="cl">  <span class="n">UartHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">WordLength</span> <span class="o">=</span> <span class="n">UART_WORDLENGTH_8B</span><span class="p">;</span>        <span class="c1">// 8 位数据
+</span></span></span><span class="line"><span class="cl">  <span class="n">UartHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">StopBits</span>   <span class="o">=</span> <span class="n">UART_STOPBITS_1</span><span class="p">;</span>           <span class="c1">// 1 位停止位
+</span></span></span><span class="line"><span class="cl">  <span class="n">UartHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">Parity</span>     <span class="o">=</span> <span class="n">UART_PARITY_NONE</span><span class="p">;</span>          <span class="c1">// 无校验
+</span></span></span><span class="line"><span class="cl">  <span class="n">UartHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">HwFlowCtl</span>  <span class="o">=</span> <span class="n">UART_HWCONTROL_NONE</span><span class="p">;</span>       <span class="c1">// 无硬件流控
+</span></span></span><span class="line"><span class="cl">  <span class="n">UartHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">Mode</span>       <span class="o">=</span> <span class="n">UART_MODE_TX_RX</span><span class="p">;</span>           <span class="c1">// 收发全双工
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nf">HAL_UART_Init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">UartHandle</span><span class="p">);</span>     <span class="c1">// 调用 HAL，它会进一步调用 HAL_UART_MspInit
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 使能串口接收中断（RXNE：接收寄存器非空） */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">__HAL_UART_ENABLE_IT</span><span class="p">(</span><span class="o">&amp;</span><span class="n">UartHandle</span><span class="p">,</span> <span class="n">UART_IT_RXNE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm">  * @brief  UART MSP 初始化：配置时钟、GPIO 复用、NVIC 中断
+</span></span></span><span class="line"><span class="cl"><span class="cm">  * @note   这是 HAL 的&#34;弱函数&#34;钩子，HAL_UART_Init 会自动调用它
+</span></span></span><span class="line"><span class="cl"><span class="cm">  */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">HAL_UART_MspInit</span><span class="p">(</span><span class="n">UART_HandleTypeDef</span> <span class="o">*</span><span class="n">huart</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitTypeDef</span>  <span class="n">GPIO_InitStruct</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nf">DEBUG_USART_CLK_ENABLE</span><span class="p">();</span>              <span class="c1">// 开 USART1 时钟
+</span></span></span><span class="line"><span class="cl">  <span class="nf">DEBUG_USART_RX_GPIO_CLK_ENABLE</span><span class="p">();</span>      <span class="c1">// 开 GPIOA 时钟
+</span></span></span><span class="line"><span class="cl">  <span class="nf">DEBUG_USART_TX_GPIO_CLK_ENABLE</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* PA9 配置为复用推挽输出（TX） */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Pin</span>   <span class="o">=</span> <span class="n">DEBUG_USART_TX_PIN</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Mode</span>  <span class="o">=</span> <span class="n">GPIO_MODE_AF_PP</span><span class="p">;</span>        <span class="c1">// 复用推挽
+</span></span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Pull</span>  <span class="o">=</span> <span class="n">GPIO_PULLUP</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Speed</span> <span class="o">=</span> <span class="n">GPIO_SPEED_FREQ_HIGH</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">HAL_GPIO_Init</span><span class="p">(</span><span class="n">DEBUG_USART_TX_GPIO_PORT</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">GPIO_InitStruct</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* PA10 配置为复用输入（RX） */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Pin</span>   <span class="o">=</span> <span class="n">DEBUG_USART_RX_PIN</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Mode</span>  <span class="o">=</span> <span class="n">GPIO_MODE_AF_INPUT</span><span class="p">;</span>      <span class="c1">// 复用输入
+</span></span></span><span class="line"><span class="cl">  <span class="nf">HAL_GPIO_Init</span><span class="p">(</span><span class="n">DEBUG_USART_RX_GPIO_PORT</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">GPIO_InitStruct</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 配置 NVIC：抢占优先级 0，子优先级 1 */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">HAL_NVIC_SetPriority</span><span class="p">(</span><span class="n">DEBUG_USART_IRQ</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">HAL_NVIC_EnableIRQ</span><span class="p">(</span><span class="n">DEBUG_USART_IRQ</span><span class="p">);</span>            <span class="c1">// 使能 USART1 中断通道
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 发送字符串：逐字节调用 HAL_UART_Transmit */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">Usart_SendString</span><span class="p">(</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="n">str</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">do</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">HAL_UART_Transmit</span><span class="p">(</span><span class="o">&amp;</span><span class="n">UartHandle</span><span class="p">,</span> <span class="p">(</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="p">)(</span><span class="n">str</span> <span class="o">+</span> <span class="n">k</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1000</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">k</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span> <span class="k">while</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">str</span> <span class="o">+</span> <span class="n">k</span><span class="p">)</span> <span class="o">!=</span> <span class="sc">&#39;\0&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 重定向 C 库 printf 到串口：链接器会把 printf 的底层输出指向这里 */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">fputc</span><span class="p">(</span><span class="kt">int</span> <span class="n">ch</span><span class="p">,</span> <span class="n">FILE</span> <span class="o">*</span><span class="n">f</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">HAL_UART_Transmit</span><span class="p">(</span><span class="o">&amp;</span><span class="n">UartHandle</span><span class="p">,</span> <span class="p">(</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">ch</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1000</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="p">(</span><span class="n">ch</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 重定向 C 库 scanf/getchar 到串口 */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">fgetc</span><span class="p">(</span><span class="n">FILE</span> <span class="o">*</span><span class="n">f</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">int</span> <span class="n">ch</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">HAL_UART_Receive</span><span class="p">(</span><span class="o">&amp;</span><span class="n">UartHandle</span><span class="p">,</span> <span class="p">(</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">ch</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1000</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="p">(</span><span class="n">ch</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="4-stm32f1xx_itc中断服务函数节选">4. stm32f1xx_it.c（中断服务函数，节选）
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;./usart/bsp_debug_usart.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm">  * @brief  USART1 中断服务函数
+</span></span></span><span class="line"><span class="cl"><span class="cm">  * @note   芯片发生 USART1 中断时，硬件自动跳到这里
+</span></span></span><span class="line"><span class="cl"><span class="cm">  */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">USART1_IRQHandler</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 交给 HAL 的统一中断处理入口，它会判断中断源并调用相应回调 */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">HAL_UART_IRQHandler</span><span class="p">(</span><span class="o">&amp;</span><span class="n">UartHandle</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 下面的回显逻辑通常写在回调 HAL_UART_RxCpltCallback 中：
+</span></span></span><span class="line"><span class="cl"><span class="cm">     在接收完成回调里再次开启接收，即可实现持续回显 */</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="四代码分段讲解">四、代码分段讲解
+</h2><h3 id="1-txrx-为什么要复用">1. TX/RX 为什么要&quot;复用&quot;？
+</h3><p>USART 是<strong>片上外设</strong>，并不是 GPIO 直接产生的信号。要让 PA9/PA10 输出 USART 波形，必须把引脚配置为<strong>复用功能（AF）</strong>，由内部外设&quot;接管&quot;这两个脚。TX 用复用推挽，RX 用复用输入。</p>
+<h3 id="2-hal_uart_init-会触发-hal_uart_mspinit">2. <code>HAL_UART_Init</code> 会触发 <code>HAL_UART_MspInit</code>
+</h3><p>这是 HAL 库的核心设计：<strong>&ldquo;通用配置&quot;和&quot;平台相关配置&quot;分离</strong>。</p>
+<ul>
+<li><code>HAL_UART_Init()</code> 只配置 USART 本身的参数（波特率等）；</li>
+<li>它会回调 <code>HAL_UART_MspInit()</code>，由你在里面开时钟、配 GPIO、配 NVIC。</li>
+</ul>
+<p>好处是同一套 <code>HAL_UART_Init</code> 代码可以跨芯片复用，差异都收敛在 MSP 函数里。</p>
+<h3 id="3-printf-重定向原理">3. printf 重定向原理
+</h3><p>C 语言的 <code>printf</code> 最终会调用底层 <code>_write</code>/<code>fputc</code> 来输出一个字符。我们<strong>重写 <code>fputc</code></strong>，让它把字符通过 <code>HAL_UART_Transmit</code> 发到串口，就能直接 <code>printf(&quot;调试信息=%d\n&quot;, val)</code>。注意工程需勾选 &ldquo;Use MicroLIB&rdquo;（Keil）或开启 <code>-u _printf_float</code>（GCC）以支持浮点打印。</p>
+<h3 id="4-中断接收-vs-轮询接收">4. 中断接收 vs 轮询接收
+</h3><ul>
+<li><code>HAL_UART_Receive()</code> 是<strong>阻塞轮询</strong>，CPU 干等；</li>
+<li>开启 <code>UART_IT_RXNE</code> 中断后，每收到一字节硬件自动进 <code>USART1_IRQHandler</code>，在 <code>HAL_UART_RxCpltCallback</code> 回调里处理，CPU 不阻塞。回显实验就是趁这个时机把收到的字节再发回去。</li>
+</ul>
+<hr>
+<h2 id="五实验现象">五、实验现象
+</h2><ol>
+<li>打开串口助手，选择正确串口号、波特率 115200、<strong>8-N-1、无流控</strong>；</li>
+<li>开发板复位后，串口助手收到两行欢迎语：
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">欢迎使用野火开发板
+</span></span><span class="line"><span class="cl">自定义函数输出：这是一个串口中断接收回显实验
+</span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+<li>在串口助手发送区输入任意字符并发送，开发板会把相同字符回发回来（回显）。</li>
+</ol>
+<hr>
+<h2 id="六常见问题">六、常见问题
+</h2><p><strong>Q1：串口助手收不到任何数据？</strong></p>
+<ul>
+<li>确认波特率、数据位、停止位、校验位与代码一致（本例 115200/8/1/None）；</li>
+<li>确认 TX/RX <strong>交叉连接</strong>（开发板 TX 接转接板 RX，反之亦然）；</li>
+<li>确认系统时钟真的是 72MHz——波特率由外设时钟分频得到，时钟错了波特率就偏了。</li>
+</ul>
+<p><strong>Q2：能编译但 printf 没输出？</strong></p>
+<ul>
+<li>Keil 需勾选 MicroLIB；GCC 需实现 <code>_write</code> 或确认 <code>fputc</code> 被链接；</li>
+<li>确认 <code>__HAL_RCC_USART1_CLK_ENABLE()</code> 与 GPIO 时钟都已开启。</li>
+</ul>
+<p><strong>Q3：中文乱码？</strong></p>
+<ul>
+<li>串口助手编码选 GBK/UTF-8 与发送端一致；字符串里的中文以何种编码存储就选哪种。</li>
+</ul>
+<p><strong>Q4：接收会丢字节？</strong></p>
+<ul>
+<li>中断里处理太慢或没及时重新开启接收会导致溢出。正式项目建议用 <strong>DMA + 空闲中断（IDLE）</strong> 收一帧数据。</li>
+</ul>
+<hr>
+<h2 id="七小结">七、小结
+</h2><ul>
+<li>USART 初始化 = 配句柄参数 + MSP（时钟/GPIO/NVIC）+ 使能中断；</li>
+<li><code>printf</code> 重定向是调试利器，几乎所有 STM32 工程都保留它；</li>
+<li>&ldquo;主循环空闲 + 中断处理&quot;是相比轮询更高效的结构。</li>
+</ul>
+<hr>
+<h2 id="八拓展应用">八、拓展应用
+</h2><ol>
+<li><strong>DMA + 空闲中断接收</strong>：在 <code>HAL_UARTEx_RxEventCallback</code> 中利用 IDLE 中断收完整帧，避免逐字节中断开销（见 <code>15-DMA</code> 章节的串口 DMA 用法）。</li>
+<li><strong>自定义日志分级</strong>：封装 <code>log_info()</code>/<code>log_err()</code> 宏，带文件名、行号、颜色，做成一个小日志库。</li>
+<li><strong>命令行交互</strong>：在串口上实现一个简易 Shell（解析 <code>led on</code>、<code>adc read</code> 等命令），用串口控制整个板子。</li>
+<li><strong>485 通信</strong>：把 USART 接 485 收发器芯片，通过 <code>DE/RE</code> 控制收发方向，做总线式多机通信（参考 <code>USART—485通信</code>）。</li>
+</ol>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/stm32f103/">STM32F103</a>
+        
+            <a href="/tags/hal%E5%BA%93/">HAL库</a>
+        
+            <a href="/tags/usart/">USART</a>
+        
+            <a href="/tags/%E4%B8%B2%E5%8F%A3/">串口</a>
+        
+            <a href="/tags/printf%E9%87%8D%E5%AE%9A%E5%90%91/">Printf重定向</a>
+        
+            <a href="/tags/%E9%87%8E%E7%81%AB/">野火</a>
+        
+    </section>
+
+
+    <section class="article-lastmod">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <span>
+            最后更新于 Sep 09, 2026 09:51 &#43;0800
+        </span>
+    </section></footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/stm32-dma-%E7%9B%B4%E6%8E%A5%E5%AD%98%E5%82%A8%E5%8C%BA%E8%AE%BF%E9%97%AE%E5%AD%98%E5%82%A8%E5%99%A8%E5%88%B0%E5%AD%98%E5%82%A8%E5%99%A8/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">STM32 DMA — 直接存储区访问（存储器到存储器）</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/stm32-tim-%E5%9F%BA%E6%9C%AC%E5%AE%9A%E6%97%B6%E5%99%A8%E5%AE%9A%E6%97%B61ms-%E4%B8%AD%E6%96%AD/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">STM32 TIM — 基本定时器定时（1ms 中断）</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/stm32-i2c-%E8%BD%AF%E4%BB%B6%E6%A8%A1%E6%8B%9F%E8%AF%BB%E5%86%99-eepromat24c02/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">STM32 I2C — 软件模拟读写 EEPROM（AT24C02）</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/stm32-spi-%E8%AF%BB%E5%86%99%E4%B8%B2%E8%A1%8C-flashw25q64/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">STM32 SPI — 读写串行 FLASH（W25Q64）</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/stm32-adc-%E7%8B%AC%E7%AB%8B%E6%A8%A1%E5%BC%8F%E5%8D%95%E9%80%9A%E9%81%93--dma-%E8%BF%9E%E7%BB%AD%E9%87%87%E9%9B%86/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">STM32 ADC — 独立模式单通道 &#43; DMA 连续采集</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="ClingYang/ClingYang.github.io"
+        issue-term="pathname"
+        
+        label="💬comment"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2026 CLing
+    </section>
+    
+    <section class="powerby">
+        
+            世界是你们 <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<style>
+    #TableOfContents > ul, ol {
+        ul, ol {
+            display: none;
+        }
+        .open {
+            display: block;
+        }
+    }
+</style>
+
+<script>
+    function initTocHide() {
+        
+        let toc = document.querySelector(".widget--toc");
+        if (!toc) {
+            return;
+        }
+        
+        window.addEventListener('scroll', function() {
+            
+            let currentLi = document.querySelector(".active-class");
+            if (!currentLi) {
+                return
+            }
+            
+            let elementsByClassName = document.querySelectorAll(".open");
+            if (elementsByClassName.length > 0) {
+                elementsByClassName.forEach((ul) => {
+                    ul.classList.remove("open")
+                })
+            }
+            
+            if (currentLi.children.length > 1) {
+                currentLi.children[1].classList.add("open")
+            }
+            
+            let ul = currentLi.parentElement;
+            do {
+                ul.classList.add("open");
+                ul = ul.parentElement.parentElement
+            } while (ul !== undefined && (ul.localName === 'ul' || ul.localName === 'ol'))
+        });
+    }
+    initTocHide()
+</script>
+
+    </body>
+</html>

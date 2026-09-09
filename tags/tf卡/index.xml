@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>TF卡 on CLing</title>
+        <link>https://clingyang.github.io/tags/tf%E5%8D%A1/</link>
+        <description>Recent content in TF卡 on CLing</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en-us</language>
+        <copyright>CLing</copyright>
+        <lastBuildDate>Wed, 09 Sep 2026 09:51:13 +0800</lastBuildDate><atom:link href="https://clingyang.github.io/tags/tf%E5%8D%A1/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>HC32 SDIOC — SD 卡接口</title>
+        <link>https://clingyang.github.io/post/mcu_hc32/sdioc/</link>
+        <pubDate>Wed, 09 Sep 2026 09:00:00 +0800</pubDate>
+        
+        <guid>https://clingyang.github.io/post/mcu_hc32/sdioc/</guid>
+        <description>&lt;h1 id=&#34;sdioc--给单片机插一张存储卡&#34;&gt;SDIOC — 给单片机插一张存储卡
+&lt;/h1&gt;&lt;h2 id=&#34;这一章讲什么&#34;&gt;这一章讲什么
+&lt;/h2&gt;&lt;p&gt;上一章的 QSPI Flash 是&lt;strong&gt;焊死在板子上&lt;/strong&gt;的，容量 8MB 左右。如果你要存&lt;strong&gt;几个 GB 的数据&lt;/strong&gt;，或者希望&lt;strong&gt;把存储介质拔下来插到电脑上看&lt;/strong&gt;，那就该用 &lt;strong&gt;SD 卡 / TF 卡&lt;/strong&gt;了。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;SDIOC&lt;/strong&gt;（SD Input/Output Controller）就是 HC32F460 里专门驱动 SD 卡的硬件控制器。&lt;/p&gt;
+&lt;p&gt;SD 卡的好处很直白：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;容量大&lt;/strong&gt;：几 GB 到几十 GB，随便买。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;可插拔&lt;/strong&gt;：数据存好了，卡拔下来插电脑读，超方便。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;有文件系统&lt;/strong&gt;：配合 FatFS 就能直接读写 &lt;code&gt;.txt&lt;/code&gt;、&lt;code&gt;.csv&lt;/code&gt;、&lt;code&gt;.wav&lt;/code&gt; 文件，电脑也认。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;代价是：SD 卡的协议比 SPI Flash 复杂得多（初始化要走一整套握手流程），好在 ddl 库把这些都封装好了。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;sdioc-的引脚&#34;&gt;SDIOC 的引脚
+&lt;/h2&gt;&lt;p&gt;SD 卡通信需要 &lt;strong&gt;CLK + CMD + 数据线&lt;/strong&gt; 三类信号：&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;信号&lt;/th&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;引脚&lt;/th&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;作用&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;CK&lt;/strong&gt;（时钟）&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;PB15&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;主机给卡的时钟&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;CMD&lt;/strong&gt;（命令）&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;PA6&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;双向，发命令、收响应&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;D0&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;PB4&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;数据线 0&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;D1&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;PA8&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;数据线 1&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;D2&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;PA9&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;数据线 2&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;D3&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;PB5&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;数据线 3&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;CD&lt;/strong&gt;（检测）&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;PH2&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;检测卡有没有插入（可选）&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;引脚复用统一用 &lt;code&gt;Func_Sdio&lt;/code&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nf&#34;&gt;PORT_SetFunc&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;PortB&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Pin15&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Func_Sdio&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Disable&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;   &lt;span class=&#34;c1&#34;&gt;// 每根线都这样配
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;HC32F460 有两个 SDIOC 单元：&lt;code&gt;M4_SDIOC1&lt;/code&gt;、&lt;code&gt;M4_SDIOC2&lt;/code&gt;。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;总线宽度1-线还是-4-线&#34;&gt;总线宽度：1 线还是 4 线
+&lt;/h2&gt;&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;总线宽度&lt;/th&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;ddl 写法&lt;/th&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;数据线&lt;/th&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;速度&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;1 位&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;SdiocBusWidth1Bit&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;只用 D0&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;慢，但省引脚&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;4 位&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;SdiocBusWidth4Bit&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;D0~D3 一起用&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;快 4 倍，推荐&lt;/strong&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;和 QSPI 一个道理——多开几条车道就快几倍。4 线模式是标准做法。&lt;/p&gt;
+&lt;h2 id=&#34;时钟频率与速度模式&#34;&gt;时钟频率与速度模式
+&lt;/h2&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;SdiocClk50M&lt;/span&gt;              &lt;span class=&#34;c1&#34;&gt;// 50MHz 时钟
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;SdiocHighSpeedMode&lt;/span&gt;       &lt;span class=&#34;c1&#34;&gt;// 高速模式
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;模式&lt;/th&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;最高时钟&lt;/th&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;理论带宽（4 线）&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;普通速度 &lt;code&gt;SdiocNormalSpeedMode&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;25MHz&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;~12.5 MB/s&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;高速&lt;/strong&gt; &lt;code&gt;SdiocHighSpeedMode&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;50MHz&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;~25 MB/s&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;高速 + 4 线是性能最优组合，本章示例用的就是这个。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;实际速度还受卡本身速度等级（Class 10、U1、U3）限制。买卡别买山寨的，杂牌卡不仅慢，还容易初始化失败。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;核心概念sd-卡按扇区读写&#34;&gt;核心概念：SD 卡按「扇区」读写
+&lt;/h2&gt;&lt;p&gt;这是 SD 卡最重要的概念，理解了它才能写对代码。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;SD 卡的最小读写单位是一个「块」（Block），也叫「扇区」（Sector），固定 512 字节。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;你&lt;strong&gt;不能&lt;/strong&gt;只读一个字节，也&lt;strong&gt;不能&lt;/strong&gt;只写 100 字节。所有操作都是「从第 N 个扇区开始，读/写 M 个扇区」。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;   SD 卡内部（就是一长串 512 字节的格子）
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;   ┌────────┬────────┬────────┬────────┬─────
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;   │ 扇区0  │ 扇区1  │ 扇区2  │ 扇区3  │ ...
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;   │ 512B   │ 512B   │ 512B   │ 512B   │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;   └────────┴────────┴────────┴────────┴─────
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;     ↑
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;     地址 = 扇区号（不是字节地址！）
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;所以数据缓冲区的大小必须是 &lt;strong&gt;512 的整数倍&lt;/strong&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;static&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;uint32_t&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;au32WriteBlocks&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;512&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;];&lt;/span&gt;   &lt;span class=&#34;c1&#34;&gt;// 512 个 uint32_t = 2048 字节 = 4 个扇区
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#define SD_SECTOR_COUNT   (4u)          &lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;// 正好对应 4 个扇区
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;这个对应关系必须严格匹配&lt;/strong&gt;，不匹配就会读写越界，是新手最容易出错的地方。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;对比一下三种存储器的操作单位，很好记：&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;存储器&lt;/th&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;读单位&lt;/th&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;写单位&lt;/th&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;擦除单位&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;SPI Flash (QSPI)&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;任意字节&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;≤256B 页&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;4KB 扇区&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;SD 卡&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;512B 扇区&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;512B 扇区&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;512B 扇区&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;内部 EEPROM&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;任意字节&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;任意字节&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;—&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;sdcard-驱动库接口&#34;&gt;SDCARD 驱动库接口
+&lt;/h2&gt;&lt;p&gt;ddl 库在 SDIOC 之上封装了一层 &lt;code&gt;SDCARD_xxx&lt;/code&gt; 函数（在 &lt;code&gt;sd_card.h&lt;/code&gt; 里），用起来很简单：&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;函数&lt;/th&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;作用&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;SDCARD_Init(&amp;amp;handle, &amp;amp;cfg)&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;初始化 SD 卡（内部完成一整套上电握手、识别容量）&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;SDCARD_ReadBlocks(&amp;amp;handle, 起始扇区, 扇区数, 缓冲区, 超时)&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;读多个扇区&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;SDCARD_WriteBlocks(&amp;amp;handle, 起始扇区, 扇区数, 缓冲区, 超时)&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;写多个扇区&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;SDCARD_Erase(&amp;amp;handle, 起始扇区, 扇区数, 超时)&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;擦除多个扇区&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;注意每个函数最后都有个&lt;strong&gt;超时参数&lt;/strong&gt;（单位是内部循环次数/毫秒量级）。SD 卡操作可能很慢（尤其擦除），超时给太小会误判失败。示例里擦除给 20000、读写给 2000~20000。&lt;/p&gt;
+&lt;p&gt;初始化用两个结构体：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;stc_sd_handle_t&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;stcSdhandle&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;                 &lt;span class=&#34;c1&#34;&gt;// 卡句柄，保存卡的信息和状态
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;stcSdhandle&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;SDIOCx&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;M4_SDIOC1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;              &lt;span class=&#34;c1&#34;&gt;// 指定用哪个 SDIOC 单元
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;stc_sdcard_init_t&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;stcCardInitCfg&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;SdiocBusWidth4Bit&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;        &lt;span class=&#34;c1&#34;&gt;// 4 线
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;SdiocClk50M&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;              &lt;span class=&#34;c1&#34;&gt;// 50MHz
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;SdiocHighSpeedMode&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;       &lt;span class=&#34;c1&#34;&gt;// 高速
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nb&#34;&gt;NULL&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;                     &lt;span class=&#34;c1&#34;&gt;// DMA 配置（NULL = 不用 DMA，走轮询）
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;};&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nf&#34;&gt;SDCARD_Init&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;stcSdhandle&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;stcCardInitCfg&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;最后那个 &lt;code&gt;NULL&lt;/code&gt; 就是 DMA 配置。传 NULL 表示&lt;strong&gt;用 CPU 轮询搬数据&lt;/strong&gt;；传 DMA 配置结构体就变成 &lt;strong&gt;DMA 传输&lt;/strong&gt;（CPU 不参与搬运，效率高得多，适合大数据量）。SDK 里有对应的 DMA 版本示例。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;本章示例&#34;&gt;本章示例
+&lt;/h2&gt;&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;示例&lt;/th&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;学到什么&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;../sdioc_read_write/&#34; &gt;SD 卡读写：擦除、写入、读回校验&lt;/a&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;SDIOC 引脚配置、4 线高速初始化、扇区读写、擦除后数据验证、&lt;code&gt;memcmp&lt;/code&gt; 校验&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;小结&#34;&gt;小结
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;SDIOC 是 HC32F460 驱动 SD/TF 卡的硬件控制器，有两个单元。&lt;/li&gt;
+&lt;li&gt;引脚：&lt;strong&gt;CK + CMD + D0~D3&lt;/strong&gt;（4 线），复用为 &lt;code&gt;Func_Sdio&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;4 线 + 高速（50MHz）&lt;/strong&gt; 是性能最优组合。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;SD 卡按 512 字节扇区读写&lt;/strong&gt;，缓冲区大小必须是 512 的整数倍，且和扇区数严格对应。&lt;/li&gt;
+&lt;li&gt;用 &lt;code&gt;SDCARD_Init&lt;/code&gt; / &lt;code&gt;ReadBlocks&lt;/code&gt; / &lt;code&gt;WriteBlocks&lt;/code&gt; / &lt;code&gt;Erase&lt;/code&gt; 四个函数即可，每个都带超时参数。&lt;/li&gt;
+&lt;li&gt;传 &lt;code&gt;NULL&lt;/code&gt; 走轮询，传 DMA 配置走 DMA（大数据量首选）。&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

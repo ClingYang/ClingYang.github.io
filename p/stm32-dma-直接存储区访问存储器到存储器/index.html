@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="野火 EBF STM32F103 Mini HAL 库：用 DMA1 把一段常量数组自动搬运到内存数组，演示\"不占用 CPU\"的数据传输本质。">
+<title>STM32 DMA — 直接存储区访问（存储器到存储器）</title>
+
+<link rel='canonical' href='https://clingyang.github.io/p/stm32-dma-%E7%9B%B4%E6%8E%A5%E5%AD%98%E5%82%A8%E5%8C%BA%E8%AE%BF%E9%97%AE%E5%AD%98%E5%82%A8%E5%99%A8%E5%88%B0%E5%AD%98%E5%82%A8%E5%99%A8/'>
+
+<link rel="stylesheet" href="/scss/style.min.e14f3ba93baae65b2aef2339f32b6f25d7a0184785ebf4f6bd7d3376ae5dc2d4.css"><meta property='og:title' content="STM32 DMA — 直接存储区访问（存储器到存储器）">
+<meta property='og:description' content="野火 EBF STM32F103 Mini HAL 库：用 DMA1 把一段常量数组自动搬运到内存数组，演示\"不占用 CPU\"的数据传输本质。">
+<meta property='og:url' content='https://clingyang.github.io/p/stm32-dma-%E7%9B%B4%E6%8E%A5%E5%AD%98%E5%82%A8%E5%8C%BA%E8%AE%BF%E9%97%AE%E5%AD%98%E5%82%A8%E5%99%A8%E5%88%B0%E5%AD%98%E5%82%A8%E5%99%A8/'>
+<meta property='og:site_name' content='CLing'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='STM32F103' /><meta property='article:tag' content='HAL库' /><meta property='article:tag' content='DMA' /><meta property='article:tag' content='存储器到存储器' /><meta property='article:tag' content='存储器到外设' /><meta property='article:tag' content='野火' /><meta property='article:published_time' content='2026-09-09T10:10:00&#43;08:00'/><meta property='article:modified_time' content='2026-09-09T09:51:13&#43;08:00'/>
+<meta name="twitter:title" content="STM32 DMA — 直接存储区访问（存储器到存储器）">
+<meta name="twitter:description" content="野火 EBF STM32F103 Mini HAL 库：用 DMA1 把一段常量数组自动搬运到内存数组，演示\"不占用 CPU\"的数据传输本质。">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                            height="290" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🏀</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">CLing</a></h1>
+            <h2 class="site-description">你好 欢迎来到我的博客</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>档案</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E6%8A%80%E6%9C%AF%E9%93%BE%E6%8E%A5/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>技术链接</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/excel/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+                
+                <span>Excel教程</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#一功能简介">一、功能简介</a></li>
+    <li><a href="#二硬件准备">二、硬件准备</a></li>
+    <li><a href="#三完整代码带中文注释">三、完整代码（带中文注释）</a>
+      <ol>
+        <li><a href="#1-maincm2m-搬运--校验">1. main.c（M2M 搬运 + 校验）</a></li>
+      </ol>
+    </li>
+    <li><a href="#四代码分段讲解">四、代码分段讲解</a>
+      <ol>
+        <li><a href="#1-dma-到底省了什么">1. DMA 到底省了什么？</a></li>
+        <li><a href="#2-四个关键配置">2. 四个关键配置</a></li>
+        <li><a href="#3-通道与触发源">3. 通道与触发源</a></li>
+        <li><a href="#4-传输完成怎么知道">4. 传输完成怎么知道？</a></li>
+        <li><a href="#5-补充存储器到外设如-usart-发大报">5. 补充：存储器到外设（如 USART 发大报）</a></li>
+      </ol>
+    </li>
+    <li><a href="#五实验现象">五、实验现象</a></li>
+    <li><a href="#六常见问题">六、常见问题</a></li>
+    <li><a href="#七小结">七、小结</a></li>
+    <li><a href="#八拓展应用">八、拓展应用</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/stm32/" >
+                STM32
+            </a>
+        
+            <a href="/categories/dma/" >
+                DMA
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/stm32-dma-%E7%9B%B4%E6%8E%A5%E5%AD%98%E5%82%A8%E5%8C%BA%E8%AE%BF%E9%97%AE%E5%AD%98%E5%82%A8%E5%99%A8%E5%88%B0%E5%AD%98%E5%82%A8%E5%99%A8/">STM32 DMA — 直接存储区访问（存储器到存储器）</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            野火 EBF STM32F103 Mini HAL 库：用 DMA1 把一段常量数组自动搬运到内存数组，演示&#34;不占用 CPU&#34;的数据传输本质。
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2026-09-09</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 3 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="stm32-dma--直接存储区访问存储器到存储器">STM32 DMA — 直接存储区访问（存储器到存储器）
+</h1><blockquote>
+<p><strong>开发板</strong>：野火 EBF STM32F103 Mini<br>
+<strong>固件库</strong>：HAL 库<br>
+<strong>对应例程</strong>：<code>15-DMA—直接存储区访问 / DMA—存储器到存储器模式</code>（并补充&quot;存储器到外设&quot;思路）<br>
+<strong>参考源码</strong>：<code>User/main.c</code>（存储器到存储器）</p>
+</blockquote>
+<p>DMA（Direct Memory Access，直接存储器访问）允许<strong>外设与内存、内存与内存之间直接搬运数据</strong>，全程无需 CPU 参与。CPU 只需&quot;下发搬运指令&quot;，搬运由 DMA 控制器在后台完成，大幅解放内核。本文从最直观的&quot;内存→内存&quot;搬运入手，再延伸到&quot;内存→外设&quot;。</p>
+<hr>
+<h2 id="一功能简介">一、功能简介
+</h2><p>例程准备两个数组：</p>
+<ul>
+<li>源数组 <code>aSRC_Const_Buffer</code>：32 个 32 位常量（已初始化）；</li>
+<li>目标数组 <code>aDST_Buffer</code>：32 个 32 位空位。</li>
+</ul>
+<p>用 DMA 把源数组<strong>整块搬</strong>到目标数组，搬运完成后比较两数组是否一致：一致则点亮 LED2（成功），否则点亮 LED1（失败）。</p>
+<p>核心知识点：</p>
+<ol>
+<li>DMA 的方向、地址递增、数据宽度、传输模式、优先级；</li>
+<li>STM32F1 的 DMA 通道与触发源（存储器到存储器必须用 DMA1）；</li>
+<li>用标志位轮询传输完成。</li>
+</ol>
+<hr>
+<h2 id="二硬件准备">二、硬件准备
+</h2><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">项目</th>
+					<th style="text-align: left">说明</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left">开发板</td>
+					<td style="text-align: left">野火 EBF STM32F103 Mini</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">DMA 控制器</td>
+					<td style="text-align: left">DMA1（F103 仅 1 个 DMA 控制器，7 个通道）</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">本例通道</td>
+					<td style="text-align: left">DMA1_Channel6（软件触发，M2M 模式专用）</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">指示</td>
+					<td style="text-align: left">LED1 → PC2（失败）、LED2 → PC3（成功）</td>
+			</tr>
+	</tbody>
+</table></div>
+<blockquote>
+<p><strong>存储器到存储器（M2M）模式</strong>是 DMA 的特例：它不依赖外设硬件请求，而是<strong>软件触发</strong>一次就自动连续搬完，非常适合做 memcpy 加速。</p>
+</blockquote>
+<hr>
+<h2 id="三完整代码带中文注释">三、完整代码（带中文注释）
+</h2><h3 id="1-maincm2m-搬运--校验">1. main.c（M2M 搬运 + 校验）
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span><span class="lnt">80
+</span><span class="lnt">81
+</span><span class="lnt">82
+</span><span class="lnt">83
+</span><span class="lnt">84
+</span><span class="lnt">85
+</span><span class="lnt">86
+</span><span class="lnt">87
+</span><span class="lnt">88
+</span><span class="lnt">89
+</span><span class="lnt">90
+</span><span class="lnt">91
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;main.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;stm32f1xx.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;./led/bsp_led.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 存储器到存储器传输必须使用 DMA1 */</span>
+</span></span><span class="line"><span class="cl"><span class="n">DMA_HandleTypeDef</span> <span class="n">DMA_Handle</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#define DMA_STREAM          DMA1_Channel6
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define DMA_STREAM_CLOCK()  __HAL_RCC_DMA1_CLK_ENABLE();
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define BUFFER_SIZE         32
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 源数据：常量数组（放在 Flash，DMA 把它读进 SRAM） */</span>
+</span></span><span class="line"><span class="cl"><span class="k">const</span> <span class="kt">uint32_t</span> <span class="n">aSRC_Const_Buffer</span><span class="p">[</span><span class="n">BUFFER_SIZE</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="mh">0x01020304</span><span class="p">,</span><span class="mh">0x05060708</span><span class="p">,</span><span class="mh">0x090A0B0C</span><span class="p">,</span><span class="mh">0x0D0E0F10</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="mh">0x11121314</span><span class="p">,</span><span class="mh">0x15161718</span><span class="p">,</span><span class="mh">0x191A1B1C</span><span class="p">,</span><span class="mh">0x1D1E1F20</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="mh">0x21222324</span><span class="p">,</span><span class="mh">0x25262728</span><span class="p">,</span><span class="mh">0x292A2B2C</span><span class="p">,</span><span class="mh">0x2D2E2F30</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="mh">0x31323334</span><span class="p">,</span><span class="mh">0x35363738</span><span class="p">,</span><span class="mh">0x393A3B3C</span><span class="p">,</span><span class="mh">0x3D3E3F40</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="mh">0x41424344</span><span class="p">,</span><span class="mh">0x45464748</span><span class="p">,</span><span class="mh">0x494A4B4C</span><span class="p">,</span><span class="mh">0x4D4E4F50</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="mh">0x51525354</span><span class="p">,</span><span class="mh">0x55565758</span><span class="p">,</span><span class="mh">0x595A5B5C</span><span class="p">,</span><span class="mh">0x5D5E5F60</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="mh">0x61626364</span><span class="p">,</span><span class="mh">0x65666768</span><span class="p">,</span><span class="mh">0x696A6B6C</span><span class="p">,</span><span class="mh">0x6D6E6F70</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="mh">0x71727374</span><span class="p">,</span><span class="mh">0x75767778</span><span class="p">,</span><span class="mh">0x797A7B7C</span><span class="p">,</span><span class="mh">0x7D7E7F80</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 目标数组：等待被填充 */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">uint32_t</span> <span class="n">aDST_Buffer</span><span class="p">[</span><span class="n">BUFFER_SIZE</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">DMA_Config</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="nf">Buffercmp</span><span class="p">(</span><span class="k">const</span> <span class="kt">uint32_t</span><span class="o">*</span> <span class="n">pBuffer</span><span class="p">,</span> <span class="kt">uint32_t</span><span class="o">*</span> <span class="n">pBuffer1</span><span class="p">,</span> <span class="kt">uint16_t</span> <span class="n">BufferLength</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">uint8_t</span> <span class="n">TransferStatus</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">SystemClock_Config</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">LED_GPIO_Config</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nf">DMA_Config</span><span class="p">();</span>    <span class="c1">// 配置并启动 DMA 搬运
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 轮询等待 DMA 传输完成标志（TCIF6） */</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span><span class="p">(</span><span class="nf">__HAL_DMA_GET_FLAG</span><span class="p">(</span><span class="o">&amp;</span><span class="n">DMA_Handle</span><span class="p">,</span> <span class="n">DMA_FLAG_TC6</span><span class="p">)</span> <span class="o">==</span> <span class="n">RESET</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 比较源与目标是否一致 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">TransferStatus</span> <span class="o">=</span> <span class="nf">Buffercmp</span><span class="p">(</span><span class="n">aSRC_Const_Buffer</span><span class="p">,</span> <span class="n">aDST_Buffer</span><span class="p">,</span> <span class="n">BUFFER_SIZE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">TransferStatus</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">LED1_ON</span><span class="p">;</span>       <span class="c1">// 不一致 =&gt; 失败灯
+</span></span></span><span class="line"><span class="cl">  <span class="k">else</span>
+</span></span><span class="line"><span class="cl">    <span class="n">LED2_ON</span><span class="p">;</span>       <span class="c1">// 一致 =&gt; 成功灯
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* DMA 配置：存储器 -&gt; 存储器 */</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">DMA_Config</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">HAL_StatusTypeDef</span> <span class="n">DMA_status</span> <span class="o">=</span> <span class="n">HAL_ERROR</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">DMA_STREAM_CLOCK</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">DMA_Handle</span><span class="p">.</span><span class="n">Instance</span>                 <span class="o">=</span> <span class="n">DMA_STREAM</span><span class="p">;</span>                 <span class="c1">// DMA1_Channel6
+</span></span></span><span class="line"><span class="cl">  <span class="n">DMA_Handle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">Direction</span>          <span class="o">=</span> <span class="n">DMA_MEMORY_TO_MEMORY</span><span class="p">;</span>        <span class="c1">// 存储器到存储器
+</span></span></span><span class="line"><span class="cl">  <span class="n">DMA_Handle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">PeriphInc</span>          <span class="o">=</span> <span class="n">DMA_PINC_ENABLE</span><span class="p">;</span>             <span class="c1">// 外设(源)地址递增
+</span></span></span><span class="line"><span class="cl">  <span class="n">DMA_Handle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">MemInc</span>             <span class="o">=</span> <span class="n">DMA_MINC_ENABLE</span><span class="p">;</span>             <span class="c1">// 内存(目标)地址递增
+</span></span></span><span class="line"><span class="cl">  <span class="n">DMA_Handle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">PeriphDataAlignment</span><span class="o">=</span> <span class="n">DMA_PDATAALIGN_WORD</span><span class="p">;</span>         <span class="c1">// 源数据 32 位
+</span></span></span><span class="line"><span class="cl">  <span class="n">DMA_Handle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">MemDataAlignment</span>   <span class="o">=</span> <span class="n">DMA_MDATAALIGN_WORD</span><span class="p">;</span>         <span class="c1">// 目标数据 32 位
+</span></span></span><span class="line"><span class="cl">  <span class="n">DMA_Handle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">Mode</span>               <span class="o">=</span> <span class="n">DMA_NORMAL</span><span class="p">;</span>                 <span class="c1">// 普通模式（一次）
+</span></span></span><span class="line"><span class="cl">  <span class="n">DMA_Handle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">Priority</span>           <span class="o">=</span> <span class="n">DMA_PRIORITY_MEDIUM</span><span class="p">;</span>         <span class="c1">// 中等优先级
+</span></span></span><span class="line"><span class="cl">  <span class="nf">HAL_DMA_Init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">DMA_Handle</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 启动传输：源地址 -&gt; 目标地址，共 BUFFER_SIZE 个数据项 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">DMA_status</span> <span class="o">=</span> <span class="nf">HAL_DMA_Start</span><span class="p">(</span><span class="o">&amp;</span><span class="n">DMA_Handle</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                             <span class="p">(</span><span class="kt">uint32_t</span><span class="p">)</span><span class="n">aSRC_Const_Buffer</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                             <span class="p">(</span><span class="kt">uint32_t</span><span class="p">)</span><span class="n">aDST_Buffer</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                             <span class="n">BUFFER_SIZE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">DMA_status</span> <span class="o">!=</span> <span class="n">HAL_OK</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>   <span class="c1">// 启动失败，闪烁报警
+</span></span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">LED1_ON</span><span class="p">;</span> <span class="nf">Delay</span><span class="p">(</span><span class="mh">0xFFFFFF</span><span class="p">);</span> <span class="n">LED1_TOGGLE</span><span class="p">;</span> <span class="nf">Delay</span><span class="p">(</span><span class="mh">0xFFFFFF</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 比较两个数组是否完全一致 */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="nf">Buffercmp</span><span class="p">(</span><span class="k">const</span> <span class="kt">uint32_t</span><span class="o">*</span> <span class="n">pBuffer</span><span class="p">,</span> <span class="kt">uint32_t</span><span class="o">*</span> <span class="n">pBuffer1</span><span class="p">,</span> <span class="kt">uint16_t</span> <span class="n">BufferLength</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span><span class="p">(</span><span class="n">BufferLength</span><span class="o">--</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span><span class="p">(</span><span class="o">*</span><span class="n">pBuffer</span> <span class="o">!=</span> <span class="o">*</span><span class="n">pBuffer1</span><span class="p">)</span> <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>   <span class="c1">// 有差异立即返回 0
+</span></span></span><span class="line"><span class="cl">    <span class="n">pBuffer</span><span class="o">++</span><span class="p">;</span>   <span class="n">pBuffer1</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>   <span class="c1">// 全部相等返回 1
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="四代码分段讲解">四、代码分段讲解
+</h2><h3 id="1-dma-到底省了什么">1. DMA 到底省了什么？
+</h3><p>普通 <code>for</code> 循环拷贝数组，每个字节都要 CPU 取指、读源、写目标——CPU 全程被占。DMA 接管总线后，CPU 在 <code>HAL_DMA_Start</code> 之后就可以去干别的事（本例只是 <code>while</code> 等标志，实际项目里可以并行运算）。对<strong>大块数据 / 高速外设</strong>（ADC、SPI、USART、LCD）而言，DMA 是性能关键。</p>
+<h3 id="2-四个关键配置">2. 四个关键配置
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">字段</th>
+					<th style="text-align: left">本例</th>
+					<th style="text-align: left">含义</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left"><code>Direction</code></td>
+					<td style="text-align: left"><code>DMA_MEMORY_TO_MEMORY</code></td>
+					<td style="text-align: left">存储器→存储器（软件触发）</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><code>PeriphInc</code> / <code>MemInc</code></td>
+					<td style="text-align: left"><code>ENABLE</code></td>
+					<td style="text-align: left">源、目标地址都递增（否则会反复写同一格）</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><code>PeriphDataAlignment</code> / <code>MemDataAlignment</code></td>
+					<td style="text-align: left"><code>WORD</code>(32位)</td>
+					<td style="text-align: left">数据宽度要一致，避免错位</td>
+			</tr>
+			<tr>
+					<td style="text-align: left"><code>Mode</code></td>
+					<td style="text-align: left"><code>DMA_NORMAL</code></td>
+					<td style="text-align: left">普通模式：搬完一次就停（对比循环 <code>DMA_CIRCULAR</code>）</td>
+			</tr>
+	</tbody>
+</table></div>
+<blockquote>
+<p>注意：这里&quot;Periph&quot;一方是源数组，在 M2M 模式下 HAL 把源/目标统称为外设/内存，只需保证两者都递增、宽度相同即可。</p>
+</blockquote>
+<h3 id="3-通道与触发源">3. 通道与触发源
+</h3><p>F103 的 DMA1 有 7 个通道，每个通道固定对应某些外设请求（如 ADC1→CH1、SPI1→CH3、USART1_TX→CH4）。<strong>只有 DMA1 支持 M2M 软件触发</strong>，所以本例用 <code>DMA1_Channel6</code>。换成&quot;内存→USART&quot;时，就要选 USART 对应的专属通道，并由外设硬件触发。</p>
+<h3 id="4-传输完成怎么知道">4. 传输完成怎么知道？
+</h3><p><code>__HAL_DMA_GET_FLAG(&amp;DMA_Handle, DMA_FLAG_TC6)</code> 读取<strong>传输完成标志（TCIF）</strong>。本例用轮询等待；实际中更常用<strong>传输完成中断</strong>（<code>DMA_IT_TC</code>），在 <code>HAL_DMA_XferCpltCallback</code> 里接着处理，彻底不阻塞 CPU。</p>
+<h3 id="5-补充存储器到外设如-usart-发大报">5. 补充：存储器到外设（如 USART 发大报）
+</h3><p>野火例程还有&quot;DMA—存储器到外设模式&quot;：把 <code>Direction</code> 设为 <code>DMA_MEMORY_TO_PERIPH</code>，把外设地址填成 <code>&amp;USART1-&gt;DR</code>，源填发送缓冲区，再 <code>HAL_UART_Transmit_DMA()</code>。这样 CPU 一次性把几百字节交给 DMA，串口慢慢发、CPU 同时翻转 LED——直观展示了&quot;DMA 让 CPU 腾出手&quot;。</p>
+<hr>
+<h2 id="五实验现象">五、实验现象
+</h2><ol>
+<li>下载程序，DMA 把 32 个常量从源数组搬进目标数组；</li>
+<li>比较两数组完全一致 → <strong>LED2 点亮</strong>（成功灯）；</li>
+<li>若把源/目标数据宽度设错（比如一方 WORD 一方 BYTE），拷贝错位导致比较失败 → LED1 点亮。</li>
+</ol>
+<hr>
+<h2 id="六常见问题">六、常见问题
+</h2><p><strong>Q1：传输后数据错位/不一致？</strong></p>
+<ul>
+<li>检查源和目标<strong>数据宽度是否一致</strong>（都 WORD 或都 HALFWORD）；</li>
+<li>检查 <code>PeriphInc</code>/<code>MemInc</code> 是否都 <code>ENABLE</code>（单地址重复写会出错）。</li>
+</ul>
+<p><strong>Q2：DMA 一直不完成（标志位不来）？</strong></p>
+<ul>
+<li>M2M 模式确认用的是 DMA1；</li>
+<li>确认 <code>HAL_DMA_Start</code> 返回的 <code>DMA_status == HAL_OK</code>，且传输长度不为 0。</li>
+</ul>
+<p><strong>Q3：为什么我的外设 DMA 没动？</strong></p>
+<ul>
+<li>外设 DMA 需要<strong>对应的专属通道</strong>和<strong>外设硬件触发</strong>，不能随便选通道；</li>
+<li>外设自身要先使能（如 USART 要先 <code>HAL_UART_Init</code>）。</li>
+</ul>
+<p><strong>Q4：NORMAL 和 CIRCULAR 怎么选？</strong></p>
+<ul>
+<li>单次传输（如发一帧数据）用 <code>NORMAL</code>；</li>
+<li>连续流（如 ADC 持续采集、DAC 持续输出波形）用 <code>CIRCULAR</code>，搬完自动从头再来。</li>
+</ul>
+<hr>
+<h2 id="七小结">七、小结
+</h2><ul>
+<li>DMA 是&quot;数据搬运工&quot;，让 CPU 从繁琐的拷数据中解放；</li>
+<li>M2M 配置要点：<strong>方向 M2M、双端递增、宽度一致、软件触发</strong>；</li>
+<li>掌握 DMA 后，ADC、SPI、USART、DAC 等高速外设才能真正发挥性能。</li>
+</ul>
+<hr>
+<h2 id="八拓展应用">八、拓展应用
+</h2><ol>
+<li><strong>大数组 memcpy 加速</strong>：把 <code>for</code> 循环拷贝换成 DMA M2M，批量搬运 SRAM/Flash 数据更快。</li>
+<li><strong>ADC + DMA 连续采样</strong>：如本博客 ADC 章节，DMA 把转换结果循环搬进数组，零 CPU 占用。</li>
+<li><strong>USART/SPI 大块发送</strong>：用 <code>HAL_UART_Transmit_DMA</code> / <code>HAL_SPI_Transmit_DMA</code>，发送几百 KB 时 CPU 仍可并行处理。</li>
+<li><strong>双缓冲（Double Buffer）</strong>：配合 DMA 半传输中断，实现&quot;一边 DMA 填半区、CPU 处理另半区&quot;的无缝流水线，适合音频、图像流。</li>
+</ol>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/stm32f103/">STM32F103</a>
+        
+            <a href="/tags/hal%E5%BA%93/">HAL库</a>
+        
+            <a href="/tags/dma/">Dma</a>
+        
+            <a href="/tags/%E5%AD%98%E5%82%A8%E5%99%A8%E5%88%B0%E5%AD%98%E5%82%A8%E5%99%A8/">存储器到存储器</a>
+        
+            <a href="/tags/%E5%AD%98%E5%82%A8%E5%99%A8%E5%88%B0%E5%A4%96%E8%AE%BE/">存储器到外设</a>
+        
+            <a href="/tags/%E9%87%8E%E7%81%AB/">野火</a>
+        
+    </section>
+
+
+    <section class="article-lastmod">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <span>
+            最后更新于 Sep 09, 2026 09:51 &#43;0800
+        </span>
+    </section></footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/stm32-adc-%E7%8B%AC%E7%AB%8B%E6%A8%A1%E5%BC%8F%E5%8D%95%E9%80%9A%E9%81%93--dma-%E8%BF%9E%E7%BB%AD%E9%87%87%E9%9B%86/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">STM32 ADC — 独立模式单通道 &#43; DMA 连续采集</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/stm32-tim-%E5%9F%BA%E6%9C%AC%E5%AE%9A%E6%97%B6%E5%99%A8%E5%AE%9A%E6%97%B61ms-%E4%B8%AD%E6%96%AD/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">STM32 TIM — 基本定时器定时（1ms 中断）</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/stm32-i2c-%E8%BD%AF%E4%BB%B6%E6%A8%A1%E6%8B%9F%E8%AF%BB%E5%86%99-eepromat24c02/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">STM32 I2C — 软件模拟读写 EEPROM（AT24C02）</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/stm32-spi-%E8%AF%BB%E5%86%99%E4%B8%B2%E8%A1%8C-flashw25q64/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">STM32 SPI — 读写串行 FLASH（W25Q64）</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/stm32-usart-%E4%B8%B2%E5%8F%A3%E9%80%9A%E4%BF%A1%E4%B8%8E-printf-%E9%87%8D%E5%AE%9A%E5%90%91/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">STM32 USART — 串口通信与 printf 重定向</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="ClingYang/ClingYang.github.io"
+        issue-term="pathname"
+        
+        label="💬comment"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2026 CLing
+    </section>
+    
+    <section class="powerby">
+        
+            世界是你们 <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<style>
+    #TableOfContents > ul, ol {
+        ul, ol {
+            display: none;
+        }
+        .open {
+            display: block;
+        }
+    }
+</style>
+
+<script>
+    function initTocHide() {
+        
+        let toc = document.querySelector(".widget--toc");
+        if (!toc) {
+            return;
+        }
+        
+        window.addEventListener('scroll', function() {
+            
+            let currentLi = document.querySelector(".active-class");
+            if (!currentLi) {
+                return
+            }
+            
+            let elementsByClassName = document.querySelectorAll(".open");
+            if (elementsByClassName.length > 0) {
+                elementsByClassName.forEach((ul) => {
+                    ul.classList.remove("open")
+                })
+            }
+            
+            if (currentLi.children.length > 1) {
+                currentLi.children[1].classList.add("open")
+            }
+            
+            let ul = currentLi.parentElement;
+            do {
+                ul.classList.add("open");
+                ul = ul.parentElement.parentElement
+            } while (ul !== undefined && (ul.localName === 'ul' || ul.localName === 'ol'))
+        });
+    }
+    initTocHide()
+</script>
+
+    </body>
+</html>

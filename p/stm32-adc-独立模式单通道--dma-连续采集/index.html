@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="野火 EBF STM32F103 Mini HAL 库：配置 ADC1 单通道连续转换，用 DMA 循环搬运数据到内存，解放 CPU 并实时打印电压值。">
+<title>STM32 ADC — 独立模式单通道 &#43; DMA 连续采集</title>
+
+<link rel='canonical' href='https://clingyang.github.io/p/stm32-adc-%E7%8B%AC%E7%AB%8B%E6%A8%A1%E5%BC%8F%E5%8D%95%E9%80%9A%E9%81%93--dma-%E8%BF%9E%E7%BB%AD%E9%87%87%E9%9B%86/'>
+
+<link rel="stylesheet" href="/scss/style.min.e14f3ba93baae65b2aef2339f32b6f25d7a0184785ebf4f6bd7d3376ae5dc2d4.css"><meta property='og:title' content="STM32 ADC — 独立模式单通道 + DMA 连续采集">
+<meta property='og:description' content="野火 EBF STM32F103 Mini HAL 库：配置 ADC1 单通道连续转换，用 DMA 循环搬运数据到内存，解放 CPU 并实时打印电压值。">
+<meta property='og:url' content='https://clingyang.github.io/p/stm32-adc-%E7%8B%AC%E7%AB%8B%E6%A8%A1%E5%BC%8F%E5%8D%95%E9%80%9A%E9%81%93--dma-%E8%BF%9E%E7%BB%AD%E9%87%87%E9%9B%86/'>
+<meta property='og:site_name' content='CLing'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='STM32F103' /><meta property='article:tag' content='HAL库' /><meta property='article:tag' content='ADC' /><meta property='article:tag' content='DMA' /><meta property='article:tag' content='单通道' /><meta property='article:tag' content='野火' /><meta property='article:published_time' content='2026-09-09T09:30:00&#43;08:00'/><meta property='article:modified_time' content='2026-09-09T09:51:13&#43;08:00'/>
+<meta name="twitter:title" content="STM32 ADC — 独立模式单通道 + DMA 连续采集">
+<meta name="twitter:description" content="野火 EBF STM32F103 Mini HAL 库：配置 ADC1 单通道连续转换，用 DMA 循环搬运数据到内存，解放 CPU 并实时打印电压值。">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                            height="290" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🏀</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">CLing</a></h1>
+            <h2 class="site-description">你好 欢迎来到我的博客</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>档案</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E6%8A%80%E6%9C%AF%E9%93%BE%E6%8E%A5/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>技术链接</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/excel/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+                
+                <span>Excel教程</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#一功能简介">一、功能简介</a></li>
+    <li><a href="#二硬件准备">二、硬件准备</a></li>
+    <li><a href="#三完整代码带中文注释">三、完整代码（带中文注释）</a>
+      <ol>
+        <li><a href="#1-bsp_adch引脚与-dma-通道定义">1. bsp_adc.h（引脚与 DMA 通道定义）</a></li>
+        <li><a href="#2-bsp_adccgpiodmaadc-配置">2. bsp_adc.c（GPIO、DMA、ADC 配置）</a></li>
+        <li><a href="#3-mainc主循环读取并打印">3. main.c（主循环读取并打印）</a></li>
+      </ol>
+    </li>
+    <li><a href="#四代码分段讲解">四、代码分段讲解</a>
+      <ol>
+        <li><a href="#1-为什么引脚要设成-gpio_mode_analog">1. 为什么引脚要设成 <code>GPIO_MODE_ANALOG</code>？</a></li>
+        <li><a href="#2-dma-方向外设--内存">2. DMA 方向：外设 → 内存</a></li>
+        <li><a href="#3-__hal_linkdma-做了什么">3. <code>__HAL_LINKDMA</code> 做了什么？</a></li>
+        <li><a href="#4-adc-时钟为什么分频">4. ADC 时钟为什么分频？</a></li>
+        <li><a href="#5-电压换算">5. 电压换算</a></li>
+      </ol>
+    </li>
+    <li><a href="#五实验现象">五、实验现象</a></li>
+    <li><a href="#六常见问题">六、常见问题</a></li>
+    <li><a href="#七小结">七、小结</a></li>
+    <li><a href="#八拓展应用">八、拓展应用</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/stm32/" >
+                STM32
+            </a>
+        
+            <a href="/categories/adc/" >
+                ADC
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/stm32-adc-%E7%8B%AC%E7%AB%8B%E6%A8%A1%E5%BC%8F%E5%8D%95%E9%80%9A%E9%81%93--dma-%E8%BF%9E%E7%BB%AD%E9%87%87%E9%9B%86/">STM32 ADC — 独立模式单通道 &#43; DMA 连续采集</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            野火 EBF STM32F103 Mini HAL 库：配置 ADC1 单通道连续转换，用 DMA 循环搬运数据到内存，解放 CPU 并实时打印电压值。
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2026-09-09</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 4 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="stm32-adc--独立模式单通道--dma-连续采集">STM32 ADC — 独立模式单通道 + DMA 连续采集
+</h1><blockquote>
+<p><strong>开发板</strong>：野火 EBF STM32F103 Mini<br>
+<strong>固件库</strong>：HAL 库<br>
+<strong>对应例程</strong>：<code>ADC—独立模式-单通道-DMA</code><br>
+<strong>参考源码</strong>：<code>User/main.c</code>、<code>User/adc/bsp_adc.h</code>、<code>User/adc/bsp_adc.c</code></p>
+</blockquote>
+<p>ADC（Analog-to-Digital Converter，模数转换器）把现实世界的连续模拟电压变成 MCU 能处理的数字量。本文用 <strong>ADC1 单通道 + DMA 循环搬运</strong>，实现&quot;不占用 CPU&quot;的连续电压采集，是 ADC 最经典、最高效的用法之一。</p>
+<hr>
+<h2 id="一功能简介">一、功能简介
+</h2><p>把开发板上的电位器（滑变电阻，接 PC1 / ADC_CHANNEL_11）电压送到 ADC1，配置为：</p>
+<ul>
+<li><strong>独立模式</strong>（非双重 ADC 协同）；</li>
+<li><strong>单通道</strong>（只采通道 11）；</li>
+<li><strong>连续转换 + 扫描关闭</strong>（采完一个通道立刻从头再来）；</li>
+<li><strong>DMA 循环模式</strong>：每转换完一次，DMA 自动把结果搬进 <code>ADC_ConvertedValue</code> 变量。</li>
+</ul>
+<p>主循环只需读取这个变量、套公式算出电压、用 <code>printf</code> 打印即可。因 DMA 持续搬运，CPU 几乎不参与采样本体。</p>
+<p>核心知识点：</p>
+<ol>
+<li>ADC 通道、采样时间、对齐方式的概念；</li>
+<li>DMA 如何与 ADC 联动（ Peripheral→Memory）；</li>
+<li>电压换算公式：<code>V = ADC值 / 4096 × 3.3</code>。</li>
+</ol>
+<hr>
+<h2 id="二硬件准备">二、硬件准备
+</h2><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">项目</th>
+					<th style="text-align: left">说明</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left">开发板</td>
+					<td style="text-align: left">野火 EBF STM32F103 Mini</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">ADC 外设</td>
+					<td style="text-align: left">ADC1，通道 11（CH11 → PC1）</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">信号源</td>
+					<td style="text-align: left">板载电位器（滑动变阻器），中间抽头接 PC1</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">调试输出</td>
+					<td style="text-align: left">USART1（115200）打印电压值</td>
+			</tr>
+	</tbody>
+</table></div>
+<blockquote>
+<p>STM32F103 的 ADC 为 <strong>12 位</strong>，转换结果范围 0 ~ 4095，参考电压一般接 3.3V。</p>
+</blockquote>
+<hr>
+<h2 id="三完整代码带中文注释">三、完整代码（带中文注释）
+</h2><h3 id="1-bsp_adch引脚与-dma-通道定义">1. bsp_adc.h（引脚与 DMA 通道定义）
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#ifndef __BSP_ADC_H
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define	__BSP_ADC_H
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;stm32f1xx.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* ADC GPIO 宏定义：CH11 -&gt; PC1 */</span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define RHEOSTAT_ADC_GPIO_PORT         GPIOC
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define RHEOSTAT_ADC_GPIO_PIN          GPIO_PIN_1
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define RHEOSTAT_ADC_GPIO_CLK_ENABLE() __HAL_RCC_GPIOC_CLK_ENABLE()
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* ADC 序号宏定义 */</span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define RHEOSTAT_ADC                  ADC1
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define RHEOSTAT_ADC_CLK_ENABLE()     __HAL_RCC_ADC1_CLK_ENABLE();
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define RHEOSTAT_ADC_CHANNEL          ADC_CHANNEL_11
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* ADC 使用的 DMA 通道：ADC1 固定对应 DMA1_Channel1 */</span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define RHEOSTAT_ADC_DMA_CLK_ENABLE() __HAL_RCC_DMA1_CLK_ENABLE();
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define RHEOSTAT_ADC_DMA_STREAM       DMA1_Channel1
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">Rheostat_Init</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#endif </span><span class="cm">/* __BSP_ADC_H */</span><span class="cp">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="2-bsp_adccgpiodmaadc-配置">2. bsp_adc.c（GPIO、DMA、ADC 配置）
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;./adc/bsp_adc.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">__IO</span> <span class="kt">uint32_t</span> <span class="n">ADC_ConvertedValue</span><span class="p">;</span>        <span class="c1">// DMA 搬运的目标：转换结果
+</span></span></span><span class="line"><span class="cl"><span class="n">DMA_HandleTypeDef</span> <span class="n">hdma_adcx</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">ADC_HandleTypeDef</span> <span class="n">ADC_Handle</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">ADC_ChannelConfTypeDef</span> <span class="n">ADC_Config</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 第 1 步：配置 ADC 输入引脚为模拟模式 */</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">Rheostat_ADC_GPIO_Config</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitTypeDef</span> <span class="n">GPIO_InitStructure</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nf">RHEOSTAT_ADC_CLK_ENABLE</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">RHEOSTAT_ADC_GPIO_CLK_ENABLE</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStructure</span><span class="p">.</span><span class="n">Pin</span>  <span class="o">=</span> <span class="n">RHEOSTAT_ADC_GPIO_PIN</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStructure</span><span class="p">.</span><span class="n">Mode</span> <span class="o">=</span> <span class="n">GPIO_MODE_ANALOG</span><span class="p">;</span>   <span class="c1">// 必须设为模拟输入
+</span></span></span><span class="line"><span class="cl">  <span class="nf">HAL_GPIO_Init</span><span class="p">(</span><span class="n">RHEOSTAT_ADC_GPIO_PORT</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">GPIO_InitStructure</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 第 2 步：配置 DMA 与 ADC 工作模式 */</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">Rheostat_ADC_Mode_Config</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="cm">/* ---- DMA 结构体参数初始化 ---- */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">RHEOSTAT_ADC_DMA_CLK_ENABLE</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">hdma_adcx</span><span class="p">.</span><span class="n">Instance</span>               <span class="o">=</span> <span class="n">RHEOSTAT_ADC_DMA_STREAM</span><span class="p">;</span>    <span class="c1">// DMA1_Channel1
+</span></span></span><span class="line"><span class="cl">  <span class="n">hdma_adcx</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">Direction</span>        <span class="o">=</span> <span class="n">DMA_PERIPH_TO_MEMORY</span><span class="p">;</span>       <span class="c1">// 外设 -&gt; 内存
+</span></span></span><span class="line"><span class="cl">  <span class="n">hdma_adcx</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">PeriphInc</span>        <span class="o">=</span> <span class="n">DMA_PINC_DISABLE</span><span class="p">;</span>           <span class="c1">// 外设地址不递增（固定为 ADC_DR）
+</span></span></span><span class="line"><span class="cl">  <span class="n">hdma_adcx</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">MemInc</span>           <span class="o">=</span> <span class="n">DMA_MINC_DISABLE</span><span class="p">;</span>           <span class="c1">// 这里只采 1 个变量，内存也不递增
+</span></span></span><span class="line"><span class="cl">  <span class="n">hdma_adcx</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">PeriphDataAlignment</span> <span class="o">=</span> <span class="n">DMA_PDATAALIGN_HALFWORD</span><span class="p">;</span> <span class="c1">// 外设数据 16 位（ADC 是 16 位寄存器）
+</span></span></span><span class="line"><span class="cl">  <span class="n">hdma_adcx</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">MemDataAlignment</span>    <span class="o">=</span> <span class="n">DMA_MDATAALIGN_HALFWORD</span><span class="p">;</span> <span class="c1">// 内存数据 16 位
+</span></span></span><span class="line"><span class="cl">  <span class="n">hdma_adcx</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">Mode</span>             <span class="o">=</span> <span class="n">DMA_CIRCULAR</span><span class="p">;</span>               <span class="c1">// 循环模式：不断搬
+</span></span></span><span class="line"><span class="cl">  <span class="n">hdma_adcx</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">Priority</span>         <span class="o">=</span> <span class="n">DMA_PRIORITY_MEDIUM</span><span class="p">;</span>        <span class="c1">// 中等优先级
+</span></span></span><span class="line"><span class="cl">  <span class="nf">HAL_DMA_Init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">hdma_adcx</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 把 DMA 句柄绑到 ADC 句柄（HAL 内部用这个关联触发搬运） */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">__HAL_LINKDMA</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ADC_Handle</span><span class="p">,</span> <span class="n">DMA_Handle</span><span class="p">,</span> <span class="n">hdma_adcx</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* ---- ADC 时钟分频：PCLK2(72M)/8 = 9MHz，必须在允许范围 ---- */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">RCC_PeriphCLKInitTypeDef</span> <span class="n">ADC_CLKInit</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">ADC_CLKInit</span><span class="p">.</span><span class="n">PeriphClockSelection</span> <span class="o">=</span> <span class="n">RCC_PERIPHCLK_ADC</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">ADC_CLKInit</span><span class="p">.</span><span class="n">AdcClockSelection</span>    <span class="o">=</span> <span class="n">RCC_ADCPCLK2_DIV8</span><span class="p">;</span>         <span class="c1">// 分频因子 8
+</span></span></span><span class="line"><span class="cl">  <span class="nf">HAL_RCCEx_PeriphCLKConfig</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ADC_CLKInit</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* ---- ADC 基本参数 ---- */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">ADC_Handle</span><span class="p">.</span><span class="n">Instance</span>               <span class="o">=</span> <span class="n">RHEOSTAT_ADC</span><span class="p">;</span>             <span class="c1">// ADC1
+</span></span></span><span class="line"><span class="cl">  <span class="n">ADC_Handle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">DataAlign</span>        <span class="o">=</span> <span class="n">ADC_DATAALIGN_RIGHT</span><span class="p">;</span>       <span class="c1">// 右对齐
+</span></span></span><span class="line"><span class="cl">  <span class="n">ADC_Handle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">ScanConvMode</span>     <span class="o">=</span> <span class="n">DISABLE</span><span class="p">;</span>                   <span class="c1">// 关闭扫描（单通道不需要）
+</span></span></span><span class="line"><span class="cl">  <span class="n">ADC_Handle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">ContinuousConvMode</span> <span class="o">=</span> <span class="n">ENABLE</span><span class="p">;</span>                 <span class="c1">// 连续转换
+</span></span></span><span class="line"><span class="cl">  <span class="n">ADC_Handle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">NbrOfConversion</span>  <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>                        <span class="c1">// 规则序列 1 个转换
+</span></span></span><span class="line"><span class="cl">  <span class="n">ADC_Handle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">DiscontinuousConvMode</span> <span class="o">=</span> <span class="n">DISABLE</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">ADC_Handle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">ExternalTrigConv</span> <span class="o">=</span> <span class="n">ADC_SOFTWARE_START</span><span class="p">;</span>        <span class="c1">// 软件触发
+</span></span></span><span class="line"><span class="cl">  <span class="nf">HAL_ADC_Init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ADC_Handle</span><span class="p">);</span>                                    <span class="c1">// 会回调 HAL_ADC_MspInit
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* ---- 配置规则通道：通道 11，序列 1，采样时间 55.5 周期 ---- */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">ADC_Config</span><span class="p">.</span><span class="n">Channel</span>      <span class="o">=</span> <span class="n">RHEOSTAT_ADC_CHANNEL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">ADC_Config</span><span class="p">.</span><span class="n">Rank</span>         <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">ADC_Config</span><span class="p">.</span><span class="n">SamplingTime</span> <span class="o">=</span> <span class="n">ADC_SAMPLETIME_55CYCLES_5</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">HAL_ADC_ConfigChannel</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ADC_Handle</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">ADC_Config</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 启动 ADC 的 DMA 转换：结果自动、循环地写入 ADC_ConvertedValue */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">HAL_ADC_Start_DMA</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ADC_Handle</span><span class="p">,</span> <span class="p">(</span><span class="kt">uint32_t</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">ADC_ConvertedValue</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 对外初始化入口 */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">Rheostat_Init</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">Rheostat_ADC_GPIO_Config</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">Rheostat_ADC_Mode_Config</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="3-mainc主循环读取并打印">3. main.c（主循环读取并打印）
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;main.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;stm32f1xx.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;./usart/bsp_debug_usart.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;./led/bsp_led.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;./adc/bsp_adc.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">extern</span> <span class="n">__IO</span> <span class="kt">uint32_t</span> <span class="n">ADC_ConvertedValue</span><span class="p">;</span>   <span class="c1">// DMA 持续更新的转换值
+</span></span></span><span class="line"><span class="cl"><span class="kt">float</span> <span class="n">ADC_Vol</span><span class="p">;</span>                             <span class="c1">// 换算后的电压值
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">Delay</span><span class="p">(</span><span class="n">__IO</span> <span class="kt">uint32_t</span> <span class="n">nCount</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span><span class="p">(;</span> <span class="n">nCount</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">nCount</span><span class="o">--</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">SystemClock_Config</span><span class="p">();</span>          <span class="c1">// 72MHz
+</span></span></span><span class="line"><span class="cl">  <span class="nf">DEBUG_USART_Config</span><span class="p">();</span>          <span class="c1">// 串口用于打印
+</span></span></span><span class="line"><span class="cl">  <span class="nf">Rheostat_Init</span><span class="p">();</span>               <span class="c1">// 初始化 ADC + DMA
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 把 12 位 ADC 值换算成电压：Vref = 3.3V，满量程 4096 */</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ADC_Vol</span> <span class="o">=</span> <span class="p">(</span><span class="kt">float</span><span class="p">)</span><span class="n">ADC_ConvertedValue</span> <span class="o">/</span> <span class="mi">4096</span> <span class="o">*</span> <span class="p">(</span><span class="kt">float</span><span class="p">)</span><span class="mf">3.3</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\r\n</span><span class="s"> The current AD value = 0x%04X </span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">ADC_ConvertedValue</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\r\n</span><span class="s"> The current AD value = %f V </span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">ADC_Vol</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">Delay</span><span class="p">(</span><span class="mh">0x8fffff</span><span class="p">);</span>             <span class="c1">// 简单延时，控制台输出别太快
+</span></span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="四代码分段讲解">四、代码分段讲解
+</h2><h3 id="1-为什么引脚要设成-gpio_mode_analog">1. 为什么引脚要设成 <code>GPIO_MODE_ANALOG</code>？
+</h3><p>ADC 输入必须走芯片内部的模拟通路。把引脚配成模拟模式，GPIO 的数字输入缓冲会被断开，避免数字电路对微弱模拟信号产生干扰，也能降低功耗。</p>
+<h3 id="2-dma-方向外设--内存">2. DMA 方向：外设 → 内存
+</h3><p>ADC 转换结果固定存放在 <strong>数据寄存器 ADC_DR</strong>（外设端地址不变，所以 <code>PeriphInc = DISABLE</code>）。DMA 每次转换完成被触发，自动把 DR 里的 16 位值搬到 <code>ADC_ConvertedValue</code>。因为是<strong>循环模式</strong>，搬完又从头搬，形成&quot;永动机&quot;式采集。</p>
+<h3 id="3-__hal_linkdma-做了什么">3. <code>__HAL_LINKDMA</code> 做了什么？
+</h3><p>它把 DMA 句柄挂到 ADC 句柄的 <code>DMA_Handle</code> 字段上。这样 <code>HAL_ADC_Start_DMA()</code> 内部才知道用哪个 DMA 通道去搬 ADC 的数据——这是 HAL 关联&quot;外设触发 DMA&quot;的关键一步。</p>
+<h3 id="4-adc-时钟为什么分频">4. ADC 时钟为什么分频？
+</h3><p>F103 的 ADC 最高工作频率约 14MHz，而 PCLK2 是 72MHz，所以必须分频（<code>RCC_ADCPCLK2_DIV8</code> → 9MHz）。不分频会超出规格，采样不准甚至出错。</p>
+<h3 id="5-电压换算">5. 电压换算
+</h3><p>12 位分辨率 → 最大值 4095（代码里用 4096 当分母近似满量程）。参考电压 3.3V：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">电压 V = (ADC值 / 4096) × 3.3
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="五实验现象">五、实验现象
+</h2><ol>
+<li>打开串口助手（115200），复位开发板；</li>
+<li>串口每隔约 1 秒打印一次：当前 ADC 原始值和换算电压；</li>
+<li><strong>旋转电位器</strong>，电压值随之在 0 ~ 3.3V 之间连续变化，说明 DMA 在后台持续把最新采样搬进了变量。</li>
+</ol>
+<hr>
+<h2 id="六常见问题">六、常见问题
+</h2><p><strong>Q1：打印的电压一直是 0 或满量程不变？</strong></p>
+<ul>
+<li>确认电位器中心抽头确实接到了 PC1，且两端分别接 3.3V 和 GND；</li>
+<li>确认 <code>RHEOSTAT_ADC_CHANNEL</code> 与实际引脚对应（PC1 = ADC_CHANNEL_11）。</li>
+</ul>
+<p><strong>Q2：数据剧烈跳变、不稳定？</strong></p>
+<ul>
+<li>延长采样时间（<code>ADC_SAMPLETIME_55CYCLES_5</code> → 更大值）；</li>
+<li>在信号源并联一个小电容滤波，或在软件里做滑动平均。</li>
+</ul>
+<p><strong>Q3：想同时采多个通道怎么办？</strong></p>
+<ul>
+<li>开启 <code>ScanConvMode = ENABLE</code>，把 <code>NbrOfConversion</code> 设为通道数，并让 DMA 内存<strong>递增</strong>（<code>MemInc=ENABLE</code>），配合一个数组接收。详见 <code>ADC—独立模式-多通道-DMA</code>。</li>
+</ul>
+<hr>
+<h2 id="七小结">七、小结
+</h2><ul>
+<li>单通道连续采集 + DMA 循环，是 ADC 的&quot;零 CPU 占用&quot;标配；</li>
+<li>配置顺序：<strong>开时钟 → 引脚模拟模式 → DMA 参数 → ADC 参数 → 规则通道 → Start_DMA</strong>；</li>
+<li>DMA 把外设数据自动搬进内存，是后续 SPI、USART、DAC 等高速传输的共同基石。</li>
+</ul>
+<hr>
+<h2 id="八拓展应用">八、拓展应用
+</h2><ol>
+<li><strong>多通道扫描</strong>：把电位器、温度、光照等多路信号编入规则序列，用 DMA 一次性搬进数组。</li>
+<li><strong>定时器触发采样</strong>：用 TIM 的 TRGO 触发 ADC，实现固定频率（如 1kHz）的等间隔采样，做简易示波器。</li>
+<li><strong>芯片温度采集</strong>：切换通道到内部温度传感器（<code>ADC_CHANNEL_TEMPSENSOR</code>），免接外部元件测芯片温（见 <code>ADC—芯片温度</code>）。</li>
+<li><strong>DMA 半传输/传输完成中断</strong>：在回调里做 FFT、求平均，搭一个低成本信号采集前端。</li>
+</ol>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/stm32f103/">STM32F103</a>
+        
+            <a href="/tags/hal%E5%BA%93/">HAL库</a>
+        
+            <a href="/tags/adc/">ADC</a>
+        
+            <a href="/tags/dma/">Dma</a>
+        
+            <a href="/tags/%E5%8D%95%E9%80%9A%E9%81%93/">单通道</a>
+        
+            <a href="/tags/%E9%87%8E%E7%81%AB/">野火</a>
+        
+    </section>
+
+
+    <section class="article-lastmod">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <span>
+            最后更新于 Sep 09, 2026 09:51 &#43;0800
+        </span>
+    </section></footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/stm32-dma-%E7%9B%B4%E6%8E%A5%E5%AD%98%E5%82%A8%E5%8C%BA%E8%AE%BF%E9%97%AE%E5%AD%98%E5%82%A8%E5%99%A8%E5%88%B0%E5%AD%98%E5%82%A8%E5%99%A8/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">STM32 DMA — 直接存储区访问（存储器到存储器）</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/stm32-tim-%E5%9F%BA%E6%9C%AC%E5%AE%9A%E6%97%B6%E5%99%A8%E5%AE%9A%E6%97%B61ms-%E4%B8%AD%E6%96%AD/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">STM32 TIM — 基本定时器定时（1ms 中断）</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/stm32-i2c-%E8%BD%AF%E4%BB%B6%E6%A8%A1%E6%8B%9F%E8%AF%BB%E5%86%99-eepromat24c02/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">STM32 I2C — 软件模拟读写 EEPROM（AT24C02）</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/stm32-spi-%E8%AF%BB%E5%86%99%E4%B8%B2%E8%A1%8C-flashw25q64/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">STM32 SPI — 读写串行 FLASH（W25Q64）</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/stm32-usart-%E4%B8%B2%E5%8F%A3%E9%80%9A%E4%BF%A1%E4%B8%8E-printf-%E9%87%8D%E5%AE%9A%E5%90%91/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">STM32 USART — 串口通信与 printf 重定向</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="ClingYang/ClingYang.github.io"
+        issue-term="pathname"
+        
+        label="💬comment"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2026 CLing
+    </section>
+    
+    <section class="powerby">
+        
+            世界是你们 <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<style>
+    #TableOfContents > ul, ol {
+        ul, ol {
+            display: none;
+        }
+        .open {
+            display: block;
+        }
+    }
+</style>
+
+<script>
+    function initTocHide() {
+        
+        let toc = document.querySelector(".widget--toc");
+        if (!toc) {
+            return;
+        }
+        
+        window.addEventListener('scroll', function() {
+            
+            let currentLi = document.querySelector(".active-class");
+            if (!currentLi) {
+                return
+            }
+            
+            let elementsByClassName = document.querySelectorAll(".open");
+            if (elementsByClassName.length > 0) {
+                elementsByClassName.forEach((ul) => {
+                    ul.classList.remove("open")
+                })
+            }
+            
+            if (currentLi.children.length > 1) {
+                currentLi.children[1].classList.add("open")
+            }
+            
+            let ul = currentLi.parentElement;
+            do {
+                ul.classList.add("open");
+                ul = ul.parentElement.parentElement
+            } while (ul !== undefined && (ul.localName === 'ul' || ul.localName === 'ol'))
+        });
+    }
+    initTocHide()
+</script>
+
+    </body>
+</html>

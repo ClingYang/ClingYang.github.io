@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="野火 EBF STM32F103 Mini HAL 库：用普通 GPIO 模拟 I2C 时序，读写 AT24C02 串行 EEPROM，保存小数与长整型数据。">
+<title>STM32 I2C — 软件模拟读写 EEPROM（AT24C02）</title>
+
+<link rel='canonical' href='https://clingyang.github.io/p/stm32-i2c-%E8%BD%AF%E4%BB%B6%E6%A8%A1%E6%8B%9F%E8%AF%BB%E5%86%99-eepromat24c02/'>
+
+<link rel="stylesheet" href="/scss/style.min.e14f3ba93baae65b2aef2339f32b6f25d7a0184785ebf4f6bd7d3376ae5dc2d4.css"><meta property='og:title' content="STM32 I2C — 软件模拟读写 EEPROM（AT24C02）">
+<meta property='og:description' content="野火 EBF STM32F103 Mini HAL 库：用普通 GPIO 模拟 I2C 时序，读写 AT24C02 串行 EEPROM，保存小数与长整型数据。">
+<meta property='og:url' content='https://clingyang.github.io/p/stm32-i2c-%E8%BD%AF%E4%BB%B6%E6%A8%A1%E6%8B%9F%E8%AF%BB%E5%86%99-eepromat24c02/'>
+<meta property='og:site_name' content='CLing'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='STM32F103' /><meta property='article:tag' content='HAL库' /><meta property='article:tag' content='I2C' /><meta property='article:tag' content='EEPROM' /><meta property='article:tag' content='AT24C02' /><meta property='article:tag' content='软件I2C' /><meta property='article:tag' content='野火' /><meta property='article:published_time' content='2026-09-09T09:50:00&#43;08:00'/><meta property='article:modified_time' content='2026-09-09T09:51:13&#43;08:00'/>
+<meta name="twitter:title" content="STM32 I2C — 软件模拟读写 EEPROM（AT24C02）">
+<meta name="twitter:description" content="野火 EBF STM32F103 Mini HAL 库：用普通 GPIO 模拟 I2C 时序，读写 AT24C02 串行 EEPROM，保存小数与长整型数据。">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                            height="290" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🏀</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">CLing</a></h1>
+            <h2 class="site-description">你好 欢迎来到我的博客</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>档案</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E6%8A%80%E6%9C%AF%E9%93%BE%E6%8E%A5/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>技术链接</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/excel/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+                
+                <span>Excel教程</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#一功能简介">一、功能简介</a></li>
+    <li><a href="#二硬件准备">二、硬件准备</a></li>
+    <li><a href="#三完整代码带中文注释">三、完整代码（带中文注释）</a>
+      <ol>
+        <li><a href="#1-bsp_i2c_gpioh引脚与宏">1. bsp_i2c_gpio.h（引脚与宏）</a></li>
+        <li><a href="#2-bsp_i2c_gpioc时序模拟核心节选">2. bsp_i2c_gpio.c（时序模拟核心，节选）</a></li>
+        <li><a href="#3-bsp_i2c_eeceeprom-读写节选">3. bsp_i2c_ee.c（EEPROM 读写，节选）</a></li>
+        <li><a href="#4-mainc掉电保存演示">4. main.c（掉电保存演示）</a></li>
+      </ol>
+    </li>
+    <li><a href="#四代码分段讲解">四、代码分段讲解</a>
+      <ol>
+        <li><a href="#1-为什么用软件-i2c">1. 为什么用软件 I2C？</a></li>
+        <li><a href="#2-开漏输出--上拉电阻">2. 开漏输出 + 上拉电阻</a></li>
+        <li><a href="#3-起始停止信号的定义">3. 起始/停止信号的定义</a></li>
+        <li><a href="#4-acknack-应答">4. ACK/NACK 应答</a></li>
+        <li><a href="#5-at24c02-的页写陷阱">5. AT24C02 的页写陷阱</a></li>
+        <li><a href="#6-写后为什么要等">6. 写后为什么要等？</a></li>
+      </ol>
+    </li>
+    <li><a href="#五实验现象">五、实验现象</a></li>
+    <li><a href="#六常见问题">六、常见问题</a></li>
+    <li><a href="#七小结">七、小结</a></li>
+    <li><a href="#八拓展应用">八、拓展应用</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/stm32/" >
+                STM32
+            </a>
+        
+            <a href="/categories/i2c/" >
+                I2C
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/stm32-i2c-%E8%BD%AF%E4%BB%B6%E6%A8%A1%E6%8B%9F%E8%AF%BB%E5%86%99-eepromat24c02/">STM32 I2C — 软件模拟读写 EEPROM（AT24C02）</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            野火 EBF STM32F103 Mini HAL 库：用普通 GPIO 模拟 I2C 时序，读写 AT24C02 串行 EEPROM，保存小数与长整型数据。
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2026-09-09</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 6 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="stm32-i2c--软件模拟读写-eepromat24c02">STM32 I2C — 软件模拟读写 EEPROM（AT24C02）
+</h1><blockquote>
+<p><strong>开发板</strong>：野火 EBF STM32F103 Mini<br>
+<strong>固件库</strong>：HAL 库<br>
+<strong>对应例程</strong>：<code>15-I2C-读写EEPROM</code><br>
+<strong>参考源码</strong>：<code>User/main.c</code>、<code>User/i2c/bsp_i2c_gpio.h</code>、<code>User/i2c/bsp_i2c_gpio.c</code>、<code>User/i2c/bsp_i2c_ee.c</code></p>
+</blockquote>
+<p>I2C（Inter-Integrated Circuit）是一种<strong>两线制、半双工、多主从</strong>的同步总线，只需要 SCL（时钟）和 SDA（数据）两根线就能挂多个设备。EEPROM 是 I2C 最典型的从机，用来保存<strong>掉电不丢</strong>的配置参数。</p>
+<blockquote>
+<p>本文用<strong>软件模拟 I2C</strong>（GPIO 翻转时序），而非硬件 I2C 外设。原因是：软件 I2C 时序完全可见、易调试、跨平台可移植，野火例程特意用它来把 I2C 协议讲透。</p>
+</blockquote>
+<hr>
+<h2 id="一功能简介">一、功能简介
+</h2><p>板上 AT24C02 是一颗 2Kbit（256 字节）的 I2C EEPROM。程序逻辑如下：</p>
+<ul>
+<li>第一次运行（或未检测到数据标志）：写入一个 <code>0xCD</code> 标志，并把 7 个 <code>小数</code> 和 7 个 <code>整数</code> 存进去；</li>
+<li>之后每次复位：检测到标志，从 EEPROM 读出之前存的数据，打印到串口验证&quot;掉电不丢&quot;。</li>
+</ul>
+<p>核心知识点：</p>
+<ol>
+<li>I2C 的起始/停止/应答（ACK/NACK）时序如何用 GPIO 拼出来；</li>
+<li>AT24C02 的设备地址与页写限制（每页 8 字节）；</li>
+<li><strong>写后必须等待 EEPROM 内部写周期完成</strong>才能继续访问。</li>
+</ol>
+<hr>
+<h2 id="二硬件准备">二、硬件准备
+</h2><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">项目</th>
+					<th style="text-align: left">说明</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left">开发板</td>
+					<td style="text-align: left">野火 EBF STM32F103 Mini</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">I2C 引脚</td>
+					<td style="text-align: left">SCL → PA2，SDA → PA3（普通 GPIO，开漏输出）</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">从机</td>
+					<td style="text-align: left">AT24C02，设备地址 <code>0xA0</code>（写）/ <code>0xA1</code>（读）</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">调试输出</td>
+					<td style="text-align: left">USART1（115200）</td>
+			</tr>
+	</tbody>
+</table></div>
+<blockquote>
+<p>AT24C02 地址 <code>1 0 1 0 A2 A1 A0 R/W</code>，板上 A2/A1/A0 接地 → <code>1010000</code>，左移 1 位加 R/W 位 → 写 <code>0xA0</code>、读 <code>0xA1</code>。</p>
+</blockquote>
+<hr>
+<h2 id="三完整代码带中文注释">三、完整代码（带中文注释）
+</h2><h3 id="1-bsp_i2c_gpioh引脚与宏">1. bsp_i2c_gpio.h（引脚与宏）
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#ifndef _BSP_I2C_GPIO_H
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define _BSP_I2C_GPIO_H
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;inttypes.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#define EEPROM_I2C_WR   0   </span><span class="cm">/* 写控制 bit */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define EEPROM_I2C_RD   1   </span><span class="cm">/* 读控制 bit */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 只需改这 4 行，就能把 I2C 搬到任意 GPIO */</span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define I2Cx_SDA_GPIO_CLK_ENABLE()   __HAL_RCC_GPIOA_CLK_ENABLE()
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define I2Cx_SCL_GPIO_CLK_ENABLE()   __HAL_RCC_GPIOA_CLK_ENABLE()
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#define EEPROM_GPIO_PORT_I2C   GPIOA
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define EEPROM_I2C_SCL_PIN     GPIO_PIN_2   </span><span class="cm">/* 时钟线 */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define EEPROM_I2C_SDA_PIN     GPIO_PIN_3   </span><span class="cm">/* 数据线 */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 直接操作寄存器翻转 IO（比库函数快，满足 I2C 时序） */</span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define EEPROM_I2C_SCL_1()  EEPROM_GPIO_PORT_I2C-&gt;BSRR = EEPROM_I2C_SCL_PIN
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define EEPROM_I2C_SCL_0()  EEPROM_GPIO_PORT_I2C-&gt;BRR  = EEPROM_I2C_SCL_PIN
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define EEPROM_I2C_SDA_1()  EEPROM_GPIO_PORT_I2C-&gt;BSRR = EEPROM_I2C_SDA_PIN
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define EEPROM_I2C_SDA_0()  EEPROM_GPIO_PORT_I2C-&gt;BRR  = EEPROM_I2C_SDA_PIN
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define EEPROM_I2C_SDA_READ()  ((EEPROM_GPIO_PORT_I2C-&gt;IDR &amp; EEPROM_I2C_SDA_PIN) != 0)
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">i2c_CfgGpio</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">i2c_Start</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">i2c_Stop</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">i2c_SendByte</span><span class="p">(</span><span class="kt">uint8_t</span> <span class="n">_ucByte</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="nf">i2c_ReadByte</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="nf">i2c_WaitAck</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">i2c_Ack</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">i2c_NAck</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#endif
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="2-bsp_i2c_gpioc时序模拟核心节选">2. bsp_i2c_gpio.c（时序模拟核心，节选）
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span><span class="lnt">113
+</span><span class="lnt">114
+</span><span class="lnt">115
+</span><span class="lnt">116
+</span><span class="lnt">117
+</span><span class="lnt">118
+</span><span class="lnt">119
+</span><span class="lnt">120
+</span><span class="lnt">121
+</span><span class="lnt">122
+</span><span class="lnt">123
+</span><span class="lnt">124
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;bsp_i2c_gpio.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;stm32f1xx.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 简单延时：循环 10 次约产生 200KHz 的 SCL（72MHz 主频下经验值） */</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">i2c_Delay</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">uint8_t</span> <span class="n">i</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 起始信号：SCL 高时，SDA 出现下降沿 */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">i2c_Start</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">EEPROM_I2C_SDA_1</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">EEPROM_I2C_SCL_1</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">i2c_Delay</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">EEPROM_I2C_SDA_0</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">i2c_Delay</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">EEPROM_I2C_SCL_0</span><span class="p">();</span>   <span class="c1">// 拉低 SCL，准备发数据
+</span></span></span><span class="line"><span class="cl">  <span class="nf">i2c_Delay</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 停止信号：SCL 高时，SDA 出现上升沿 */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">i2c_Stop</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">EEPROM_I2C_SDA_0</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">EEPROM_I2C_SCL_1</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">i2c_Delay</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">EEPROM_I2C_SDA_1</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 发送 1 字节（高位先发） */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">i2c_SendByte</span><span class="p">(</span><span class="kt">uint8_t</span> <span class="n">_ucByte</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">uint8_t</span> <span class="n">i</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">8</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">_ucByte</span> <span class="o">&amp;</span> <span class="mh">0x80</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="nf">EEPROM_I2C_SDA_1</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="k">else</span>
+</span></span><span class="line"><span class="cl">      <span class="nf">EEPROM_I2C_SDA_0</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">i2c_Delay</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">EEPROM_I2C_SCL_1</span><span class="p">();</span>   <span class="c1">// 上升沿锁存
+</span></span></span><span class="line"><span class="cl">    <span class="nf">i2c_Delay</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">EEPROM_I2C_SCL_0</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="mi">7</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="nf">EEPROM_I2C_SDA_1</span><span class="p">();</span> <span class="c1">// 第 8 位发完释放 SDA 总线
+</span></span></span><span class="line"><span class="cl">    <span class="n">_ucByte</span> <span class="o">&lt;&lt;=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">i2c_Delay</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 读取 1 字节 */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="nf">i2c_ReadByte</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">uint8_t</span> <span class="n">i</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">8</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">value</span> <span class="o">&lt;&lt;=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">EEPROM_I2C_SCL_1</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">i2c_Delay</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nf">EEPROM_I2C_SDA_READ</span><span class="p">())</span>
+</span></span><span class="line"><span class="cl">      <span class="n">value</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">EEPROM_I2C_SCL_0</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">i2c_Delay</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">value</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 等待从机应答：第 9 个时钟读 SDA，0=有应答 */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="nf">i2c_WaitAck</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">uint8_t</span> <span class="n">re</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">EEPROM_I2C_SDA_1</span><span class="p">();</span>   <span class="c1">// 释放 SDA，交由从机拉低
+</span></span></span><span class="line"><span class="cl">  <span class="nf">i2c_Delay</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">EEPROM_I2C_SCL_1</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">i2c_Delay</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="nf">EEPROM_I2C_SDA_READ</span><span class="p">())</span>
+</span></span><span class="line"><span class="cl">    <span class="n">re</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>             <span class="c1">// 没拉低 =&gt; 无应答
+</span></span></span><span class="line"><span class="cl">  <span class="k">else</span>
+</span></span><span class="line"><span class="cl">    <span class="n">re</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">EEPROM_I2C_SCL_0</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">i2c_Delay</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">re</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 主机发 ACK（拉低 SDA 一个时钟） */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">i2c_Ack</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">EEPROM_I2C_SDA_0</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">i2c_Delay</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">EEPROM_I2C_SCL_1</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">i2c_Delay</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">EEPROM_I2C_SCL_0</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">i2c_Delay</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">EEPROM_I2C_SDA_1</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 主机发 NACK（最后 1 字节后通知从机&#34;别再发了&#34;） */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">i2c_NAck</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">EEPROM_I2C_SDA_1</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">i2c_Delay</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">EEPROM_I2C_SCL_1</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">i2c_Delay</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">EEPROM_I2C_SCL_0</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">i2c_Delay</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 配置 GPIO 为开漏输出，并先发一个停止信号复位总线 */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">i2c_CfgGpio</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitTypeDef</span> <span class="n">GPIO_InitStruct</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">I2Cx_SCL_GPIO_CLK_ENABLE</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">I2Cx_SDA_GPIO_CLK_ENABLE</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Pin</span>   <span class="o">=</span> <span class="n">EEPROM_I2C_SCL_PIN</span> <span class="o">|</span> <span class="n">EEPROM_I2C_SDA_PIN</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Mode</span>  <span class="o">=</span> <span class="n">GPIO_MODE_OUTPUT_OD</span><span class="p">;</span>   <span class="c1">// 开漏输出
+</span></span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Pull</span>  <span class="o">=</span> <span class="n">GPIO_NOPULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Speed</span> <span class="o">=</span> <span class="n">GPIO_SPEED_FREQ_HIGH</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">HAL_GPIO_Init</span><span class="p">(</span><span class="n">EEPROM_GPIO_PORT_I2C</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">GPIO_InitStruct</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nf">i2c_Stop</span><span class="p">();</span>   <span class="c1">// 复位 I2C 总线上所有设备到待机态
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="3-bsp_i2c_eeceeprom-读写节选">3. bsp_i2c_ee.c（EEPROM 读写，节选）
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;bsp_i2c_ee.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;bsp_i2c_gpio.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#define EEPROM_DEV_ADDR   0xA0   </span><span class="cm">/* 设备地址（写） */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define EEPROM_PAGE_SIZE  8      </span><span class="cm">/* 24C02 每页 8 字节 */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define EEPROM_SIZE       256
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 随机读取：先写地址，再重复起始读数据 */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="nf">ee_ReadBytes</span><span class="p">(</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="n">_pReadBuf</span><span class="p">,</span> <span class="kt">uint16_t</span> <span class="n">_usAddress</span><span class="p">,</span> <span class="kt">uint16_t</span> <span class="n">_usSize</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">uint16_t</span> <span class="n">i</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">i2c_Start</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">i2c_SendByte</span><span class="p">(</span><span class="n">EEPROM_DEV_ADDR</span> <span class="o">|</span> <span class="n">EEPROM_I2C_WR</span><span class="p">);</span>   <span class="c1">// 写指令+地址
+</span></span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="nf">i2c_WaitAck</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="k">goto</span> <span class="n">cmd_fail</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">i2c_SendByte</span><span class="p">((</span><span class="kt">uint8_t</span><span class="p">)</span><span class="n">_usAddress</span><span class="p">);</span>               <span class="c1">// 发送存储地址
+</span></span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="nf">i2c_WaitAck</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="k">goto</span> <span class="n">cmd_fail</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nf">i2c_Start</span><span class="p">();</span>                                      <span class="c1">// 重复起始条件
+</span></span></span><span class="line"><span class="cl">  <span class="nf">i2c_SendByte</span><span class="p">(</span><span class="n">EEPROM_DEV_ADDR</span> <span class="o">|</span> <span class="n">EEPROM_I2C_RD</span><span class="p">);</span>   <span class="c1">// 改为读指令
+</span></span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="nf">i2c_WaitAck</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="k">goto</span> <span class="n">cmd_fail</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">_usSize</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">_pReadBuf</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nf">i2c_ReadByte</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">!=</span> <span class="n">_usSize</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="nf">i2c_Ack</span><span class="p">();</span>      <span class="c1">// 中间字节回 ACK，让从机继续发
+</span></span></span><span class="line"><span class="cl">    <span class="k">else</span>
+</span></span><span class="line"><span class="cl">      <span class="nf">i2c_NAck</span><span class="p">();</span>     <span class="c1">// 最后一字节回 NACK，结束
+</span></span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">i2c_Stop</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="nl">cmd_fail</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">i2c_Stop</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 页写：跨页时自动拆分，写后等待内部写周期结束 */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="nf">ee_WriteBytes</span><span class="p">(</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="n">_pWriteBuf</span><span class="p">,</span> <span class="kt">uint16_t</span> <span class="n">_usAddress</span><span class="p">,</span> <span class="kt">uint16_t</span> <span class="n">_usSize</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">uint16_t</span> <span class="n">i</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">usAddr</span> <span class="o">=</span> <span class="n">_usAddress</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">_usSize</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 每页首地址或第 0 字节：重新起始 + 等上次写完成 */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">((</span><span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">||</span> <span class="p">(</span><span class="n">usAddr</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">EEPROM_PAGE_SIZE</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="nf">i2c_Stop</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">      <span class="k">for</span> <span class="p">(</span><span class="n">m</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">m</span> <span class="o">&lt;</span> <span class="mi">1000</span><span class="p">;</span> <span class="n">m</span><span class="o">++</span><span class="p">)</span>        <span class="c1">// 轮询等待 EEPROM 就绪
+</span></span></span><span class="line"><span class="cl">      <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">i2c_Start</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">i2c_SendByte</span><span class="p">(</span><span class="n">EEPROM_DEV_ADDR</span> <span class="o">|</span> <span class="n">EEPROM_I2C_WR</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="nf">i2c_WaitAck</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">break</span><span class="p">;</span>  <span class="c1">// 有应答说明内部写已完成
+</span></span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="n">m</span> <span class="o">==</span> <span class="mi">1000</span><span class="p">)</span> <span class="k">goto</span> <span class="n">cmd_fail</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="nf">i2c_SendByte</span><span class="p">((</span><span class="kt">uint8_t</span><span class="p">)</span><span class="n">usAddr</span><span class="p">);</span>    <span class="c1">// 发送当前存储地址
+</span></span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="nf">i2c_WaitAck</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="k">goto</span> <span class="n">cmd_fail</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">i2c_SendByte</span><span class="p">(</span><span class="n">_pWriteBuf</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>        <span class="c1">// 写 1 字节
+</span></span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nf">i2c_WaitAck</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="k">goto</span> <span class="n">cmd_fail</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">usAddr</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">i2c_Stop</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 等待最后一次 EEPROM 内部写操作结束 */</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="nf">ee_CheckDevice</span><span class="p">(</span><span class="n">EEPROM_DEV_ADDR</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="nl">cmd_fail</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">i2c_Stop</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="4-mainc掉电保存演示">4. main.c（掉电保存演示）
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;main.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;stm32f1xx.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;./usart/bsp_debug_usart.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;./led/bsp_led.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;./i2c/bsp_i2c_ee.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="n">cal_flag</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">int_bufffer</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl"><span class="kt">long</span> <span class="kt">double</span> <span class="n">double_buffer</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#define DOUBLE_ADDR  10
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define LONGINT_ADDR 70
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">HAL_Init</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">SystemClock_Config</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">DEBUG_USART_Config</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\r\n</span><span class="s"> 这是一个EEPROM 读写小数和长整数实验 </span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nf">i2c_CfgGpio</span><span class="p">();</span>                    <span class="c1">// 初始化 I2C GPIO（开漏）
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nf">ee_ReadBytes</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cal_flag</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>    <span class="c1">// 读 0 地址的标志位
+</span></span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">cal_flag</span> <span class="o">!=</span> <span class="mh">0xCD</span><span class="p">)</span>             <span class="c1">// 没写过
+</span></span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;没有检测到数据标志，即将写入</span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">cal_flag</span> <span class="o">=</span> <span class="mh">0xCD</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">ee_WriteBytes</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cal_flag</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="mi">7</span><span class="p">;</span> <span class="n">k</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">double_buffer</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">k</span> <span class="o">+</span> <span class="mf">0.1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="n">int_bufffer</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>   <span class="o">=</span> <span class="n">k</span> <span class="o">*</span> <span class="mi">500</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">ee_WriteBytes</span><span class="p">((</span><span class="kt">void</span><span class="o">*</span><span class="p">)</span><span class="n">double_buffer</span><span class="p">,</span> <span class="n">DOUBLE_ADDR</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">double_buffer</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">ee_WriteBytes</span><span class="p">((</span><span class="kt">void</span><span class="o">*</span><span class="p">)</span><span class="n">int_bufffer</span><span class="p">,</span>   <span class="n">LONGINT_ADDR</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">int_bufffer</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;已写入，请复位开发板读取验证</span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">else</span>                               <span class="c1">// 已写过
+</span></span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;检测到数据标志，读出数据：</span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">ee_ReadBytes</span><span class="p">((</span><span class="kt">void</span><span class="o">*</span><span class="p">)</span><span class="n">double_buffer</span><span class="p">,</span> <span class="n">DOUBLE_ADDR</span><span class="p">,</span>  <span class="k">sizeof</span><span class="p">(</span><span class="n">double_buffer</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">ee_ReadBytes</span><span class="p">((</span><span class="kt">void</span><span class="o">*</span><span class="p">)</span><span class="n">int_bufffer</span><span class="p">,</span>   <span class="n">LONGINT_ADDR</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">int_bufffer</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="mi">7</span><span class="p">;</span> <span class="n">k</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;小数=%LF 整数=%d</span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">double_buffer</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">int_bufffer</span><span class="p">[</span><span class="n">k</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="四代码分段讲解">四、代码分段讲解
+</h2><h3 id="1-为什么用软件-i2c">1. 为什么用软件 I2C？
+</h3><p>STM32 的硬件 I2C 外设历史上&quot;坑&quot;较多，而<strong>软件模拟</strong>用两根 GPIO 翻转电平就能拼出时序，逻辑完全透明、易于用示波器对照学习。理解了软件 I2C，再看硬件 I2C 寄存器就轻松了。</p>
+<h3 id="2-开漏输出--上拉电阻">2. 开漏输出 + 上拉电阻
+</h3><p>I2C 总线要求 SDA/SCL 是**开漏（OD）**结构，并外接上拉电阻。开漏意味着引脚只能拉低或&quot;释放&quot;（靠上拉变高），这样多设备才能&quot;线与&quot;——谁拉低谁说了算，避免总线冲突。所以 <code>i2c_CfgGpio</code> 把引脚配成 <code>GPIO_MODE_OUTPUT_OD</code>。</p>
+<h3 id="3-起始停止信号的定义">3. 起始/停止信号的定义
+</h3><ul>
+<li><strong>起始</strong>：SCL 为高时，SDA 由高变低；</li>
+<li><strong>停止</strong>：SCL 为高时，SDA 由低变高。</li>
+<li>数据位必须在 SCL 低电平时改变，在 SCL 高电平时保持稳定（主机在 SCL 上升沿采样）。这正是 <code>i2c_SendByte</code> 里&quot;先摆数据、再拉高 SCL、再拉低&quot;的由来。</li>
+</ul>
+<h3 id="4-acknack-应答">4. ACK/NACK 应答
+</h3><p>每传完 1 字节，接收方要在第 9 个时钟把 SDA 拉低表示&quot;收到&quot;（ACK）。读操作时，<strong>主机</strong>作为接收方：中间字节发 ACK 让从机继续发，最后一字节发 NACK 告诉从机&quot;到此为止&quot;。</p>
+<h3 id="5-at24c02-的页写陷阱">5. AT24C02 的页写陷阱
+</h3><p>24C02 <strong>每页只有 8 字节</strong>，且一次页写不能跨页（跨页会回绕覆盖）。所以 <code>ee_WriteBytes</code> 在遇到&quot;页首地址&quot;时重新发起始+地址，把数据按页切片写入。这是 I2C EEPROM 驱动最容易出错的地方。</p>
+<h3 id="6-写后为什么要等">6. 写后为什么要等？
+</h3><p>主机把数据送到 EEPROM 后，EEPROM 要在内部把数据烧录进存储阵列（约几毫秒）。这段时间内它对总线寻址无应答。<code>ee_WriteBytes</code> 用 <code>ee_CheckDevice</code> 轮询应答，直到 EEPROM 响应，才认为写入完成——否则下一条命令会失败。</p>
+<hr>
+<h2 id="五实验现象">五、实验现象
+</h2><ol>
+<li>第一次上电，串口打印&quot;没有检测到数据标志，即将写入&quot;；写完后提示&quot;请复位开发板读取验证&quot;；</li>
+<li>按下复位键（不断电也可），串口打印出之前写入的 7 个小数和整数，证明数据已掉电保存；</li>
+<li>即使断开电源再上电，数据依然存在（EEPROM 特性）。</li>
+</ol>
+<hr>
+<h2 id="六常见问题">六、常见问题
+</h2><p><strong>Q1：读写一直失败、检测不到设备？</strong></p>
+<ul>
+<li>确认 SDA/SCL 外接了上拉电阻（开发板一般已焊好），且 GPIO 配置为开漏；</li>
+<li>确认设备地址 <code>0xA0</code> 与板上 A2/A1/A0 电平一致；</li>
+<li>用示波器看 SCL 是否有波形，确认 <code>i2c_Delay</code> 延时合理（太快超出从机响应能力）。</li>
+</ul>
+<p><strong>Q2：写入后读出数据错乱？</strong></p>
+<ul>
+<li>多半是<strong>跨页没处理</strong>或<strong>写后没等忙</strong>；务必保留页拆分与 <code>ee_CheckDevice</code> 等待逻辑；</li>
+<li>注意 AT24C02 容量仅 256 字节，地址别越界。</li>
+</ul>
+<p><strong>Q3：软件 I2C 和硬件 I2C 怎么选？</strong></p>
+<ul>
+<li>学习/移植/调试选软件 I2C；追求速率（400kHz/1MHz 快速模式）和 CPU 解放选硬件 I2C + DMA。</li>
+</ul>
+<hr>
+<h2 id="七小结">七、小结
+</h2><ul>
+<li>I2C 是<strong>两线、多设备、半双工</strong>总线，靠地址寻址区分从机；</li>
+<li>软件 I2C 用 GPIO 翻转拼出起始/停止/应答时序，是理解协议的最佳路径；</li>
+<li>EEPROM 驱动要点：<strong>页写不跨页、写后等忙、读前发地址再重复起始</strong>。</li>
+</ul>
+<hr>
+<h2 id="八拓展应用">八、拓展应用
+</h2><ol>
+<li><strong>保存用户配置</strong>：把屏幕亮度、通信参数等存进 EEPROM，上电自动恢复。</li>
+<li><strong>传感器标定系数</strong>：把零点/增益标定数据存 EEPROM，避免每次上电重新标定。</li>
+<li><strong>多从机总线</strong>：在同一条 I2C 上挂温湿度传感器（如 SHT30）、RTC（如 PCF8563）、OLED，用不同地址分时访问。</li>
+<li><strong>硬件 I2C + 中断/DMA</strong>：把软件模拟换成 <code>HAL_I2C_Mem_Write/Read</code>，提升速率并释放 CPU（参考后续硬件 I2C 进阶）。</li>
+</ol>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/stm32f103/">STM32F103</a>
+        
+            <a href="/tags/hal%E5%BA%93/">HAL库</a>
+        
+            <a href="/tags/i2c/">I2c</a>
+        
+            <a href="/tags/eeprom/">EEPROM</a>
+        
+            <a href="/tags/at24c02/">AT24C02</a>
+        
+            <a href="/tags/%E8%BD%AF%E4%BB%B6i2c/">软件I2C</a>
+        
+            <a href="/tags/%E9%87%8E%E7%81%AB/">野火</a>
+        
+    </section>
+
+
+    <section class="article-lastmod">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <span>
+            最后更新于 Sep 09, 2026 09:51 &#43;0800
+        </span>
+    </section></footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/stm32-dma-%E7%9B%B4%E6%8E%A5%E5%AD%98%E5%82%A8%E5%8C%BA%E8%AE%BF%E9%97%AE%E5%AD%98%E5%82%A8%E5%99%A8%E5%88%B0%E5%AD%98%E5%82%A8%E5%99%A8/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">STM32 DMA — 直接存储区访问（存储器到存储器）</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/stm32-tim-%E5%9F%BA%E6%9C%AC%E5%AE%9A%E6%97%B6%E5%99%A8%E5%AE%9A%E6%97%B61ms-%E4%B8%AD%E6%96%AD/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">STM32 TIM — 基本定时器定时（1ms 中断）</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/stm32-spi-%E8%AF%BB%E5%86%99%E4%B8%B2%E8%A1%8C-flashw25q64/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">STM32 SPI — 读写串行 FLASH（W25Q64）</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/stm32-adc-%E7%8B%AC%E7%AB%8B%E6%A8%A1%E5%BC%8F%E5%8D%95%E9%80%9A%E9%81%93--dma-%E8%BF%9E%E7%BB%AD%E9%87%87%E9%9B%86/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">STM32 ADC — 独立模式单通道 &#43; DMA 连续采集</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/stm32-usart-%E4%B8%B2%E5%8F%A3%E9%80%9A%E4%BF%A1%E4%B8%8E-printf-%E9%87%8D%E5%AE%9A%E5%90%91/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">STM32 USART — 串口通信与 printf 重定向</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="ClingYang/ClingYang.github.io"
+        issue-term="pathname"
+        
+        label="💬comment"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2026 CLing
+    </section>
+    
+    <section class="powerby">
+        
+            世界是你们 <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<style>
+    #TableOfContents > ul, ol {
+        ul, ol {
+            display: none;
+        }
+        .open {
+            display: block;
+        }
+    }
+</style>
+
+<script>
+    function initTocHide() {
+        
+        let toc = document.querySelector(".widget--toc");
+        if (!toc) {
+            return;
+        }
+        
+        window.addEventListener('scroll', function() {
+            
+            let currentLi = document.querySelector(".active-class");
+            if (!currentLi) {
+                return
+            }
+            
+            let elementsByClassName = document.querySelectorAll(".open");
+            if (elementsByClassName.length > 0) {
+                elementsByClassName.forEach((ul) => {
+                    ul.classList.remove("open")
+                })
+            }
+            
+            if (currentLi.children.length > 1) {
+                currentLi.children[1].classList.add("open")
+            }
+            
+            let ul = currentLi.parentElement;
+            do {
+                ul.classList.add("open");
+                ul = ul.parentElement.parentElement
+            } while (ul !== undefined && (ul.localName === 'ul' || ul.localName === 'ol'))
+        });
+    }
+    initTocHide()
+</script>
+
+    </body>
+</html>

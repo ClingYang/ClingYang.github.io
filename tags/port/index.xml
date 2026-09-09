@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>PORT on CLing</title>
+        <link>https://clingyang.github.io/tags/port/</link>
+        <description>Recent content in PORT on CLing</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en-us</language>
+        <copyright>CLing</copyright>
+        <lastBuildDate>Wed, 09 Sep 2026 09:51:13 +0800</lastBuildDate><atom:link href="https://clingyang.github.io/tags/port/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>HC32 GPIO — 通用输入输出口</title>
+        <link>https://clingyang.github.io/post/mcu_hc32/gpio/</link>
+        <pubDate>Wed, 09 Sep 2026 09:00:00 +0800</pubDate>
+        
+        <guid>https://clingyang.github.io/post/mcu_hc32/gpio/</guid>
+        <description>&lt;h1 id=&#34;gpio--从点亮一颗-led-开始&#34;&gt;GPIO — 从点亮一颗 LED 开始
+&lt;/h1&gt;&lt;h2 id=&#34;这一章讲什么&#34;&gt;这一章讲什么
+&lt;/h2&gt;&lt;p&gt;GPIO 的全称是 &lt;strong&gt;G&lt;/strong&gt;eneral &lt;strong&gt;P&lt;/strong&gt;urpose &lt;strong&gt;I&lt;/strong&gt;nput/&lt;strong&gt;O&lt;/strong&gt;utput，翻译过来就是「通用输入输出口」。&lt;/p&gt;
+&lt;p&gt;你可以把它理解成单片机身上的&lt;strong&gt;手和眼睛&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;当它配置成&lt;strong&gt;输出&lt;/strong&gt;，芯片就能主动往外送电（高电平 3.3V）或者拉到地（低电平 0V）——这就是「手」，能去驱动 LED、蜂鸣器、继电器。&lt;/li&gt;
+&lt;li&gt;当它配置成&lt;strong&gt;输入&lt;/strong&gt;，芯片就能读外面的电压是高还是低——这就是「眼睛」，能读按键、读传感器的开关信号。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;HC32F460 上，GPIO 模块在 ddl 库里叫 &lt;strong&gt;PORT&lt;/strong&gt;。所以你看到的函数全是 &lt;code&gt;PORT_xxx()&lt;/code&gt; 开头，比如 &lt;code&gt;PORT_Init()&lt;/code&gt;、&lt;code&gt;PORT_SetBits()&lt;/code&gt;。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;给 STM32 老手的提示&lt;/strong&gt;
+如果你之前用过 STM32 标准外设库，HC32 的 PORT 模块和 &lt;code&gt;GPIO_Init()&lt;/code&gt; 是一一对应的关系，只是换了名字：&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;STM32 标准库&lt;/th&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;HC32 ddl 库&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;GPIO_Init()&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;PORT_Init()&lt;/code&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;GPIO_SetBits()&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;PORT_SetBits()&lt;/code&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;GPIO_ResetBits()&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;PORT_ResetBits()&lt;/code&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;需要自己读再写反&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;PORT_Toggle()&lt;/code&gt; 一步搞定&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;GPIO_ReadInputDataBit()&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;PORT_GetBit()&lt;/code&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;RCC_APB2PeriphClockCmd()&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;GPIO &lt;strong&gt;不需要&lt;/strong&gt;单独开时钟&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;最后那一条很重要：&lt;strong&gt;HC32F460 的 GPIO 不需要手动开外设时钟&lt;/strong&gt;。这一点和 STM32 不一样，少了一步，但也容易让人忘记「其他外设是要开时钟的」。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;hc32f460-的-gpio-长什么样&#34;&gt;HC32F460 的 GPIO 长什么样
+&lt;/h2&gt;&lt;p&gt;HC32F460JEUA（LQFP100 封装）一共有 8 组 PORT：&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;端口名&lt;/th&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;ddl 里的写法&lt;/th&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;说明&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;PORTA&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;PortA&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;常用，LED / USART 都在这&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;PORTB&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;PortB&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;QSPI / SDIOC 复用口多&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;PORTC&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;PortC&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;按键 PC13 在这&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;PORTD&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;PortD&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;PORTE&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;PortE&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;PORTH&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;PortH&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;引脚很少，常做特殊功能&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;每组最多 16 个引脚，在 ddl 里写成 &lt;code&gt;Pin00&lt;/code&gt; ~ &lt;code&gt;Pin15&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;所以「PA0 这个引脚」在 HC32 的代码里就写成两个参数：&lt;code&gt;PortA, Pin00&lt;/code&gt;。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;核心配置结构体&#34;&gt;核心配置结构体
+&lt;/h2&gt;&lt;p&gt;所有 GPIO 配置都塞在一个结构体 &lt;code&gt;stc_port_init_t&lt;/code&gt; 里。最常用的三个成员：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;stc_port_init_t&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;stcPortInit&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;stcPortInit&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;enPinMode&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Pin_Mode_Out&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;   &lt;span class=&#34;c1&#34;&gt;// 引脚模式：输出
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;stcPortInit&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;enPullUp&lt;/span&gt;  &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Enable&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;         &lt;span class=&#34;c1&#34;&gt;// 内部上拉电阻：使能
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;stcPortInit&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;enExInt&lt;/span&gt;   &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Enable&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;         &lt;span class=&#34;c1&#34;&gt;// 外部中断输入：使能
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;enPinMode&lt;/code&gt; 只有两个常用取值，非常好记：&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;取值&lt;/th&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;含义&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;Pin_Mode_Out&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;输出模式（推挽）&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;Pin_Mode_In&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;输入模式&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;Pin_Mode_Ana&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;模拟模式（给 ADC / DAC 用，把数字电路断开）&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;配好结构体，调一次 &lt;code&gt;PORT_Init()&lt;/code&gt; 就生效了：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nf&#34;&gt;PORT_Init&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;PortA&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Pin00&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;stcPortInit&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;一个坑&lt;/strong&gt;：&lt;code&gt;stc_port_init_t&lt;/code&gt; 的成员不止这三个（还有开漏、驱动能力、施密特触发等）。
+C 语言里&lt;strong&gt;没赋值的局部结构体成员是随机垃圾值&lt;/strong&gt;，直接用会出现「有时能跑有时不能跑」的灵异现象。
+所以 HC32 的示例代码里，&lt;code&gt;PORT_Init()&lt;/code&gt; 之前一定会先来一句：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nf&#34;&gt;MEM_ZERO_STRUCT&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;stcPortInit&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;   &lt;span class=&#34;c1&#34;&gt;// 整个结构体清零
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这个宏是 ddl 库提供的，等价于 &lt;code&gt;memset(&amp;amp;stcPortInit, 0, sizeof(stcPortInit))&lt;/code&gt;。&lt;strong&gt;养成习惯，每次配结构体前都清零。&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;读写引脚的四个函数&#34;&gt;读写引脚的四个函数
+&lt;/h2&gt;&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;函数&lt;/th&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;干什么&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;PORT_SetBits(port, pin)&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;输出&lt;strong&gt;高&lt;/strong&gt;电平（置 1）&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;PORT_ResetBits(port, pin)&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;输出&lt;strong&gt;低&lt;/strong&gt;电平（清 0）&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;PORT_Toggle(port, pin)&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;翻转&lt;/strong&gt;电平（高变低、低变高）&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;PORT_GetBit(port, pin)&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;读&lt;/strong&gt;引脚电平，返回 &lt;code&gt;Set&lt;/code&gt; 或 &lt;code&gt;Reset&lt;/code&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;code&gt;PORT_Toggle()&lt;/code&gt; 是做流水灯、做方波最省事的函数，比「读出来 → 取反 → 写回去」三步简洁得多。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;本章示例&#34;&gt;本章示例
+&lt;/h2&gt;&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;示例&lt;/th&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;学到什么&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;../gpio_output/&#34; &gt;GPIO 输出：点亮并闪烁 LED&lt;/a&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;配置引脚为输出、&lt;code&gt;PORT_Toggle&lt;/code&gt; 翻转电平、&lt;code&gt;Ddl_Delay1ms&lt;/code&gt; 延时&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;开发板上的-led-在哪&#34;&gt;开发板上的 LED 在哪
+&lt;/h2&gt;&lt;p&gt;HC32F460JEUA KIT 板载三颗 LED，全部挂在 PORTA 上，而且是&lt;strong&gt;低电平点亮&lt;/strong&gt;（共阳极接法）：&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;LED 颜色&lt;/th&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;引脚&lt;/th&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;ddl 写法&lt;/th&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;点亮条件&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;红&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;PA0&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;PortA, Pin00&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;输出低电平&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;绿&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;PA1&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;PortA, Pin01&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;输出低电平&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;蓝&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;PA2&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;PortA, Pin02&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;输出低电平&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;「低电平点亮」这件事一定要记住，它是新手最容易踩的坑：你写 &lt;code&gt;PORT_SetBits()&lt;/code&gt; 想点灯，结果灯灭了。&lt;/p&gt;
+&lt;p&gt;SDK 里的 BSP 已经帮你封装好了，用起来不用管极性：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nf&#34;&gt;BSP_LED_Init&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;();&lt;/span&gt;              &lt;span class=&#34;c1&#34;&gt;// 初始化三颗 LED
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nf&#34;&gt;BSP_LED_On&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;LED_RED&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;         &lt;span class=&#34;c1&#34;&gt;// 点亮红灯（内部其实调的是 PORT_ResetBits）
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nf&#34;&gt;BSP_LED_Off&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;LED_RED&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;        &lt;span class=&#34;c1&#34;&gt;// 熄灭红灯
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nf&#34;&gt;BSP_LED_Toggle&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;LED_GREEN&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;   &lt;span class=&#34;c1&#34;&gt;// 翻转绿灯
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;BSP 文件位置：&lt;code&gt;bsp/ev_hc32f460_lqfp100_v2/ev_hc32f460_lqfp100_v2.c&lt;/code&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;小结&#34;&gt;小结
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;HC32 的 GPIO 模块叫 &lt;strong&gt;PORT&lt;/strong&gt;，函数是 &lt;code&gt;PORT_xxx()&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;引脚用「端口 + 引脚号」两个参数表示，比如 &lt;code&gt;PortA, Pin00&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;配置流程固定三步：&lt;strong&gt;清零结构体 → 填结构体 → &lt;code&gt;PORT_Init()&lt;/code&gt;&lt;/strong&gt;。&lt;/li&gt;
+&lt;li&gt;GPIO &lt;strong&gt;不需要&lt;/strong&gt;开外设时钟，但别的外设需要，用 &lt;code&gt;PWC_FcgxPeriphClockCmd()&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;开发板 LED 是&lt;strong&gt;低电平点亮&lt;/strong&gt;。&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

@@ -1,0 +1,1553 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="PUYA PY32F403 HAL 库 V1.4.5 USART_HyperTerminal_Polling 示例逐行讲解：波特率、超时机制、回显、printf 重定向">
+<title>PY32F403 USART — 轮询方式串口收发与回显</title>
+
+<link rel='canonical' href='https://clingyang.github.io/p/py32f403-usart-%E8%BD%AE%E8%AF%A2%E6%96%B9%E5%BC%8F%E4%B8%B2%E5%8F%A3%E6%94%B6%E5%8F%91%E4%B8%8E%E5%9B%9E%E6%98%BE/'>
+
+<link rel="stylesheet" href="/scss/style.min.e14f3ba93baae65b2aef2339f32b6f25d7a0184785ebf4f6bd7d3376ae5dc2d4.css"><meta property='og:title' content="PY32F403 USART — 轮询方式串口收发与回显">
+<meta property='og:description' content="PUYA PY32F403 HAL 库 V1.4.5 USART_HyperTerminal_Polling 示例逐行讲解：波特率、超时机制、回显、printf 重定向">
+<meta property='og:url' content='https://clingyang.github.io/p/py32f403-usart-%E8%BD%AE%E8%AF%A2%E6%96%B9%E5%BC%8F%E4%B8%B2%E5%8F%A3%E6%94%B6%E5%8F%91%E4%B8%8E%E5%9B%9E%E6%98%BE/'>
+<meta property='og:site_name' content='CLing'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='USART_HyperTerminal_Polling' /><meta property='article:tag' content='usart' /><meta property='article:tag' content='V1.4.5' /><meta property='article:tag' content='PY32F403' /><meta property='article:published_time' content='2026-09-08T14:52:21&#43;08:00'/><meta property='article:modified_time' content='2026-09-09T10:25:00&#43;08:00'/>
+<meta name="twitter:title" content="PY32F403 USART — 轮询方式串口收发与回显">
+<meta name="twitter:description" content="PUYA PY32F403 HAL 库 V1.4.5 USART_HyperTerminal_Polling 示例逐行讲解：波特率、超时机制、回显、printf 重定向">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                            height="290" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🏀</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">CLing</a></h1>
+            <h2 class="site-description">你好 欢迎来到我的博客</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>档案</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E6%8A%80%E6%9C%AF%E9%93%BE%E6%8E%A5/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>技术链接</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/excel/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+                
+                <span>Excel教程</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#1-功能简介">1. 功能简介</a></li>
+    <li><a href="#2-硬件准备">2. 硬件准备</a>
+      <ol>
+        <li><a href="#接线关键tx-接-rx交叉接">接线（关键！TX 接 RX，交叉接）</a></li>
+        <li><a href="#串口助手参数">串口助手参数</a></li>
+      </ol>
+    </li>
+    <li><a href="#3-完整代码带中文注释">3. 完整代码（带中文注释）</a>
+      <ol>
+        <li><a href="#配套的-msp-文件引脚在这里配">配套的 MSP 文件（引脚在这里配）</a></li>
+      </ol>
+    </li>
+    <li><a href="#4-代码分段讲解">4. 代码分段讲解</a>
+      <ol>
+        <li><a href="#41-txstartmessagesize-为什么要--1">4.1 <code>TXSTARTMESSAGESIZE</code> 为什么要 <code>-1</code></a></li>
+        <li><a href="#42-init-结构体每个字段的含义">4.2 <code>Init</code> 结构体每个字段的含义</a></li>
+        <li><a href="#43-一帧数据在线上长什么样">4.3 一帧数据在线上长什么样</a></li>
+        <li><a href="#44-超时参数怎么理解">4.4 超时参数怎么理解</a></li>
+        <li><a href="#45-轮询的本质缺陷">4.5 轮询的本质缺陷</a></li>
+        <li><a href="#46-把-printf-打通强烈建议做这一步">4.6 把 printf 打通（强烈建议做这一步）</a></li>
+      </ol>
+    </li>
+    <li><a href="#5-实验现象">5. 实验现象</a>
+      <ol>
+        <li><a href="#时序示意">时序示意</a></li>
+      </ol>
+    </li>
+    <li><a href="#6-常见问题">6. 常见问题</a></li>
+    <li><a href="#7-小结">7. 小结</a></li>
+    <li><a href="#8-拓展应用">8. 拓展应用</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/puya/" >
+                PUYA
+            </a>
+        
+            <a href="/categories/usart/" >
+                USART
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/py32f403-usart-%E8%BD%AE%E8%AF%A2%E6%96%B9%E5%BC%8F%E4%B8%B2%E5%8F%A3%E6%94%B6%E5%8F%91%E4%B8%8E%E5%9B%9E%E6%98%BE/">PY32F403 USART — 轮询方式串口收发与回显</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            PUYA PY32F403 HAL 库 V1.4.5 USART_HyperTerminal_Polling 示例逐行讲解：波特率、超时机制、回显、printf 重定向
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2026-09-08</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 8 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="usart_hyperterminal_polling--串口轮询收发与回显">USART_HyperTerminal_Polling — 串口轮询收发与回显
+</h1><blockquote>
+<p><strong>芯片</strong>: PY32F403（Cortex-M4，最高 72MHz）
+<strong>固件库</strong>: PY32F403_Firmware V1.4.5
+<strong>源文件</strong>: <code>PY32F403_Firmware_V1.4.5/Projects/PY32F403-STK/Example/USART/USART_HyperTerminal_Polling/Src/main.c</code>
+<strong>难度</strong>: ★☆☆☆☆ 入门必做（第二课）</p>
+</blockquote>
+<hr>
+<h2 id="1-功能简介">1. 功能简介
+</h2><p>程序流程用大白话说就是四步：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">① 上电 → 串口发一句提示：&#34;请用键盘输入 12 个字符&#34;
+</span></span><span class="line"><span class="cl">② 死等 → 一直等，直到收满 12 个字节（最多等 5 秒）
+</span></span><span class="line"><span class="cl">③ 回显 → 把收到的 12 个字节原封不动发回去
+</span></span><span class="line"><span class="cl">④ 收尾 → 发一句 &#34;Example Finished&#34;，点亮 LED，进死循环
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>&ldquo;轮询&rdquo;（Polling）是什么意思？</strong></p>
+<p>就是 CPU 站在那里<strong>死等</strong>。<code>HAL_UART_Receive()</code> 内部是这样的：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">循环 {
+</span></span><span class="line"><span class="cl">   看一眼状态寄存器的 RXNE 标志位（接收缓冲区非空？）
+</span></span><span class="line"><span class="cl">   还没来 → 再看一眼 → 再看一眼 → ...（CPU 就在这空转）
+</span></span><span class="line"><span class="cl">   来了   → 从 DR 寄存器读走这个字节，计数 -1
+</span></span><span class="line"><span class="cl">   计数到 0 → 返回 HAL_OK
+</span></span><span class="line"><span class="cl">   超时了   → 返回 HAL_TIMEOUT
+</span></span><span class="line"><span class="cl">}
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>优点是<strong>逻辑直白，一眼就懂</strong>；缺点是<strong>这 5 秒里 CPU 干不了别的事</strong>。所以轮询适合：初始化打印、长度已知的短数据、以及现在这种教学场景。</p>
+<h2 id="2-硬件准备">2. 硬件准备
+</h2><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>需要的东西</th>
+					<th>说明</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>PY32F403-STK 开发板</td>
+					<td>—</td>
+			</tr>
+			<tr>
+					<td>USB-TTL 模块</td>
+					<td>CH340 / CP2102 / FT232 任选，注意选 <strong>3.3V</strong> 电平档</td>
+			</tr>
+			<tr>
+					<td>3 根杜邦线</td>
+					<td>TX / RX / GND</td>
+			</tr>
+			<tr>
+					<td>串口助手软件</td>
+					<td>SSCOM、XCOM、MobaXterm、PuTTY、VSCode 串口插件都行</td>
+			</tr>
+	</tbody>
+</table></div>
+<h3 id="接线关键tx-接-rx交叉接">接线（关键！TX 接 RX，交叉接）
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">   PY32F403-STK              USB-TTL 模块
+</span></span><span class="line"><span class="cl">   ─────────────             ─────────────
+</span></span><span class="line"><span class="cl">   PA2  (USART2_TX)  ──────►  RX
+</span></span><span class="line"><span class="cl">   PA3  (USART2_RX)  ◄──────  TX
+</span></span><span class="line"><span class="cl">   GND               ───────  GND     ★ 必须接，否则没有共同参考地，全是乱码
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="串口助手参数">串口助手参数
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">波特率  : 115200
+</span></span><span class="line"><span class="cl">数据位  : 8
+</span></span><span class="line"><span class="cl">停止位  : 1
+</span></span><span class="line"><span class="cl">校验位  : None
+</span></span><span class="line"><span class="cl">流  控  : None
+</span></span></code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p><strong>为什么是 PA2/PA3？</strong> 这是 STK 板 BSP 里写死的调试口定义（<code>py32f403xx_Start_Kit.h</code> 中的 <code>DEBUG_USART</code>），复用编号是 <code>GPIO_AF2_USART2</code>。如果你自己画板子换了引脚，改 MSP 里的 GPIO 配置即可。</p>
+</blockquote>
+<h2 id="3-完整代码带中文注释">3. 完整代码（带中文注释）
+</h2><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span><span class="lnt">113
+</span><span class="lnt">114
+</span><span class="lnt">115
+</span><span class="lnt">116
+</span><span class="lnt">117
+</span><span class="lnt">118
+</span><span class="lnt">119
+</span><span class="lnt">120
+</span><span class="lnt">121
+</span><span class="lnt">122
+</span><span class="lnt">123
+</span><span class="lnt">124
+</span><span class="lnt">125
+</span><span class="lnt">126
+</span><span class="lnt">127
+</span><span class="lnt">128
+</span><span class="lnt">129
+</span><span class="lnt">130
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cm">/* ==========================================================================
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * PY32F403 USART_HyperTerminal_Polling
+</span></span></span><span class="line"><span class="cl"><span class="cm"> *   USART2 (PA2/PA3) @115200，轮询发送 → 轮询接收 12 字节 → 原样回显
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * ========================================================================== */</span>
+</span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;main.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 求数组元素个数的经典宏 */</span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
+</span></span></span><span class="line"><span class="cl"><span class="cm">/* -1 是为了去掉字符串字面量末尾的 &#39;\0&#39;，我们不想把结束符也发出去 */</span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define TXSTARTMESSAGESIZE    (COUNTOF(aTxStartMessage) - 1)
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define TXENDMESSAGESIZE      (COUNTOF(aTxEndMessage)   - 1)
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">UART_HandleTypeDef</span> <span class="n">UartHandle</span><span class="p">;</span>      <span class="cm">/* 串口句柄：HAL 用它记录配置和状态 */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 开场提示语。\r\n 是回车+换行，Windows 串口助手认这个组合 */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="n">aTxStartMessage</span><span class="p">[]</span> <span class="o">=</span> <span class="s">&#34;</span><span class="se">\r\n</span><span class="s"> UART Hyperterminal communication based on Polling&#34;</span>
+</span></span><span class="line"><span class="cl">                            <span class="s">&#34;</span><span class="se">\r\n</span><span class="s"> Enter 12 characters using keyboard :</span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="n">aTxEndMessage</span><span class="p">[]</span>   <span class="o">=</span> <span class="s">&#34;</span><span class="se">\r\n</span><span class="s"> Example Finished</span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 接收缓冲区，预填 0xFF 方便调试时一眼看出&#34;哪些位置真的收到了数据&#34; */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="n">aRxBuffer</span><span class="p">[</span><span class="mi">12</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mh">0xff</span><span class="p">,</span> <span class="mh">0xff</span><span class="p">,</span> <span class="mh">0xff</span><span class="p">,</span> <span class="mh">0xff</span><span class="p">,</span> <span class="mh">0xff</span><span class="p">,</span> <span class="mh">0xff</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                         <span class="mh">0xff</span><span class="p">,</span> <span class="mh">0xff</span><span class="p">,</span> <span class="mh">0xff</span><span class="p">,</span> <span class="mh">0xff</span><span class="p">,</span> <span class="mh">0xff</span><span class="p">,</span> <span class="mh">0xff</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">APP_SystemClockConfig</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="cm">/* HAL 初始化：配 Flash + 启动 SysTick（超时计时靠它） */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">HAL_Init</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* LED 初始化：最后用它表示&#34;全流程成功&#34; */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">BSP_LED_Init</span><span class="p">(</span><span class="n">LED_GREEN</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 系统时钟：HSI 8MHz（PCLK1 = 8MHz，供 USART2 用） */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">APP_SystemClockConfig</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* ---------------- 串口初始化 ---------------- */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">UartHandle</span><span class="p">.</span><span class="n">Instance</span>          <span class="o">=</span> <span class="n">USART2</span><span class="p">;</span>                  <span class="cm">/* 用 USART2（STK 调试口）*/</span>
+</span></span><span class="line"><span class="cl">  <span class="n">UartHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">BaudRate</span>     <span class="o">=</span> <span class="mi">115200</span><span class="p">;</span>                  <span class="cm">/* 波特率                */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">UartHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">WordLength</span>   <span class="o">=</span> <span class="n">UART_WORDLENGTH_8B</span><span class="p">;</span>      <span class="cm">/* 8 位数据              */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">UartHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">StopBits</span>     <span class="o">=</span> <span class="n">UART_STOPBITS_1</span><span class="p">;</span>         <span class="cm">/* 1 位停止              */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">UartHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">Parity</span>       <span class="o">=</span> <span class="n">UART_PARITY_NONE</span><span class="p">;</span>        <span class="cm">/* 无校验                */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">UartHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">HwFlowCtl</span>    <span class="o">=</span> <span class="n">UART_HWCONTROL_NONE</span><span class="p">;</span>     <span class="cm">/* 不用 RTS/CTS 流控     */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">UartHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">Mode</span>         <span class="o">=</span> <span class="n">UART_MODE_TX_RX</span><span class="p">;</span>         <span class="cm">/* 收发都要（全双工）    */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">UartHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">OverSampling</span> <span class="o">=</span> <span class="n">UART_OVERSAMPLING_16</span><span class="p">;</span>    <span class="cm">/* 16 倍过采样，抗噪更好 */</span>
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 高级功能（自动波特率、引脚交换、数据取反等）本例都不用 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">UartHandle</span><span class="p">.</span><span class="n">AdvancedInit</span><span class="p">.</span><span class="n">AdvFeatureInit</span> <span class="o">=</span> <span class="n">UART_ADVFEATURE_NO_INIT</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 这一句内部会自动回调 HAL_UART_MspInit()，在那里配 PA2/PA3 的 GPIO 复用 */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">HAL_UART_Init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">UartHandle</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* ---------------- ① 发送开场提示 ---------------- */</span>
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 参数：句柄、数据指针、字节数、超时(ms)
+</span></span></span><span class="line"><span class="cl"><span class="cm">   * 返回 HAL_OK 表示全部字节都已送进移位寄存器 */</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="nf">HAL_UART_Transmit</span><span class="p">(</span><span class="o">&amp;</span><span class="n">UartHandle</span><span class="p">,</span> <span class="p">(</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="p">)</span><span class="n">aTxStartMessage</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                        <span class="n">TXSTARTMESSAGESIZE</span><span class="p">,</span> <span class="mi">5000</span><span class="p">)</span> <span class="o">!=</span> <span class="n">HAL_OK</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">APP_ErrorHandler</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* ---------------- ② 轮询接收 12 字节 ---------------- */</span>
+</span></span><span class="line"><span class="cl">  <span class="cm">/* ★ 注意：这里会阻塞！收不满 12 字节就一直等，5 秒后超时返回 HAL_TIMEOUT
+</span></span></span><span class="line"><span class="cl"><span class="cm">   *   → 所以你必须在 5 秒内在串口助手里发够 12 个字符 */</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="nf">HAL_UART_Receive</span><span class="p">(</span><span class="o">&amp;</span><span class="n">UartHandle</span><span class="p">,</span> <span class="p">(</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="p">)</span><span class="n">aRxBuffer</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">5000</span><span class="p">)</span> <span class="o">!=</span> <span class="n">HAL_OK</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">APP_ErrorHandler</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* ---------------- ③ 原样回显 ---------------- */</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="nf">HAL_UART_Transmit</span><span class="p">(</span><span class="o">&amp;</span><span class="n">UartHandle</span><span class="p">,</span> <span class="p">(</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="p">)</span><span class="n">aRxBuffer</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">5000</span><span class="p">)</span> <span class="o">!=</span> <span class="n">HAL_OK</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">APP_ErrorHandler</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* ---------------- ④ 发送结束语 ---------------- */</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="nf">HAL_UART_Transmit</span><span class="p">(</span><span class="o">&amp;</span><span class="n">UartHandle</span><span class="p">,</span> <span class="p">(</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="p">)</span><span class="n">aTxEndMessage</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                        <span class="n">TXENDMESSAGESIZE</span><span class="p">,</span> <span class="mi">5000</span><span class="p">)</span> <span class="o">!=</span> <span class="n">HAL_OK</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">APP_ErrorHandler</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 全流程无错 → LED 常亮，作为&#34;成功&#34;的可视化指示 */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">BSP_LED_On</span><span class="p">(</span><span class="n">LED_GREEN</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm">  * @brief  系统时钟配置：HSI 8MHz
+</span></span></span><span class="line"><span class="cl"><span class="cm">  *         HCLK = 8MHz，PCLK1 = 8MHz（USART2 挂在 APB1），PCLK2 = 4MHz
+</span></span></span><span class="line"><span class="cl"><span class="cm">  */</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">APP_SystemClockConfig</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">RCC_OscInitTypeDef</span>  <span class="n">OscInitstruct</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">  <span class="n">RCC_ClkInitTypeDef</span>  <span class="n">ClkInitstruct</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">OscInitstruct</span><span class="p">.</span><span class="n">OscillatorType</span>  <span class="o">=</span> <span class="n">RCC_OSCILLATORTYPE_HSE</span> <span class="o">|</span> <span class="n">RCC_OSCILLATORTYPE_HSI</span>
+</span></span><span class="line"><span class="cl">                                <span class="o">|</span> <span class="n">RCC_OSCILLATORTYPE_LSE</span> <span class="o">|</span> <span class="n">RCC_OSCILLATORTYPE_LSI</span>
+</span></span><span class="line"><span class="cl">                                <span class="o">|</span> <span class="n">RCC_OSCILLATORTYPE_HSI48M</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">OscInitstruct</span><span class="p">.</span><span class="n">HSEState</span>        <span class="o">=</span> <span class="n">RCC_HSE_OFF</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">OscInitstruct</span><span class="p">.</span><span class="n">HSI48MState</span>     <span class="o">=</span> <span class="n">RCC_HSI48M_OFF</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">OscInitstruct</span><span class="p">.</span><span class="n">HSIState</span>        <span class="o">=</span> <span class="n">RCC_HSI_ON</span><span class="p">;</span>       <span class="cm">/* 只用内部 8MHz RC */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">OscInitstruct</span><span class="p">.</span><span class="n">LSEState</span>        <span class="o">=</span> <span class="n">RCC_LSE_OFF</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">OscInitstruct</span><span class="p">.</span><span class="n">LSIState</span>        <span class="o">=</span> <span class="n">RCC_LSI_OFF</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">OscInitstruct</span><span class="p">.</span><span class="n">PLL</span><span class="p">.</span><span class="n">PLLState</span>    <span class="o">=</span> <span class="n">RCC_PLL_OFF</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="nf">HAL_RCC_OscConfig</span><span class="p">(</span><span class="o">&amp;</span><span class="n">OscInitstruct</span><span class="p">)</span> <span class="o">!=</span> <span class="n">HAL_OK</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">APP_ErrorHandler</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">ClkInitstruct</span><span class="p">.</span><span class="n">ClockType</span>      <span class="o">=</span> <span class="n">RCC_CLOCKTYPE_SYSCLK</span> <span class="o">|</span> <span class="n">RCC_CLOCKTYPE_HCLK</span>
+</span></span><span class="line"><span class="cl">                               <span class="o">|</span> <span class="n">RCC_CLOCKTYPE_PCLK1</span>  <span class="o">|</span> <span class="n">RCC_CLOCKTYPE_PCLK2</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">ClkInitstruct</span><span class="p">.</span><span class="n">SYSCLKSource</span>   <span class="o">=</span> <span class="n">RCC_SYSCLKSOURCE_HSI</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">ClkInitstruct</span><span class="p">.</span><span class="n">AHBCLKDivider</span>  <span class="o">=</span> <span class="n">RCC_SYSCLK_DIV1</span><span class="p">;</span>   <span class="cm">/* HCLK  = 8MHz */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">ClkInitstruct</span><span class="p">.</span><span class="n">APB1CLKDivider</span> <span class="o">=</span> <span class="n">RCC_HCLK_DIV1</span><span class="p">;</span>     <span class="cm">/* PCLK1 = 8MHz ← USART2 的时钟源 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">ClkInitstruct</span><span class="p">.</span><span class="n">APB2CLKDivider</span> <span class="o">=</span> <span class="n">RCC_HCLK_DIV2</span><span class="p">;</span>     <span class="cm">/* PCLK2 = 4MHz */</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="nf">HAL_RCC_ClockConfig</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ClkInitstruct</span><span class="p">,</span> <span class="n">FLASH_LATENCY_0</span><span class="p">)</span> <span class="o">!=</span> <span class="n">HAL_OK</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">APP_ErrorHandler</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">APP_ErrorHandler</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="配套的-msp-文件引脚在这里配">配套的 MSP 文件（引脚在这里配）
+</h3><p><code>HAL_UART_Init()</code> 内部会自动调用下面这个弱函数，GPIO 复用就在这里做：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">HAL_UART_MspInit</span><span class="p">(</span><span class="n">UART_HandleTypeDef</span> <span class="o">*</span><span class="n">huart</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitTypeDef</span> <span class="n">GPIO_InitStruct</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nf">__HAL_RCC_USART2_CLK_ENABLE</span><span class="p">();</span>      <span class="cm">/* USART2 时钟（APB1） */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">__HAL_RCC_GPIOA_CLK_ENABLE</span><span class="p">();</span>       <span class="cm">/* GPIOA 时钟（AHB2）  */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* PA2 → USART2_TX：复用推挽输出 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Pin</span>       <span class="o">=</span> <span class="n">GPIO_PIN_2</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Mode</span>      <span class="o">=</span> <span class="n">GPIO_MODE_AF_PP</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Pull</span>      <span class="o">=</span> <span class="n">GPIO_PULLUP</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Speed</span>     <span class="o">=</span> <span class="n">GPIO_SPEED_FREQ_VERY_HIGH</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Alternate</span> <span class="o">=</span> <span class="n">GPIO_AF2_USART2</span><span class="p">;</span>      <span class="cm">/* ★ AF 编号必须对 */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">HAL_GPIO_Init</span><span class="p">(</span><span class="n">GPIOA</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">GPIO_InitStruct</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* PA3 → USART2_RX */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Pin</span>       <span class="o">=</span> <span class="n">GPIO_PIN_3</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Alternate</span> <span class="o">=</span> <span class="n">GPIO_AF2_USART2</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">HAL_GPIO_Init</span><span class="p">(</span><span class="n">GPIOA</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">GPIO_InitStruct</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="4-代码分段讲解">4. 代码分段讲解
+</h2><h3 id="41-txstartmessagesize-为什么要--1">4.1 <code>TXSTARTMESSAGESIZE</code> 为什么要 <code>-1</code>
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="n">s</span><span class="p">[]</span> <span class="o">=</span> <span class="s">&#34;AB&#34;</span><span class="p">;</span>   <span class="cm">/* 内存里实际是：&#39;A&#39; &#39;B&#39; &#39;\0&#39;，sizeof(s) == 3 */</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>C 语言的字符串字面量末尾自动带一个 <code>'\0'</code>。这个 <code>'\0'</code> 是给 C 库函数（<code>strlen</code> 等）用的标记，<strong>不是要发送的数据</strong>。如果不减 1，串口助手就会多收到一个 <code>0x00</code> 字节，在 HEX 模式下能明显看到。</p>
+<h3 id="42-init-结构体每个字段的含义">4.2 <code>Init</code> 结构体每个字段的含义
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>字段</th>
+					<th>值</th>
+					<th>大白话</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>Instance</code></td>
+					<td><code>USART2</code></td>
+					<td>用哪个串口硬件</td>
+			</tr>
+			<tr>
+					<td><code>BaudRate</code></td>
+					<td><code>115200</code></td>
+					<td>每秒传多少位。双方必须一致</td>
+			</tr>
+			<tr>
+					<td><code>WordLength</code></td>
+					<td><code>8B</code></td>
+					<td>一帧里有几位有效数据。8 位是绝对主流</td>
+			</tr>
+			<tr>
+					<td><code>StopBits</code></td>
+					<td><code>1</code></td>
+					<td>帧尾停多久。1 位够用，2 位更保险但慢一点</td>
+			</tr>
+			<tr>
+					<td><code>Parity</code></td>
+					<td><code>NONE</code></td>
+					<td>不要校验位。要校验就选 <code>EVEN</code>/<code>ODD</code>，但那样 8 位数据里有 1 位被占，实际数据只有 7 位</td>
+			</tr>
+			<tr>
+					<td><code>HwFlowCtl</code></td>
+					<td><code>NONE</code></td>
+					<td>不用 RTS/CTS 硬件握手。只有高速大数据量才需要</td>
+			</tr>
+			<tr>
+					<td><code>Mode</code></td>
+					<td><code>TX_RX</code></td>
+					<td>既能发也能收。只发可以填 <code>UART_MODE_TX</code> 省一个引脚</td>
+			</tr>
+			<tr>
+					<td><code>OverSampling</code></td>
+					<td><code>16</code></td>
+					<td>一个位周期采样 16 次取中间值。抗噪好但要求时钟余量大；<code>8</code> 倍能跑更高波特率但更容易错</td>
+			</tr>
+	</tbody>
+</table></div>
+<h3 id="43-一帧数据在线上长什么样">4.3 一帧数据在线上长什么样
+</h3><p>以发送字符 <code>'A'</code>（ASCII = 0x41 = 二进制 <code>0100 0001</code>）为例，<code>8-N-1</code> 格式：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">空闲(高) │起始│ D0  D1  D2  D3  D4  D5  D6  D7 │停止│ 空闲(高)
+</span></span><span class="line"><span class="cl">─────────┐    ┌───┐           ┌───────┐        ┌──────────────
+</span></span><span class="line"><span class="cl">         └────┘   └───────────┘       └────────┘
+</span></span><span class="line"><span class="cl">          低    1   0   0   0   0   0   1   0     高
+</span></span><span class="line"><span class="cl">              └─ LSB 先发！0x41 的二进制反过来读 ─┘
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>关键点：串口是 LSB（最低位）先发</strong>。这就是为什么用逻辑分析仪抓波形时，肉眼读出来的位序要反过来才是真实数值。</p>
+<p>一帧共 10 位（1 起始 + 8 数据 + 1 停止），所以：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">115200 波特率的实际吞吐 = 115200 / 10 = 11520 字节/秒 ≈ 11.25 KB/s
+</span></span><span class="line"><span class="cl">发 12 个字节需要 12 / 11520 ≈ 1.04 ms
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="44-超时参数怎么理解">4.4 超时参数怎么理解
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">HAL_UART_Receive</span><span class="p">(</span><span class="o">&amp;</span><span class="n">UartHandle</span><span class="p">,</span> <span class="n">aRxBuffer</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">5000</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这个 <code>5000</code> <strong>不是&quot;每个字节等 5 秒&quot;，而是整个接收过程的总预算</strong>。HAL 内部：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">tickstart = HAL_GetTick();
+</span></span><span class="line"><span class="cl">while (还没收满 12 字节) {
+</span></span><span class="line"><span class="cl">   if (HAL_GetTick() - tickstart &gt; 5000) return HAL_TIMEOUT;
+</span></span><span class="line"><span class="cl">   if (RXNE 置位) { 读一个字节; 计数--; }
+</span></span><span class="line"><span class="cl">}
+</span></span><span class="line"><span class="cl">return HAL_OK;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>如果你想&quot;永远等下去&quot;，传 <code>HAL_MAX_DELAY</code>（即 <code>0xFFFFFFFF</code>）。</p>
+<blockquote>
+<p><strong>超时机制依赖 SysTick</strong>，所以还是那句话：<code>HAL_Init()</code> 不能少。</p>
+</blockquote>
+<h3 id="45-轮询的本质缺陷">4.5 轮询的本质缺陷
+</h3><p>这段代码在等 12 个字节的时候，CPU 什么都干不了。假如你的项目还要同时：</p>
+<ul>
+<li>每 10ms 采一次 ADC</li>
+<li>每 100ms 刷一次屏</li>
+<li>实时响应急停按钮</li>
+</ul>
+<p>那轮询就完全不能用了。解决办法：</p>
+<div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>方案</th>
+					<th>做法</th>
+					<th>适用</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>中断接收</td>
+					<td><code>HAL_UART_Receive_IT()</code>，收到就进 <code>HAL_UART_RxCpltCallback()</code></td>
+					<td>通用首选</td>
+			</tr>
+			<tr>
+					<td>DMA 接收</td>
+					<td><code>HAL_UART_Receive_DMA()</code>，硬件搬到内存</td>
+					<td>大数据量</td>
+			</tr>
+			<tr>
+					<td>DMA + IDLE</td>
+					<td>DMA 循环接收 + 空闲中断判定帧结束</td>
+					<td><strong>不定长数据的最佳方案</strong></td>
+			</tr>
+	</tbody>
+</table></div>
+<p>同目录下的 <code>USART_HyperTerminal_IT</code> 和 <code>USART_HyperTerminal_DMA</code> 就是前两种的示范。</p>
+<h3 id="46-把-printf-打通强烈建议做这一步">4.6 把 printf 打通（强烈建议做这一步）
+</h3><p>本例是手动调 <code>HAL_UART_Transmit()</code>，实际开发中大家都用 <code>printf</code>。改法：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">HAL_Init</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">APP_SystemClockConfig</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">BSP_USART_Config</span><span class="p">();</span>                <span class="cm">/* BSP 帮你初始化 USART2 + 重定向 */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;Hello PY32F403!</span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;HCLK  = %lu Hz</span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="nf">HAL_RCC_GetHCLKFreq</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;PCLK1 = %lu Hz</span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="nf">HAL_RCC_GetPCLK1Freq</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="kt">int</span> <span class="n">v</span> <span class="o">=</span> <span class="mi">1234</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">float</span> <span class="n">f</span> <span class="o">=</span> <span class="mf">3.14159f</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;int=%d  float=%.2f  hex=0x%08X</span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">v</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>三个坑</strong>：</p>
+<ol>
+<li><strong>MDK 必须勾 <code>Use MicroLIB</code></strong>（Options → Target），否则卡在半主机陷阱里，表现为下载后毫无反应。</li>
+<li><strong>要打印 <code>float</code></strong>，GCC 环境需要在链接选项加 <code>-u _printf_float</code>，否则浮点数打出来是空的。</li>
+<li><code>printf</code> 是<strong>阻塞</strong>的，而且很吃 Flash（几 KB）和栈。在中断服务函数里调 <code>printf</code> 是大忌，容易破坏实时性甚至栈溢出。</li>
+</ol>
+<h2 id="5-实验现象">5. 实验现象
+</h2><ol>
+<li>编译下载，接好 USB-TTL，打开串口助手（115200-8-N-1）；</li>
+<li>按复位键，串口助手立刻显示：</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl"> UART Hyperterminal communication based on Polling
+</span></span><span class="line"><span class="cl"> Enter 12 characters using keyboard :
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ol start="3">
+<li><strong>在 5 秒内</strong>在串口助手输入框里发送 12 个字符，比如 <code>Hello World!</code>（正好 12 个）；</li>
+<li>串口助手随即收到回显和结束语：</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Hello World!
+</span></span><span class="line"><span class="cl"> Example Finished
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ol start="5">
+<li>开发板上的<strong>绿色 LED 常亮</strong>，表示全流程成功。</li>
+</ol>
+<h3 id="时序示意">时序示意
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">上电
+</span></span><span class="line"><span class="cl"> │
+</span></span><span class="line"><span class="cl"> ├─► MCU 发送提示语（约 90 字节，8ms）
+</span></span><span class="line"><span class="cl"> │
+</span></span><span class="line"><span class="cl"> ├─► 等待 ...（最多 5 秒，CPU 空转）
+</span></span><span class="line"><span class="cl"> │        ↑ 你在这里输入 12 个字符
+</span></span><span class="line"><span class="cl"> ├─► 收满 12 字节
+</span></span><span class="line"><span class="cl"> │
+</span></span><span class="line"><span class="cl"> ├─► 回显 12 字节
+</span></span><span class="line"><span class="cl"> ├─► 发送 &#34; Example Finished&#34;
+</span></span><span class="line"><span class="cl"> └─► LED 亮 → while(1) 死循环
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="6-常见问题">6. 常见问题
+</h2><p><strong>Q1：串口助手一片乱码（全是问号或方块）？</strong></p>
+<p>按概率从高到低排查：</p>
+<ol>
+<li><strong>波特率不对</strong>。串口助手改成 115200 试试。</li>
+<li><strong>GND 没接</strong>。这是第二常见原因，一定要共地。</li>
+<li><strong>时钟配置和代码不符</strong>。如果你改了 <code>APP_SystemClockConfig()</code> 但忘了重新算，波特率会整体偏移。用 <code>printf(&quot;%lu\r\n&quot;, HAL_RCC_GetPCLK1Freq());</code> 验证 PCLK1 是不是 8MHz。</li>
+<li><strong>HSI 温漂</strong>。内部 RC 精度约 ±1~2%，在极端温度下叠加分频误差可能超标。改用 HSE 晶振可解决。</li>
+<li><strong>TTL 模块是 5V 电平</strong>。虽然多数情况下 F403 能容忍，但边沿会变形，长期还可能损伤 IO。务必用 3.3V 档。</li>
+</ol>
+<p><strong>Q2：完全收不到任何数据？</strong></p>
+<ol>
+<li><strong>TX/RX 接反了</strong>。这是第一名。板子的 TX(PA2) 要接模块的 RX，不是 TX 接 TX。</li>
+<li><strong>串口助手选错 COM 口</strong>。设备管理器里确认 CH340 的端口号。</li>
+<li><strong>另一个软件占用了串口</strong>。关掉 MobaXterm / 之前开的窗口再试。</li>
+<li><strong>忘了 <code>BSP_USART_Config()</code> 或 <code>HAL_UART_Init()</code></strong>。</li>
+<li><strong>USART2 时钟没开</strong>（<code>__HAL_RCC_USART2_CLK_ENABLE()</code>）。</li>
+<li><strong>AF 编号写错</strong>。PA2/PA3 做 USART2 必须是 <code>GPIO_AF2_USART2</code>，写成别的编号引脚就不通。</li>
+</ol>
+<p><strong>Q3：能收到提示语，但输入字符后没有回显？</strong></p>
+<ul>
+<li><strong>发的字符数不够 12 个</strong>。<code>HAL_UART_Receive(..., 12, 5000)</code> 一定要收满 12 个才返回。串口助手里注意&quot;发送新行&quot;选项会不会多发 <code>\r\n</code>（那就变成 14 个了，前 12 个先返回，剩下 2 个留在缓冲区）。</li>
+<li><strong>超过 5 秒才输入</strong>。已经超时进 <code>APP_ErrorHandler()</code> 死循环了，复位重来。</li>
+<li><strong>RX 引脚没通</strong>。用镊子把 PA3 短接到 GND 再松开，若程序有反应说明引脚是活的。</li>
+</ul>
+<p><strong>Q4：<code>HAL_UART_Receive()</code> 返回 <code>HAL_ERROR</code>，不是 TIMEOUT？</strong></p>
+<p>说明产生了硬件错误标志，读 <code>UartHandle.ErrorCode</code> 看具体是哪个：</p>
+<div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>错误</th>
+					<th>含义</th>
+					<th>原因</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>HAL_UART_ERROR_ORE</code></td>
+					<td>溢出错误</td>
+					<td>上一个字节还没读走，新字节又来了。轮询模式下最常见 → 改用中断/DMA</td>
+			</tr>
+			<tr>
+					<td><code>HAL_UART_ERROR_NE</code></td>
+					<td>噪声错误</td>
+					<td>线路干扰、线太长、波特率偏差大</td>
+			</tr>
+			<tr>
+					<td><code>HAL_UART_ERROR_FE</code></td>
+					<td>帧错误</td>
+					<td>没检测到停止位。通常是波特率差太多</td>
+			</tr>
+			<tr>
+					<td><code>HAL_UART_ERROR_PE</code></td>
+					<td>校验错误</td>
+					<td>双方 Parity 设置不一致</td>
+			</tr>
+	</tbody>
+</table></div>
+<p>出现 ORE 后必须清标志才能继续收：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">__HAL_UART_CLEAR_OREFLAG</span><span class="p">(</span><span class="o">&amp;</span><span class="n">UartHandle</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>Q5：<code>printf</code> 中文乱码？</strong></p>
+<p>串口助手的编码要和源文件编码一致。源文件存成 <strong>UTF-8</strong>，串口助手也选 UTF-8；或者两边都用 GBK。MDK 默认可能是 GB2312，注意统一。</p>
+<p><strong>Q6：为什么要用 <code>\r\n</code> 而不是只用 <code>\n</code>？</strong></p>
+<ul>
+<li><code>\n</code>（LF, 0x0A）：换到下一行，但光标横向位置不变</li>
+<li><code>\r</code>（CR, 0x0D）：光标回到行首</li>
+</ul>
+<p>很多串口终端（尤其 Windows 系）只发 <code>\n</code> 会出现&quot;阶梯状&quot;输出：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">第一行
+</span></span><span class="line"><span class="cl">      第二行
+</span></span><span class="line"><span class="cl">            第三行
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>所以<strong>串口输出统一用 <code>\r\n</code></strong>，这是行业惯例。</p>
+<h2 id="7-小结">7. 小结
+</h2><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>要点</th>
+					<th>内容</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>串口本质</td>
+					<td>TX/RX 两根线，全双工，<strong>LSB 先发</strong>，必须共地</td>
+			</tr>
+			<tr>
+					<td>帧格式</td>
+					<td>1 起始 + 8 数据 + 1 停止 = 10 位/字节</td>
+			</tr>
+			<tr>
+					<td>实际吞吐</td>
+					<td>波特率 ÷ 10 ≈ 字节/秒（115200 → 约 11.5 KB/s）</td>
+			</tr>
+			<tr>
+					<td>初始化流程</td>
+					<td>填 <code>Init</code> 结构体 → <code>HAL_UART_Init()</code> → MSP 里自动配 GPIO 复用</td>
+			</tr>
+			<tr>
+					<td>轮询三件套</td>
+					<td><code>HAL_UART_Transmit()</code> / <code>HAL_UART_Receive()</code> + 超时参数</td>
+			</tr>
+			<tr>
+					<td>超时含义</td>
+					<td>是<strong>整个操作</strong>的总预算，不是单字节</td>
+			</tr>
+			<tr>
+					<td>字符串长度</td>
+					<td>记得 <code>-1</code> 去掉 <code>'\0'</code></td>
+			</tr>
+			<tr>
+					<td>STK 调试口</td>
+					<td>USART2，<strong>PA2=TX / PA3=RX，AF2</strong>，115200-8-N-1</td>
+			</tr>
+			<tr>
+					<td>乱码三大元凶</td>
+					<td>波特率不符、<strong>没共地</strong>、时钟配置与代码不一致</td>
+			</tr>
+			<tr>
+					<td>收不到三大元凶</td>
+					<td><strong>TX/RX 没交叉</strong>、COM 口选错、AF 编号写错</td>
+			</tr>
+	</tbody>
+</table></div>
+<h2 id="8-拓展应用">8. 拓展应用
+</h2><p><strong>立刻能做的</strong></p>
+<ul>
+<li><strong>把 printf 打通</strong>，这是投资回报率最高的一步。之后调 ADC、SPI、I2C 全都靠它看数据。</li>
+<li><strong>串口命令行（Shell）</strong>：接收字符串，<code>strcmp</code> 比对命令，实现 <code>led on</code> / <code>led off</code> / <code>adc?</code> / <code>reboot</code> 等交互命令。这是一个非常好玩且实用的练手项目。</li>
+<li><strong>数据记录仪</strong>：每秒把 <a class="link" href="../../PY32F403_Firmware_V1_4_5_adc/ADC_TempSensor/" >ADC 温度</a> 打印成 CSV 格式（<code>时间,温度\n</code>），串口助手保存成文件，直接拖进 Excel 画曲线。</li>
+</ul>
+<p><strong>进阶项目</strong></p>
+<ul>
+<li><strong>自定义协议帧</strong>：<code>0xAA 0x55 | 长度 | 命令 | 数据 | CRC16 | 0x0D 0x0A</code>，配合状态机解析。这是所有产品级串口通信的基础结构。</li>
+<li><strong>Modbus RTU</strong>：加一片 MAX485 变成 RS485，实现标准工业协议，能直接接组态软件、PLC、工业仪表。RS485 是半双工，需要一个 GPIO 控制收发方向。</li>
+<li><strong>AT 指令模块驱动</strong>：ESP8266（WiFi）、SIM800（GSM）、HC-05（蓝牙）都是&quot;发 AT 指令 + 解析 OK/ERROR&quot;的模式。做一个&quot;发送命令 → 等待期望响应 → 超时重试&quot;的通用框架。</li>
+<li><strong>NMEA 解析</strong>：GPS 模块吐 <code>$GPRMC,...</code> 这样的 ASCII 语句，按逗号切分就能拿到经纬度、速度、时间。</li>
+</ul>
+<p><strong>工程级</strong></p>
+<ul>
+<li><strong>串口 IAP 在线升级（Bootloader）</strong>：这是嵌入式的&quot;必修高级课&quot;。流程是：Bootloader 区（0x08000000）启动 → 检查升级标志 → 从串口收固件 → 用 <a class="link" href="../../PY32F403_Firmware_V1_4_5_flash/Flash_PageEraseAndWrite/" >Flash 擦写</a> 写进 App 区 → 跳转执行。F403 有 384KB Flash（xD 型号），完全够放 Bootloader + 双备份 App。</li>
+<li><strong>DMA + IDLE 空闲中断接收框架</strong>：解决&quot;不知道对方发多长&quot;的终极方案。开一个环形缓冲区 DMA 循环接收，串口空闲一帧时间就触发 IDLE 中断，此时读 DMA 剩余计数就知道收了多少字节。零 CPU 占用，能跑到几 Mbps。</li>
+<li><strong>多机通信</strong>：RS485 总线上挂 32 个从机，用地址位/9 位数据模式做寻址，实现主从轮询采集。</li>
+<li><strong>日志分级系统</strong>：仿照嵌入式 RTOS 的做法，定义 <code>LOG_D/LOG_I/LOG_W/LOG_E</code> 宏，带颜色转义码（ANSI Escape）输出到支持彩色的终端，可编译期裁剪日志等级。</li>
+</ul>
+<p><strong>下一步建议</strong></p>
+<p>串口通了之后，去看 <a class="link" href="../../PY32F403_Firmware_V1_4_5_adc/ADC_TempSensor/" >ADC_TempSensor</a> —— 那个例子就是靠 <code>printf</code> 把芯片温度打出来的，正好检验你的串口成果。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/usart_hyperterminal_polling/">USART_HyperTerminal_Polling</a>
+        
+            <a href="/tags/usart/">USART</a>
+        
+            <a href="/tags/v1.4.5/">V1.4.5</a>
+        
+            <a href="/tags/py32f403/">PY32F403</a>
+        
+    </section>
+
+
+    <section class="article-lastmod">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <span>
+            最后更新于 Sep 09, 2026 10:25 &#43;0800
+        </span>
+    </section></footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/puya-usart-usart_hyperterminal_autobaund_it/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA USART — USART_HyperTerminal_AutoBaund_IT</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/puya-usart-usart_hyperterminal_dma/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA USART — USART_HyperTerminal_DMA</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/puya-usart-usart_hyperterminal_it/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA USART — USART_HyperTerminal_IT</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/puya-usart-usart_hyperterminal_polling/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA USART — USART_HyperTerminal_Polling</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/puya-usart-usart_hyperterminal_polling/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA USART — USART_HyperTerminal_Polling</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="ClingYang/ClingYang.github.io"
+        issue-term="pathname"
+        
+        label="💬comment"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2026 CLing
+    </section>
+    
+    <section class="powerby">
+        
+            世界是你们 <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<style>
+    #TableOfContents > ul, ol {
+        ul, ol {
+            display: none;
+        }
+        .open {
+            display: block;
+        }
+    }
+</style>
+
+<script>
+    function initTocHide() {
+        
+        let toc = document.querySelector(".widget--toc");
+        if (!toc) {
+            return;
+        }
+        
+        window.addEventListener('scroll', function() {
+            
+            let currentLi = document.querySelector(".active-class");
+            if (!currentLi) {
+                return
+            }
+            
+            let elementsByClassName = document.querySelectorAll(".open");
+            if (elementsByClassName.length > 0) {
+                elementsByClassName.forEach((ul) => {
+                    ul.classList.remove("open")
+                })
+            }
+            
+            if (currentLi.children.length > 1) {
+                currentLi.children[1].classList.add("open")
+            }
+            
+            let ul = currentLi.parentElement;
+            do {
+                ul.classList.add("open");
+                ul = ul.parentElement.parentElement
+            } while (ul !== undefined && (ul.localName === 'ul' || ul.localName === 'ol'))
+        });
+    }
+    initTocHide()
+</script>
+
+    </body>
+</html>

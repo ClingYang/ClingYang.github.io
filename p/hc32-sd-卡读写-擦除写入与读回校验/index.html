@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="HC32F460 SDIOC 实验：4 线 50MHz 高速模式初始化 SD 卡，擦除 4 个扇区并验证擦除结果，写入递增数据后读回用 memcmp 校验，LED 指示测试结果。">
+<title>HC32 SD 卡读写 — 擦除、写入与读回校验</title>
+
+<link rel='canonical' href='https://clingyang.github.io/p/hc32-sd-%E5%8D%A1%E8%AF%BB%E5%86%99-%E6%93%A6%E9%99%A4%E5%86%99%E5%85%A5%E4%B8%8E%E8%AF%BB%E5%9B%9E%E6%A0%A1%E9%AA%8C/'>
+
+<link rel="stylesheet" href="/scss/style.min.e14f3ba93baae65b2aef2339f32b6f25d7a0184785ebf4f6bd7d3376ae5dc2d4.css"><meta property='og:title' content="HC32 SD 卡读写 — 擦除、写入与读回校验">
+<meta property='og:description' content="HC32F460 SDIOC 实验：4 线 50MHz 高速模式初始化 SD 卡，擦除 4 个扇区并验证擦除结果，写入递增数据后读回用 memcmp 校验，LED 指示测试结果。">
+<meta property='og:url' content='https://clingyang.github.io/p/hc32-sd-%E5%8D%A1%E8%AF%BB%E5%86%99-%E6%93%A6%E9%99%A4%E5%86%99%E5%85%A5%E4%B8%8E%E8%AF%BB%E5%9B%9E%E6%A0%A1%E9%AA%8C/'>
+<meta property='og:site_name' content='CLing'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='HC32F460' /><meta property='article:tag' content='SDIOC' /><meta property='article:tag' content='SD卡' /><meta property='article:tag' content='扇区' /><meta property='article:tag' content='memcmp' /><meta property='article:tag' content='存储' /><meta property='article:tag' content='ddl' /><meta property='article:published_time' content='2026-09-09T09:00:00&#43;08:00'/><meta property='article:modified_time' content='2026-09-09T09:51:13&#43;08:00'/>
+<meta name="twitter:title" content="HC32 SD 卡读写 — 擦除、写入与读回校验">
+<meta name="twitter:description" content="HC32F460 SDIOC 实验：4 线 50MHz 高速模式初始化 SD 卡，擦除 4 个扇区并验证擦除结果，写入递增数据后读回用 memcmp 校验，LED 指示测试结果。">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                            height="290" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🏀</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">CLing</a></h1>
+            <h2 class="site-description">你好 欢迎来到我的博客</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>档案</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E6%8A%80%E6%9C%AF%E9%93%BE%E6%8E%A5/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>技术链接</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/excel/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+                
+                <span>Excel教程</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#1-功能简介">1. 功能简介</a></li>
+    <li><a href="#2-硬件准备">2. 硬件准备</a></li>
+    <li><a href="#3-完整代码">3. 完整代码</a></li>
+    <li><a href="#4-代码分段讲解">4. 代码分段讲解</a>
+      <ol>
+        <li><a href="#41-缓冲区大小和扇区数必须严格对应">4.1 缓冲区大小和扇区数必须严格对应</a></li>
+        <li><a href="#42-为什么要关掉-jtag-调试脚">4.2 为什么要关掉 JTAG 调试脚</a></li>
+        <li><a href="#43-错误累积的写法">4.3 错误累积的写法</a></li>
+        <li><a href="#44-擦除后的验证很有讲究">4.4 擦除后的验证很有讲究</a></li>
+        <li><a href="#45-用递增数据做测试的妙处">4.5 用递增数据做测试的妙处</a></li>
+        <li><a href="#46-超时参数为什么不一样">4.6 超时参数为什么不一样</a></li>
+        <li><a href="#47-array_sz-和-mem_zero_struct">4.7 <code>ARRAY_SZ</code> 和 <code>MEM_ZERO_STRUCT</code></a></li>
+      </ol>
+    </li>
+    <li><a href="#5-实验现象">5. 实验现象</a></li>
+    <li><a href="#6-常见问题">6. 常见问题</a></li>
+    <li><a href="#7-小结">7. 小结</a></li>
+    <li><a href="#8-拓展应用">8. 拓展应用</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/hc32/" >
+                HC32
+            </a>
+        
+            <a href="/categories/sdioc/" >
+                Sdioc
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/hc32-sd-%E5%8D%A1%E8%AF%BB%E5%86%99-%E6%93%A6%E9%99%A4%E5%86%99%E5%85%A5%E4%B8%8E%E8%AF%BB%E5%9B%9E%E6%A0%A1%E9%AA%8C/">HC32 SD 卡读写 — 擦除、写入与读回校验</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            HC32F460 SDIOC 实验：4 线 50MHz 高速模式初始化 SD 卡，擦除 4 个扇区并验证擦除结果，写入递增数据后读回用 memcmp 校验，LED 指示测试结果。
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2026-09-09</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 7 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="sd-卡读写擦除写入与读回校验">SD 卡读写：擦除、写入与读回校验
+</h1><blockquote>
+<p>源码路径：<code>example/HC32F460JEUA/6.sdioc/sd_multi_write_multi_read_4bit_50mhz/source/main.c</code></p>
+</blockquote>
+<h2 id="1-功能简介">1. 功能简介
+</h2><p>这个例子做的是一次<strong>完整的 SD 卡读写自检</strong>，就像出厂测试程序一样，一步步验证卡到底能不能正常用。</p>
+<p>程序流程（上电自动跑一遍，不需要按键）：</p>
+<ol>
+<li><strong>初始化 SD 卡</strong>：4 线总线 + 50MHz 高速模式。</li>
+<li><strong>擦除</strong>从第 0 个扇区开始的 4 个扇区。</li>
+<li><strong>读回来检查擦除结果</strong>：擦除后的数据应该全是 <code>0xFFFFFFFF</code> 或 <code>0x00000000</code>（不同卡的擦除填充值不同）。如果不是，说明擦除没成功。</li>
+<li><strong>写入数据</strong>：往这 4 个扇区写入 0、1、2、3……递增的数字（这种「有规律的数据」最容易看出错在哪）。</li>
+<li><strong>再读回来</strong>。</li>
+<li><strong>用 <code>memcmp</code> 比对</strong>写进去的和读出来的。</li>
+<li><strong>全部通过亮绿灯，任何一步失败亮红灯</strong>，然后进死循环。</li>
+</ol>
+<p>只要看到绿灯，就说明「SD 卡插好了、驱动没问题、读写都正常」。这是玩 SD 卡的第一步——先把底层通道验通，再谈上面的文件系统。</p>
+<hr>
+<h2 id="2-硬件准备">2. 硬件准备
+</h2><p>用 HC32F460JEUA KIT 开发板，板载有 <strong>TF 卡（microSD）卡座</strong>，插卡即用。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">        HC32F460                          TF / SD 卡座
+</span></span><span class="line"><span class="cl">      ┌───────────┐                     ┌──────────────┐
+</span></span><span class="line"><span class="cl">      │ PB15  CK  ├────────────────────▶│ CLK          │
+</span></span><span class="line"><span class="cl">      │ PA6   CMD ├◀───────────────────▶│ CMD          │
+</span></span><span class="line"><span class="cl">      │ PB4   D0  ├◀───────────────────▶│ DAT0         │
+</span></span><span class="line"><span class="cl">      │ PA8   D1  ├◀───────────────────▶│ DAT1         │
+</span></span><span class="line"><span class="cl">      │ PA9   D2  ├◀───────────────────▶│ DAT2         │
+</span></span><span class="line"><span class="cl">      │ PB5   D3  ├◀───────────────────▶│ DAT3 / CS    │
+</span></span><span class="line"><span class="cl">      │ PH2   CD  ├◀────────────────────│ 卡检测（可选）│
+</span></span><span class="line"><span class="cl">      └───────────┘                     └──────────────┘
+</span></span><span class="line"><span class="cl">                                            3.3V 供电
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>准备工作</strong>：</p>
+<ul>
+<li>一张 <strong>TF / microSD 卡</strong>（建议 8GB 或 16GB 的正品卡，容量太大或杂牌卡容易初始化失败）。</li>
+<li>卡插到底、听到「咔」的一声。</li>
+</ul>
+<blockquote>
+<p>⚠️ <strong>重要警告</strong>
+这个程序会<strong>擦除并覆写 SD 卡第 0~3 号扇区</strong>！
+**第 0 号扇区就是 MBR（主引导记录），存着分区表。**覆写它等于把卡「格式化坏了」——插到电脑上会提示「需要格式化」。
+<strong>千万别用存着重要资料的卡跑这个例子！</strong> 用一张空白的测试卡。
+测完想恢复正常使用，在电脑上重新格式化一次就好。</p>
+</blockquote>
+<hr>
+<h2 id="3-完整代码">3. 完整代码
+</h2><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span><span class="lnt">113
+</span><span class="lnt">114
+</span><span class="lnt">115
+</span><span class="lnt">116
+</span><span class="lnt">117
+</span><span class="lnt">118
+</span><span class="lnt">119
+</span><span class="lnt">120
+</span><span class="lnt">121
+</span><span class="lnt">122
+</span><span class="lnt">123
+</span><span class="lnt">124
+</span><span class="lnt">125
+</span><span class="lnt">126
+</span><span class="lnt">127
+</span><span class="lnt">128
+</span><span class="lnt">129
+</span><span class="lnt">130
+</span><span class="lnt">131
+</span><span class="lnt">132
+</span><span class="lnt">133
+</span><span class="lnt">134
+</span><span class="lnt">135
+</span><span class="lnt">136
+</span><span class="lnt">137
+</span><span class="lnt">138
+</span><span class="lnt">139
+</span><span class="lnt">140
+</span><span class="lnt">141
+</span><span class="lnt">142
+</span><span class="lnt">143
+</span><span class="lnt">144
+</span><span class="lnt">145
+</span><span class="lnt">146
+</span><span class="lnt">147
+</span><span class="lnt">148
+</span><span class="lnt">149
+</span><span class="lnt">150
+</span><span class="lnt">151
+</span><span class="lnt">152
+</span><span class="lnt">153
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;sd_card.h&#34;              // SD 卡驱动库（内部已包含 hc32_ddl.h）</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* ---------- SDIOC 引脚定义 ---------- */</span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define SDIOC_CD_PORT    (PortH)  </span><span class="cm">/* 卡检测（本例未启用）*/</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define SDIOC_CD_PIN     (Pin02)
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#define SDIOC_CK_PORT    (PortB)  </span><span class="cm">/* 时钟 */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define SDIOC_CK_PIN     (Pin15)
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#define SDIOC_CMD_PORT   (PortA)  </span><span class="cm">/* 命令线 */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define SDIOC_CMD_PIN    (Pin06)
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">#define SDIOC_D0_PORT    (PortB)  </span><span class="cm">/* 数据线 0 */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define SDIOC_D0_PIN     (Pin04)
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define SDIOC_D1_PORT    (PortA)  </span><span class="cm">/* 数据线 1 */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define SDIOC_D1_PIN     (Pin08)
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define SDIOC_D2_PORT    (PortA)  </span><span class="cm">/* 数据线 2 */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define SDIOC_D2_PIN     (Pin09)
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define SDIOC_D3_PORT    (PortB)  </span><span class="cm">/* 数据线 3 */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define SDIOC_D3_PIN     (Pin05)
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 测试范围：从第 0 个扇区开始，共 4 个扇区 */</span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define SD_SECTOR_START  (0u)
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define SD_SECTOR_COUNT  (4u)
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 用 SDIOC 单元 1 */</span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define SDIOC_UNIT       (M4_SDIOC1)
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/*==============================================================
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * 把 7 根引脚全部复用为 SDIO 功能
+</span></span></span><span class="line"><span class="cl"><span class="cm"> *=============================================================*/</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">en_result_t</span> <span class="nf">SdiocInitPins</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">PORT_SetFunc</span><span class="p">(</span><span class="n">SDIOC_D0_PORT</span><span class="p">,</span>  <span class="n">SDIOC_D0_PIN</span><span class="p">,</span>  <span class="n">Func_Sdio</span><span class="p">,</span> <span class="n">Disable</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">PORT_SetFunc</span><span class="p">(</span><span class="n">SDIOC_D1_PORT</span><span class="p">,</span>  <span class="n">SDIOC_D1_PIN</span><span class="p">,</span>  <span class="n">Func_Sdio</span><span class="p">,</span> <span class="n">Disable</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">PORT_SetFunc</span><span class="p">(</span><span class="n">SDIOC_D2_PORT</span><span class="p">,</span>  <span class="n">SDIOC_D2_PIN</span><span class="p">,</span>  <span class="n">Func_Sdio</span><span class="p">,</span> <span class="n">Disable</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">PORT_SetFunc</span><span class="p">(</span><span class="n">SDIOC_D3_PORT</span><span class="p">,</span>  <span class="n">SDIOC_D3_PIN</span><span class="p">,</span>  <span class="n">Func_Sdio</span><span class="p">,</span> <span class="n">Disable</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="c1">//  PORT_SetFunc(SDIOC_CD_PORT,  SDIOC_CD_PIN,  Func_Sdio, Disable);  /* 卡检测未用 */
+</span></span></span><span class="line"><span class="cl">    <span class="nf">PORT_SetFunc</span><span class="p">(</span><span class="n">SDIOC_CK_PORT</span><span class="p">,</span>  <span class="n">SDIOC_CK_PIN</span><span class="p">,</span>  <span class="n">Func_Sdio</span><span class="p">,</span> <span class="n">Disable</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">PORT_SetFunc</span><span class="p">(</span><span class="n">SDIOC_CMD_PORT</span><span class="p">,</span> <span class="n">SDIOC_CMD_PIN</span><span class="p">,</span> <span class="n">Func_Sdio</span><span class="p">,</span> <span class="n">Disable</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">Ok</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/*==============================================================
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * 主函数
+</span></span></span><span class="line"><span class="cl"><span class="cm"> *=============================================================*/</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int32_t</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint32_t</span> <span class="n">i</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">en_result_t</span> <span class="n">enTestResult</span> <span class="o">=</span> <span class="n">Ok</span><span class="p">;</span>                 <span class="cm">/* 测试结果累积标志 */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">static</span> <span class="kt">stc_sd_handle_t</span> <span class="n">stcSdhandle</span><span class="p">;</span>            <span class="cm">/* SD 卡句柄 */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 写缓冲区：512 个 uint32_t = 2048 字节 = 正好 4 个扇区（4×512）*/</span>
+</span></span><span class="line"><span class="cl">    <span class="k">static</span> <span class="kt">uint32_t</span> <span class="n">au32WriteBlocks</span><span class="p">[</span><span class="mi">512</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 读缓冲区：和写缓冲区一样大 */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">static</span> <span class="kt">uint32_t</span> <span class="n">au32ReadBlocks</span><span class="p">[</span><span class="nf">ARRAY_SZ</span><span class="p">(</span><span class="n">au32WriteBlocks</span><span class="p">)];</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* SD 卡初始化配置：4 线、50MHz、高速模式、不用 DMA */</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">stc_sdcard_init_t</span> <span class="n">stcCardInitCfg</span> <span class="o">=</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">SdiocBusWidth4Bit</span><span class="p">,</span>       <span class="cm">/* 4 位总线宽度 */</span>
+</span></span><span class="line"><span class="cl">        <span class="n">SdiocClk50M</span><span class="p">,</span>             <span class="cm">/* 50MHz 时钟 */</span>
+</span></span><span class="line"><span class="cl">        <span class="n">SdiocHighSpeedMode</span><span class="p">,</span>      <span class="cm">/* 高速模式 */</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">NULL</span><span class="p">,</span>                    <span class="cm">/* DMA 配置为空 → 用轮询方式传输 */</span>
+</span></span><span class="line"><span class="cl">    <span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 准备写入的数据：填 0,1,2,3,... 递增值，方便看出错在哪一位 */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0u</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nf">ARRAY_SZ</span><span class="p">(</span><span class="n">au32WriteBlocks</span><span class="p">);</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">au32WriteBlocks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">MEM_ZERO_STRUCT</span><span class="p">(</span><span class="n">au32ReadBlocks</span><span class="p">);</span>      <span class="cm">/* 读缓冲区清零 */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* BSP 初始化 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">BSP_CLK_Init</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">BSP_LED_Init</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 关掉 JTAG 调试脚复用（TDI/TDO/TRST 和 SDIOC 引脚有冲突）*/</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">PORT_DebugPortSetting</span><span class="p">(</span><span class="n">TDI</span><span class="p">,</span> <span class="n">Disable</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">PORT_DebugPortSetting</span><span class="p">(</span><span class="n">TDO_SWO</span><span class="p">,</span> <span class="n">Disable</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">PORT_DebugPortSetting</span><span class="p">(</span><span class="n">TRST</span><span class="p">,</span> <span class="n">Disable</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">SdiocInitPins</span><span class="p">();</span>                       <span class="cm">/* 配置 SDIOC 引脚 */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* ===== ① 初始化 SD 卡 ===== */</span>
+</span></span><span class="line"><span class="cl">    <span class="n">stcSdhandle</span><span class="p">.</span><span class="n">SDIOCx</span> <span class="o">=</span> <span class="n">SDIOC_UNIT</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">Ok</span> <span class="o">!=</span> <span class="nf">SDCARD_Init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stcSdhandle</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">stcCardInitCfg</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">enTestResult</span> <span class="o">=</span> <span class="n">Error</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* ===== ② 擦除 4 个扇区（超时给 20000）===== */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">Ok</span> <span class="o">!=</span> <span class="nf">SDCARD_Erase</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stcSdhandle</span><span class="p">,</span> <span class="n">SD_SECTOR_START</span><span class="p">,</span> <span class="n">SD_SECTOR_COUNT</span><span class="p">,</span> <span class="mi">20000u</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">enTestResult</span> <span class="o">=</span> <span class="n">Error</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* ===== ③ 读回来，验证擦除是否真的成功 ===== */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">Ok</span> <span class="o">!=</span> <span class="nf">SDCARD_ReadBlocks</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stcSdhandle</span><span class="p">,</span> <span class="n">SD_SECTOR_START</span><span class="p">,</span> <span class="n">SD_SECTOR_COUNT</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                                <span class="p">(</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="p">)</span><span class="n">au32ReadBlocks</span><span class="p">,</span> <span class="mi">2000u</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">enTestResult</span> <span class="o">=</span> <span class="n">Error</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 擦除后每个字应该是全 F 或全 0（不同卡的填充值不一样，两种都算合格）*/</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0u</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nf">ARRAY_SZ</span><span class="p">(</span><span class="n">au32WriteBlocks</span><span class="p">);</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">((</span><span class="n">au32ReadBlocks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="mh">0xFFFFFFFFul</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">(</span><span class="n">au32ReadBlocks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="mh">0x00000000ul</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">enTestResult</span> <span class="o">=</span> <span class="n">Error</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* ===== ④ 写入数据 ===== */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">Ok</span> <span class="o">!=</span> <span class="nf">SDCARD_WriteBlocks</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stcSdhandle</span><span class="p">,</span> <span class="n">SD_SECTOR_START</span><span class="p">,</span> <span class="n">SD_SECTOR_COUNT</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                                 <span class="p">(</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="p">)</span><span class="n">au32WriteBlocks</span><span class="p">,</span> <span class="mi">2000u</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">enTestResult</span> <span class="o">=</span> <span class="n">Error</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* ===== ⑤ 再读回来 ===== */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">Ok</span> <span class="o">!=</span> <span class="nf">SDCARD_ReadBlocks</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stcSdhandle</span><span class="p">,</span> <span class="n">SD_SECTOR_START</span><span class="p">,</span> <span class="n">SD_SECTOR_COUNT</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                                <span class="p">(</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="p">)</span><span class="n">au32ReadBlocks</span><span class="p">,</span> <span class="mi">20000u</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">enTestResult</span> <span class="o">=</span> <span class="n">Error</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* ===== ⑥ 比对写进去的和读出来的 ===== */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="mi">0</span> <span class="o">!=</span> <span class="nf">memcmp</span><span class="p">(</span><span class="n">au32WriteBlocks</span><span class="p">,</span> <span class="n">au32ReadBlocks</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">au32ReadBlocks</span><span class="p">)))</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">enTestResult</span> <span class="o">=</span> <span class="n">Error</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* ===== ⑦ 用 LED 显示最终结果 ===== */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">Ok</span> <span class="o">==</span> <span class="n">enTestResult</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">BSP_LED_On</span><span class="p">(</span><span class="n">LED_GREEN</span><span class="p">);</span>    <span class="cm">/* 全部通过 → 绿灯 */</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">else</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">BSP_LED_On</span><span class="p">(</span><span class="n">LED_RED</span><span class="p">);</span>      <span class="cm">/* 有任何一步失败 → 红灯 */</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="cm">/* 测完就停在这里 */</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="4-代码分段讲解">4. 代码分段讲解
+</h2><h3 id="41-缓冲区大小和扇区数必须严格对应">4.1 缓冲区大小和扇区数必须严格对应
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">uint32_t</span> <span class="n">au32WriteBlocks</span><span class="p">[</span><span class="mi">512</span><span class="p">];</span>   <span class="c1">// 512 × 4 字节 = 2048 字节
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define SD_SECTOR_COUNT   (4u)          </span><span class="c1">// 4 × 512 字节 = 2048 字节  ✓ 相等
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>这是 SD 卡编程的第一要点</strong>。SD 卡按 512 字节扇区读写，你要读 4 个扇区，缓冲区就必须至少有 4×512 = 2048 字节。</p>
+<p>这里 <code>uint32_t[512]</code> 刚好是 2048 字节，完美对应。</p>
+<p>如果你改成读 8 个扇区却不改数组大小，<code>SDCARD_ReadBlocks</code> 会往数组外面写 2048 字节——<strong>栈/内存直接被踩坏</strong>，程序表现会极其诡异（随机崩溃、其他变量莫名变化）。这种 bug 非常难查，所以两个数字<strong>一定要一起改</strong>。</p>
+<p>安全的写法是让扇区数从数组大小推导出来：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#define SD_SECTOR_COUNT  (sizeof(au32WriteBlocks) / 512u)
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="42-为什么要关掉-jtag-调试脚">4.2 为什么要关掉 JTAG 调试脚
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">PORT_DebugPortSetting</span><span class="p">(</span><span class="n">TDI</span><span class="p">,</span> <span class="n">Disable</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">PORT_DebugPortSetting</span><span class="p">(</span><span class="n">TDO_SWO</span><span class="p">,</span> <span class="n">Disable</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">PORT_DebugPortSetting</span><span class="p">(</span><span class="n">TRST</span><span class="p">,</span> <span class="n">Disable</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>芯片刚上电时，一部分引脚默认是 <strong>JTAG 调试功能</strong>（TDI、TDO、TRST）。而 SDIOC 用到的 PA8、PA9、PB4 这些引脚，正好和 JTAG 脚有复用冲突。</p>
+<p>不关掉的话，你 <code>PORT_SetFunc</code> 设成 SDIO 功能也不生效——引脚还被 JTAG 占着。<strong>这就是「代码看着完全正确但外设死活不工作」的又一个经典原因。</strong></p>
+<blockquote>
+<p>注意关掉这些脚会影响 JTAG 调试（SWD 调试不受影响，因为 SWD 只用 SWCLK/SWDIO）。所以正常用 SWD 下载调试没问题。</p>
+</blockquote>
+<h3 id="43-错误累积的写法">4.3 错误累积的写法
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">en_result_t</span> <span class="n">enTestResult</span> <span class="o">=</span> <span class="n">Ok</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="n">Ok</span> <span class="o">!=</span> <span class="nf">SDCARD_Init</span><span class="p">(...))</span>  <span class="p">{</span> <span class="n">enTestResult</span> <span class="o">=</span> <span class="n">Error</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="n">Ok</span> <span class="o">!=</span> <span class="nf">SDCARD_Erase</span><span class="p">(...))</span> <span class="p">{</span> <span class="n">enTestResult</span> <span class="o">=</span> <span class="n">Error</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">...</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="n">Ok</span> <span class="o">==</span> <span class="n">enTestResult</span><span class="p">)</span> <span class="p">{</span> <span class="err">绿灯</span> <span class="p">}</span> <span class="k">else</span> <span class="p">{</span> <span class="err">红灯</span> <span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>注意这里的设计：<strong>每一步失败都只是标记一下，不立刻退出</strong>，最后统一看结果。</p>
+<p>好处是不管中间哪一步出错，最终都会有明确的 LED 指示。缺点是初始化失败后还会继续跑后面的读写（这些必然也失败），有点浪费。</p>
+<p>工程实践中更常见的写法是<strong>失败立即返回</strong>（early return），或者用 <code>goto error_handler</code> 跳到统一的错误处理。这样逻辑更清晰、也不会在坏状态下继续操作硬件。</p>
+<h3 id="44-擦除后的验证很有讲究">4.4 擦除后的验证很有讲究
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">if</span> <span class="p">((</span><span class="n">au32ReadBlocks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="mh">0xFFFFFFFFul</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">(</span><span class="n">au32ReadBlocks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="mh">0x00000000ul</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">enTestResult</span> <span class="o">=</span> <span class="n">Error</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>为什么要接受<strong>两种</strong>值？因为 <strong>SD 卡擦除后的填充值不是统一标准</strong>——有的卡擦成全 1（<code>0xFF</code>），有的卡擦成全 0（<code>0x00</code>）。这取决于卡内部控制器的实现。</p>
+<p>所以代码宽容地认为「全 F 或全 0 都算擦干净了」。这是很实用的兼容性处理，说明写代码的人真正踩过不同品牌卡的坑。</p>
+<h3 id="45-用递增数据做测试的妙处">4.5 用递增数据做测试的妙处
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0u</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nf">ARRAY_SZ</span><span class="p">(</span><span class="n">au32WriteBlocks</span><span class="p">);</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">au32WriteBlocks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>      <span class="c1">// 0, 1, 2, 3, 4, ...
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>为什么不用随机数、不用全 0？因为<strong>递增序列是最好的调试数据</strong>：</p>
+<ul>
+<li>如果读回来的是 <code>0,1,2,3,...</code> 但从中间某处开始错乱，你一眼就能看出<strong>错在第几个字</strong>。</li>
+<li>如果整体偏移了（读回来是 <code>128,129,130...</code>），说明<strong>起始扇区算错了</strong>。</li>
+<li>如果每 128 个字重复一次，说明<strong>扇区边界处理有问题</strong>。</li>
+</ul>
+<p>用全 0 或全 F 就完全看不出这些规律。<strong>测试存储器一定要用有规律但不重复的数据</strong>，这是个很实用的技巧。</p>
+<h3 id="46-超时参数为什么不一样">4.6 超时参数为什么不一样
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">SDCARD_Erase</span><span class="p">(...,</span> <span class="mi">20000u</span><span class="p">);</span>       <span class="c1">// 擦除给 20000
+</span></span></span><span class="line"><span class="cl"><span class="nf">SDCARD_ReadBlocks</span><span class="p">(...,</span> <span class="mi">2000u</span><span class="p">);</span>   <span class="c1">// 读给 2000
+</span></span></span><span class="line"><span class="cl"><span class="nf">SDCARD_WriteBlocks</span><span class="p">(...,</span> <span class="mi">2000u</span><span class="p">);</span>  <span class="c1">// 写给 2000
+</span></span></span><span class="line"><span class="cl"><span class="nf">SDCARD_ReadBlocks</span><span class="p">(...,</span> <span class="mi">20000u</span><span class="p">);</span>  <span class="c1">// 这次读又给 20000
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>因为不同操作耗时差异很大：<strong>擦除 &raquo; 写 &gt; 读</strong>。擦除是 SD 卡最慢的操作，超时必须给得宽松，否则明明在正常工作却被判超时失败。</p>
+<p>（代码里两次读的超时值不一致，属于示例的随意之处，实际用统一给足即可。）</p>
+<h3 id="47-array_sz-和-mem_zero_struct">4.7 <code>ARRAY_SZ</code> 和 <code>MEM_ZERO_STRUCT</code>
+</h3><p>这两个是 ddl 库的实用宏：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">ARRAY_SZ</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>          <span class="c1">// 求数组元素个数 = sizeof(arr)/sizeof(arr[0])
+</span></span></span><span class="line"><span class="cl"><span class="nf">MEM_ZERO_STRUCT</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>     <span class="c1">// 把 x 清零 = memset(&amp;x, 0, sizeof(x))
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>用 <code>ARRAY_SZ</code> 而不是写死 <code>512</code>，是好习惯——以后改数组大小，循环次数自动跟着变，不会漏改。</p>
+<hr>
+<h2 id="5-实验现象">5. 实验现象
+</h2><p>插好 TF 卡，上电或复位：</p>
+<ul>
+<li><strong>绿灯亮</strong> → 全部测试通过 ✓（初始化 OK、擦除 OK、写入 OK、读回数据完全一致）</li>
+<li><strong>红灯亮</strong> → 某一步失败 ✗</li>
+</ul>
+<p>程序跑完就停在 <code>while(1)</code>，灯的状态保持不变。想再测一次就按复位键。</p>
+<p>测试完成后，这张卡的第 0~3 扇区已经被写成递增数据了。插到电脑上会提示「需要格式化」——这是正常的，因为 MBR 被覆盖了。重新格式化即可恢复。</p>
+<hr>
+<h2 id="6-常见问题">6. 常见问题
+</h2><p><strong>Q1：一直红灯，怎么定位到底哪一步失败？</strong>
+最有效的办法是<strong>加串口打印</strong>。先初始化串口，然后：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">DDL_PrintfInit</span><span class="p">(</span><span class="n">BSP_PRINTF_DEVICE</span><span class="p">,</span> <span class="n">BSP_PRINTF_BAUDRATE</span><span class="p">,</span> <span class="n">BSP_PRINTF_PortInit</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="n">Ok</span> <span class="o">!=</span> <span class="nf">SDCARD_Init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stcSdhandle</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">stcCardInitCfg</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;SDCARD_Init failed!</span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">enTestResult</span> <span class="o">=</span> <span class="n">Error</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="n">Ok</span> <span class="o">!=</span> <span class="nf">SDCARD_Erase</span><span class="p">(...))</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;Erase failed!</span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">enTestResult</span> <span class="o">=</span> <span class="n">Error</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="c1">// ... 每一步都加
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>这样串口助手里直接告诉你卡在哪儿。<strong>这就是串口章节说的「打印大法」的实战价值。</strong></p>
+<p><strong>Q2：<code>SDCARD_Init</code> 就失败了？</strong>
+最常见，按顺序查：</p>
+<ul>
+<li><strong>卡插到底了吗？</strong> 听到「咔」声才算到位。</li>
+<li><strong><code>PORT_DebugPortSetting</code> 三行写了吗？</strong> 漏了 JTAG 会占着 PA8/PA9 等引脚。</li>
+<li><strong>换张卡试试。</strong> 杂牌卡、容量特别大（64GB 以上 SDXC）的卡兼容性差，初始化协议可能不支持。建议用 8GB/16GB 正品 Class10 卡。</li>
+<li><strong>降速试试</strong>：把 <code>SdiocClk50M</code> 改成更低的时钟、<code>SdiocHighSpeedMode</code> 改成 <code>SdiocNormalSpeedMode</code>。50MHz 对信号质量要求高，杜邦线飞线基本跑不起来。</li>
+<li><strong>先用 1 线模式</strong>：<code>SdiocBusWidth4Bit</code> 改成 <code>SdiocBusWidth1Bit</code>。能通说明是 D1/D2/D3 那几根线的问题。</li>
+</ul>
+<p><strong>Q3：初始化过了，但擦除或读写失败？</strong></p>
+<ul>
+<li><strong>超时给太小了。</strong> 试着把超时参数加大 10 倍。</li>
+<li><strong>降低时钟频率</strong>。速度越快越容易出错。</li>
+<li>检查 D1/D2/D3 三根线（只有 4 线模式才用到它们，1 线模式下不影响初始化但影响读写）。</li>
+</ul>
+<p><strong>Q4：<code>memcmp</code> 比对失败，但读写函数都返回 Ok？</strong></p>
+<ul>
+<li>说明数据传输过程中出错了（信号质量问题）。<strong>降低时钟频率</strong>是第一手段。</li>
+<li>也检查缓冲区大小和扇区数是否匹配（见 4.1）。</li>
+</ul>
+<p><strong>Q5：我的卡插上后电脑不认了！</strong></p>
+<ul>
+<li>这是<strong>预期行为</strong>，因为程序覆写了第 0 扇区（MBR）。在电脑上重新格式化即可恢复。</li>
+<li>想避免破坏文件系统，把 <code>SD_SECTOR_START</code> 改成一个很大的值（比如 <code>100000u</code>），去测卡的中后段区域，就不会碰到 MBR 和文件系统的关键结构了。</li>
+</ul>
+<p><strong>Q6：怎么让读写更快？</strong></p>
+<ul>
+<li>用 <strong>DMA 版本</strong>。把 <code>stcCardInitCfg</code> 最后那个 <code>NULL</code> 换成 DMA 配置，CPU 就不用参与搬数据了。SDK 里有现成的 <code>sd_multi_write_multi_read_4bit_dma_50mhz</code> 示例。</li>
+<li><strong>一次多读几个扇区</strong>。读 100 个扇区比读 100 次单扇区快得多（命令开销省下来了）。</li>
+</ul>
+<hr>
+<h2 id="7-小结">7. 小结
+</h2><ul>
+<li>SD 卡<strong>按 512 字节扇区读写</strong>，缓冲区大小和扇区数<strong>必须严格对应</strong>，否则内存越界。</li>
+<li>用 <code>SDCARD_Init</code> / <code>Erase</code> / <code>WriteBlocks</code> / <code>ReadBlocks</code> 四个函数，每个都带<strong>超时参数</strong>（擦除要给大）。</li>
+<li><strong>必须先关 JTAG 调试脚复用</strong>（<code>PORT_DebugPortSetting</code>），否则引脚被占用。</li>
+<li>擦除后的值可能是<strong>全 F 或全 0</strong>，两种都要当成正常。</li>
+<li>测存储器用<strong>递增数据</strong>，最容易定位错在哪。</li>
+<li>出问题按这个顺序试：<strong>降时钟 → 换 1 线 → 换卡 → 加串口打印定位</strong>。</li>
+<li>本例会覆写第 0 扇区（MBR），<strong>用测试卡，别用有重要数据的卡</strong>。</li>
+</ul>
+<hr>
+<h2 id="8-拓展应用">8. 拓展应用
+</h2><p>底层通道验通之后，SD 卡真正的威力才开始：</p>
+<ul>
+<li>
+<p><strong>移植 FatFS 文件系统</strong>（最重要的下一步）
+把 <code>SDCARD_ReadBlocks</code> / <code>WriteBlocks</code> 接到 FatFS 的 <code>disk_read</code> / <code>disk_write</code> 接口上，你就能这样写代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">f_open</span><span class="p">(</span><span class="o">&amp;</span><span class="n">file</span><span class="p">,</span> <span class="s">&#34;data.csv&#34;</span><span class="p">,</span> <span class="n">FA_WRITE</span> <span class="o">|</span> <span class="n">FA_CREATE_ALWAYS</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">f_printf</span><span class="p">(</span><span class="o">&amp;</span><span class="n">file</span><span class="p">,</span> <span class="s">&#34;%d,%d</span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">temperature</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">f_close</span><span class="p">(</span><span class="o">&amp;</span><span class="n">file</span><span class="p">);</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>生成的文件电脑能直接打开！</strong> 这是 SD 卡最大的价值所在——数据不再是裸扇区，而是人能看懂的文件。</p>
+</li>
+<li>
+<p><strong>数据记录仪 / 数据采集器</strong>
+传感器数据按时间戳存成 CSV 文件，拔卡插电脑，Excel 直接打开画曲线。温湿度记录、电池测试、振动监测都这么做。</p>
+</li>
+<li>
+<p><strong>黑匣子 / 运行日志</strong>
+设备运行状态、错误码持续写入日志文件。出故障了把卡拔出来分析，比接串口盯着看实用得多。</p>
+</li>
+<li>
+<p><strong>音频播放器</strong>
+WAV 文件存卡里，用 FatFS 读出 PCM 数据送给 DAC 或 I2S 功放，就是个音乐播放器。语音提示、报警音同理。</p>
+</li>
+<li>
+<p><strong>图片 / 界面资源加载</strong>
+GUI 的图片、字库、皮肤存在卡里，需要时读出来显示。好处是<strong>改素材不用重新编译固件</strong>，换张卡就换了界面。</p>
+</li>
+<li>
+<p><strong>固件升级（OTA / 卡升级）</strong>
+把新固件 <code>.bin</code> 放到卡里，设备上电时 Bootloader 检测到有升级文件就自动更新。这是工业设备最省事的升级方式——现场维护人员只需要插张卡。</p>
+</li>
+<li>
+<p><strong>配置文件</strong>
+设备参数写成卡里的 <code>config.txt</code>，用户用记事本改改就能配置设备，不用专门做上位机软件。非常适合小批量产品。</p>
+</li>
+<li>
+<p><strong>摄像头存图</strong>
+接个 OV2640 摄像头，拍照存成 JPG 到卡里，做个简易行车记录仪或监控。</p>
+</li>
+</ul>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/hc32f460/">HC32F460</a>
+        
+            <a href="/tags/sdioc/">SDIOC</a>
+        
+            <a href="/tags/sd%E5%8D%A1/">SD卡</a>
+        
+            <a href="/tags/%E6%89%87%E5%8C%BA/">扇区</a>
+        
+            <a href="/tags/memcmp/">Memcmp</a>
+        
+            <a href="/tags/%E5%AD%98%E5%82%A8/">存储</a>
+        
+            <a href="/tags/ddl/">Ddl</a>
+        
+    </section>
+
+
+    <section class="article-lastmod">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <span>
+            最后更新于 Sep 09, 2026 09:51 &#43;0800
+        </span>
+    </section></footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/hc32-gpio-%E8%BE%93%E5%87%BA-%E7%82%B9%E4%BA%AE%E5%B9%B6%E9%97%AA%E7%83%81-led/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HC32 GPIO 输出 — 点亮并闪烁 LED</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/hc32-qspi-flash-%E8%AF%BB%E5%86%99-%E6%93%A6%E9%99%A4%E9%A1%B5%E5%86%99%E4%B8%8E%E6%98%A0%E5%B0%84%E8%AF%BB%E5%9B%9E%E6%A0%A1%E9%AA%8C/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HC32 QSPI Flash 读写 — 擦除、页写与映射读回校验</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/hc32-spi-lcd-%E6%98%BE%E7%A4%BA-%E6%96%87%E5%AD%97%E8%BE%93%E5%87%BA%E4%B8%8E%E5%85%A8%E5%B1%8F%E5%88%B7%E8%89%B2/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HC32 SPI LCD 显示 — 文字输出与全屏刷色</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/hc32-timer0-%E5%AE%9A%E6%97%B6%E4%B8%AD%E6%96%AD-%E5%8F%8C%E9%80%9A%E9%81%93%E5%91%A8%E6%9C%9F%E7%BF%BB%E8%BD%AC-led/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HC32 Timer0 定时中断 — 双通道周期翻转 LED</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/hc32-%E4%B8%B2%E5%8F%A3%E8%BD%AE%E8%AF%A2-%E6%94%B6%E5%8F%91%E6%95%B0%E6%8D%AE%E4%B8%8E-printf-%E6%89%93%E5%8D%B0/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">HC32 串口轮询 — 收发数据与 printf 打印</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="ClingYang/ClingYang.github.io"
+        issue-term="pathname"
+        
+        label="💬comment"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2026 CLing
+    </section>
+    
+    <section class="powerby">
+        
+            世界是你们 <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<style>
+    #TableOfContents > ul, ol {
+        ul, ol {
+            display: none;
+        }
+        .open {
+            display: block;
+        }
+    }
+</style>
+
+<script>
+    function initTocHide() {
+        
+        let toc = document.querySelector(".widget--toc");
+        if (!toc) {
+            return;
+        }
+        
+        window.addEventListener('scroll', function() {
+            
+            let currentLi = document.querySelector(".active-class");
+            if (!currentLi) {
+                return
+            }
+            
+            let elementsByClassName = document.querySelectorAll(".open");
+            if (elementsByClassName.length > 0) {
+                elementsByClassName.forEach((ul) => {
+                    ul.classList.remove("open")
+                })
+            }
+            
+            if (currentLi.children.length > 1) {
+                currentLi.children[1].classList.add("open")
+            }
+            
+            let ul = currentLi.parentElement;
+            do {
+                ul.classList.add("open");
+                ul = ul.parentElement.parentElement
+            } while (ul !== undefined && (ul.localName === 'ul' || ul.localName === 'ol'))
+        });
+    }
+    initTocHide()
+</script>
+
+    </body>
+</html>

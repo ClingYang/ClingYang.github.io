@@ -7,7 +7,200 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>CLing</copyright>
-        <lastBuildDate>Tue, 08 Sep 2026 16:03:27 +0800</lastBuildDate><atom:link href="https://clingyang.github.io/tags/%E4%B8%AD%E6%96%AD/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Wed, 09 Sep 2026 09:51:13 +0800</lastBuildDate><atom:link href="https://clingyang.github.io/tags/%E4%B8%AD%E6%96%AD/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>HC32 Timer0 — 基础定时器</title>
+        <link>https://clingyang.github.io/post/mcu_hc32/timer0/</link>
+        <pubDate>Wed, 09 Sep 2026 09:00:00 +0800</pubDate>
+        
+        <guid>https://clingyang.github.io/post/mcu_hc32/timer0/</guid>
+        <description>&lt;h1 id=&#34;timer0--单片机的秒表和闹钟&#34;&gt;Timer0 — 单片机的秒表和闹钟
+&lt;/h1&gt;&lt;h2 id=&#34;这一章讲什么&#34;&gt;这一章讲什么
+&lt;/h2&gt;&lt;p&gt;定时器（Timer）是单片机里最有用的外设之一。你可以把它想象成一个&lt;strong&gt;能自动数数的计数器 + 闹钟&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;它接一个时钟源，每来一个时钟脉冲就 &lt;strong&gt;+1&lt;/strong&gt;，自动数数，完全不占用 CPU。&lt;/li&gt;
+&lt;li&gt;你给它设一个「目标值」（比较值 CmpValue），数到这个值时它就「闹铃」——触发一次中断，或者翻转一个信号。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;有了它，你就能做很多&lt;strong&gt;精确定时&lt;/strong&gt;的事：每隔 1 秒采一次温度、每隔 20 毫秒扫描一次按键、生成固定频率的方波……而且 CPU 不用像 &lt;code&gt;Ddl_Delay1ms&lt;/code&gt; 那样傻等，可以去干别的活，时间到了定时器自然会通知它。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;关于 PWM 的说明&lt;/strong&gt;
+HC32F460 里能直接输出 PWM 波形的是 &lt;strong&gt;TimerA / TimerB / Timer4/6&lt;/strong&gt; 这些高级定时器。
+&lt;strong&gt;Timer0 是「基础定时器」&lt;/strong&gt;，它的强项是&lt;strong&gt;精确定时和产生周期性中断&lt;/strong&gt;，本身没有独立的 PWM 输出引脚。
+不过定时器的思想是相通的：Timer0 产生固定周期的中断、在中断里翻转引脚，本质就是一个「软件方波发生器」，理解了它，再学硬件 PWM 就水到渠成。本章示例就演示 Timer0 最经典的用法——&lt;strong&gt;定时中断&lt;/strong&gt;。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;timer0-的两种计数模式&#34;&gt;Timer0 的两种计数模式
+&lt;/h2&gt;&lt;p&gt;这是 Timer0 最需要理解的概念。它有两种工作模式：&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;模式&lt;/th&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;ddl 写法&lt;/th&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;时钟源&lt;/th&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;特点&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;同步模式&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;Tim0_Sync&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;内部时钟 PCLK1&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;频率高、精度高，跟着系统时钟走&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;异步模式&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;Tim0_Async&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;外部低速晶振 XTAL32（32.768kHz）&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;频率低、超省电，可在低功耗下工作&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;同步（Sync）&lt;/strong&gt;：用芯片内部的高速时钟 PCLK1 来数数。适合需要较高频率、较高精度的定时。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;异步（Async）&lt;/strong&gt;：用外部 32.768kHz 的低速晶振（就是钟表用的那种表晶）来数数。频率低但极省电，适合待机、RTC 类的慢速定时。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Timer0 有两个独立通道 &lt;strong&gt;ChannelA&lt;/strong&gt; 和 &lt;strong&gt;ChannelB&lt;/strong&gt;，可以分别配成不同模式——本章示例就把 A 通道配成异步、B 通道配成同步，同时跑。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;定时周期怎么算&#34;&gt;定时周期怎么算
+&lt;/h2&gt;&lt;p&gt;这是新手最关心的：「我想要 0.5 秒定时一次，比较值该填多少？」&lt;/p&gt;
+&lt;p&gt;公式很简单：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;定时时间 = (比较值 CmpValue + 1) × 分频系数 ÷ 时钟频率
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;反过来求比较值：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;CmpValue = 时钟频率 ÷ 分频系数 × 定时时间 − 1
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;举个例子（示例代码里 A 通道的算法）：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;时钟源：XTAL32 = 32000 Hz（代码里按 32000 算）&lt;/li&gt;
+&lt;li&gt;分频：÷4&lt;/li&gt;
+&lt;li&gt;想要 0.5 秒翻转一次（即半个周期 0.5s）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;CmpValue&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;32000&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;/&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;4&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;/&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;2&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;-&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;3999&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;代码里写成 &lt;code&gt;(uint16_t)(32000u/4u/2u - 1u)&lt;/code&gt;，数到 3999 就中断一次，正好 0.5 秒，翻转一次 LED → 1 秒一个亮灭周期。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;分频（ClockDivision）&lt;/strong&gt; 的作用：时钟太快、16 位计数器（最大 65535）数不过来时，先把时钟「除慢」。可选 &lt;code&gt;Tim0_ClkDiv1&lt;/code&gt;（不分频）到 &lt;code&gt;Tim0_ClkDiv1024&lt;/code&gt;（÷1024）等。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;配置流程&#34;&gt;配置流程
+&lt;/h2&gt;&lt;p&gt;Timer0 定时中断的标准套路：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;18
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cm&#34;&gt;/* ① 开 Timer0 外设时钟 */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nf&#34;&gt;PWC_Fcg2PeriphClockCmd&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;PWC_FCG2_PERIPH_TIM02&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Enable&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cm&#34;&gt;/* ② 填基础配置：模式、时钟源、分频、比较值 */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;stcTimerCfg&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Tim0_CounterMode&lt;/span&gt;      &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Tim0_Sync&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;stcTimerCfg&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Tim0_SyncClockSource&lt;/span&gt;  &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Tim0_Pclk1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;stcTimerCfg&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Tim0_ClockDivision&lt;/span&gt;    &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Tim0_ClkDiv1024&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;stcTimerCfg&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Tim0_CmpValue&lt;/span&gt;         &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;算出来的值&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nf&#34;&gt;TIMER0_BaseInit&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;M4_TMR02&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Tim0_ChannelB&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;stcTimerCfg&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cm&#34;&gt;/* ③ 使能通道中断 */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nf&#34;&gt;TIMER0_IntCmd&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;M4_TMR02&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Tim0_ChannelB&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Enable&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cm&#34;&gt;/* ④ 注册中断回调 + 配 NVIC（见下）*/&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;...&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cm&#34;&gt;/* ⑤ 启动计数 */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nf&#34;&gt;TIMER0_Cmd&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;M4_TMR02&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Tim0_ChannelB&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Enable&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;hr&gt;
+&lt;h2 id=&#34;hc32-的中断注册机制重点&#34;&gt;HC32 的中断注册机制（重点）
+&lt;/h2&gt;&lt;p&gt;这是 HC32 和 STM32 差别最大的地方，&lt;strong&gt;务必理解&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;STM32 的中断函数名是固定的（如 &lt;code&gt;TIM2_IRQHandler&lt;/code&gt;），你直接写这个函数就行。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;HC32F460 不一样&lt;/strong&gt;：它有一批「可编程中断向量」（Int000_IRQn ~ Int031_IRQn 等），你需要&lt;strong&gt;手动把「某个中断源」绑定到「某个向量号」，并指定回调函数&lt;/strong&gt;。这个绑定动作用 &lt;code&gt;enIrqRegistration()&lt;/code&gt; 完成：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;stc_irq_regi_conf_t&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;stcIrqRegiConf&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;stcIrqRegiConf&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;enIRQn&lt;/span&gt;      &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Int001_IRQn&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;        &lt;span class=&#34;c1&#34;&gt;// 用哪个向量号
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;stcIrqRegiConf&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;enIntSrc&lt;/span&gt;    &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;INT_TMR02_GCMA&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;     &lt;span class=&#34;c1&#34;&gt;// 中断源：Timer0_2 通道A比较匹配
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;stcIrqRegiConf&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;pfnCallback&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Timer0A_CallBack&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;  &lt;span class=&#34;c1&#34;&gt;// 中断发生时调用哪个函数
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nf&#34;&gt;enIrqRegistration&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;stcIrqRegiConf&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;              &lt;span class=&#34;c1&#34;&gt;// 完成绑定
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nf&#34;&gt;NVIC_ClearPendingIRQ&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;stcIrqRegiConf&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;enIRQn&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;              &lt;span class=&#34;c1&#34;&gt;// 清挂起
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nf&#34;&gt;NVIC_SetPriority&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;stcIrqRegiConf&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;enIRQn&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;DDL_IRQ_PRIORITY_15&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;  &lt;span class=&#34;c1&#34;&gt;// 设优先级
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nf&#34;&gt;NVIC_EnableIRQ&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;stcIrqRegiConf&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;enIRQn&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;                   &lt;span class=&#34;c1&#34;&gt;// 使能 NVIC
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;记住这四件套：&lt;strong&gt;注册（enIrqRegistration）→ 清挂起 → 设优先级 → 使能 NVIC&lt;/strong&gt;。以后所有需要中断的外设（定时器、按键、串口中断）都是这个流程，只是 &lt;code&gt;enIntSrc&lt;/code&gt; 换成对应的中断源。&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;本章示例&#34;&gt;本章示例
+&lt;/h2&gt;&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;示例&lt;/th&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;学到什么&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;../timer0_pwm/&#34; &gt;Timer0 定时中断：双通道定时翻转 LED&lt;/a&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;同步/异步双模式、比较值计算、&lt;code&gt;enIrqRegistration&lt;/code&gt; 中断注册、中断回调&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;小结&#34;&gt;小结
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;Timer0 是&lt;strong&gt;基础定时器&lt;/strong&gt;，强项是精确定时和周期中断（PWM 输出要用 TimerA/B）。&lt;/li&gt;
+&lt;li&gt;两种模式：&lt;strong&gt;同步（PCLK1，高速高精度）&lt;/strong&gt;、&lt;strong&gt;异步（XTAL32，低速省电）&lt;/strong&gt;。&lt;/li&gt;
+&lt;li&gt;定时时间 = (比较值+1) × 分频 ÷ 时钟频率。&lt;/li&gt;
+&lt;li&gt;用之前先 &lt;code&gt;PWC_Fcg2PeriphClockCmd&lt;/code&gt; 开时钟。&lt;/li&gt;
+&lt;li&gt;HC32 中断要&lt;strong&gt;手动注册&lt;/strong&gt;：&lt;code&gt;enIrqRegistration&lt;/code&gt; → 清挂起 → 设优先级 → 使能 NVIC。&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        </item>
+        <item>
         <title>AT32 I2C — 读写 EEPROM（最常用的 I2C 从设备）</title>
         <link>https://clingyang.github.io/p/at32-i2c-%E8%AF%BB%E5%86%99-eeprom%E6%9C%80%E5%B8%B8%E7%94%A8%E7%9A%84-i2c-%E4%BB%8E%E8%AE%BE%E5%A4%87/</link>
         <pubDate>Tue, 08 Sep 2026 15:03:00 +0800</pubDate>

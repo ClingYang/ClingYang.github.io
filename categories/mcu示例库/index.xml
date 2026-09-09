@@ -7,7 +7,198 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>CLing</copyright>
-        <lastBuildDate>Tue, 08 Sep 2026 16:31:23 +0800</lastBuildDate><atom:link href="https://clingyang.github.io/categories/mcu%E7%A4%BA%E4%BE%8B%E5%BA%93/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Wed, 09 Sep 2026 09:51:13 +0800</lastBuildDate><atom:link href="https://clingyang.github.io/categories/mcu%E7%A4%BA%E4%BE%8B%E5%BA%93/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>乐鑫 ESP32 — WiFi&#43;蓝牙双模 SoC 入门</title>
+        <link>https://clingyang.github.io/post/mcu_esp32/</link>
+        <pubDate>Wed, 09 Sep 2026 09:00:00 +0800</pubDate>
+        
+        <guid>https://clingyang.github.io/post/mcu_esp32/</guid>
+        <description>&lt;h1 id=&#34;esp32-mcu-示例代码库&#34;&gt;ESP32 MCU 示例代码库
+&lt;/h1&gt;&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;厂商&lt;/strong&gt;: 乐鑫 (Espressif)&lt;br&gt;
+&lt;strong&gt;芯片&lt;/strong&gt;: ESP32 / ESP32-S2 / ESP32-S3 / ESP32-C3&lt;br&gt;
+&lt;strong&gt;开发框架&lt;/strong&gt;: ESP-IDF（Espressif IoT Development Framework）&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;esp32-是什么&#34;&gt;ESP32 是什么？
+&lt;/h2&gt;&lt;p&gt;ESP32 是乐鑫推出的 &lt;strong&gt;WiFi + 蓝牙双模 SoC&lt;/strong&gt;，集成度极高：&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;特性&lt;/th&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;参数&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;CPU&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;Xtensa LX6 双核，240MHz&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;WiFi&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;802.11 b/g/n&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;蓝牙&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;BT 4.2 + BLE&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;RAM&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;520KB SRAM&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;Flash&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;外置，4~16MB&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;GPIO&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;34 个&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;ADC&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;18 通道，12 位&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;接口&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;SPI、I2C、UART、I2S、SDIO、CAN&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;为什么用 ESP32？&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;自带 WiFi 和蓝牙，不需要外接模块&lt;/li&gt;
+&lt;li&gt;价格便宜（~10 元）&lt;/li&gt;
+&lt;li&gt;生态成熟，开源项目多&lt;/li&gt;
+&lt;li&gt;支持 Arduino 和 ESP-IDF 两种开发方式&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;开发环境&#34;&gt;开发环境
+&lt;/h2&gt;&lt;h3 id=&#34;esp-idf官方框架&#34;&gt;ESP-IDF（官方框架）
+&lt;/h3&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;9
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# 安装 ESP-IDF&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;git clone --recursive https://github.com/espressif/esp-idf.git
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nb&#34;&gt;cd&lt;/span&gt; esp-idf
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;./install.sh
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# 编译和烧录&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;idf.py set-target esp32
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;idf.py build
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;idf.py -p /dev/ttyUSB0 flash monitor
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id=&#34;arduino-ide更简单&#34;&gt;Arduino IDE（更简单）
+&lt;/h3&gt;&lt;ol&gt;
+&lt;li&gt;安装 Arduino IDE&lt;/li&gt;
+&lt;li&gt;添加 ESP32 开发板 URL：&lt;code&gt;https://dl.espressif.com/dl/package_esp32_index.json&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;安装 ESP32 开发板包&lt;/li&gt;
+&lt;li&gt;选择板子和端口，直接写代码&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;项目结构&#34;&gt;项目结构
+&lt;/h2&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;project_test/
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;├── CMakeLists.txt          # 项目 CMake 配置
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;├── sdkconfig               # SDK 配置（menuconfig 生成）
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;├── main/
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│   ├── CMakeLists.txt      # 主模块 CMake 配置
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│   └── hello_world_main.c  # 主程序
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;└── README.md
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;hr&gt;
+&lt;h2 id=&#34;示例列表&#34;&gt;示例列表
+&lt;/h2&gt;&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;示例&lt;/th&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;说明&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;./hello_world/&#34; &gt;Hello World&lt;/a&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;打印芯片信息，ESP32 入门第一个实验&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;学了-esp32-能做什么&#34;&gt;学了 ESP32 能做什么？
+&lt;/h2&gt;&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;项目&lt;/th&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;原理&lt;/th&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;难度&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;智能家居&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;WiFi + MQTT + 手机 APP 控制家电&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;⭐⭐⭐&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;物联网传感器&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;WiFi 上传温湿度数据到云平台&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;⭐⭐&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;蓝牙遥控车&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;BLE 连接手机，控制电机&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;⭐⭐⭐&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;网络摄像头&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;ESP32-CAM + WiFi 视频流&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;⭐⭐⭐⭐&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;天气站&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;WiFi 获取天气 API，LCD 显示&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;⭐⭐⭐&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;OTA 远程升级&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;WiFi 下载新固件，自动更新&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;⭐⭐⭐⭐&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;WiFi 遥控器&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;ESP32 建 Web 服务器，手机浏览器控制&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;⭐⭐⭐&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;蓝牙音箱&lt;/strong&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;A2DP 蓝牙音频流&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;⭐⭐⭐⭐&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+</description>
+        </item>
+        <item>
         <title>华大半导体 (HDSC / XHSC) HC32 MCU 示例代码库</title>
         <link>https://clingyang.github.io/post/mcu_hc32/</link>
         <pubDate>Tue, 08 Sep 2026 14:52:21 +0800</pubDate>
@@ -37,10 +228,82 @@
 			&lt;/tr&gt;
 	&lt;/tbody&gt;
 &lt;/table&gt;
+&lt;blockquote&gt;
+&lt;p&gt;HC32 用的是 &lt;strong&gt;ddl 库&lt;/strong&gt;（Device Driver Library），不是 STM32 那套标准外设库。
+函数命名风格是 &lt;code&gt;PORT_xxx()&lt;/code&gt;、&lt;code&gt;USART_xxx()&lt;/code&gt;、&lt;code&gt;TIMER0_xxx()&lt;/code&gt;，配置全部通过 &lt;code&gt;stc_xxx_t&lt;/code&gt; 结构体完成。
+两个和 STM32 最不一样的地方：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;GPIO 不用开外设时钟&lt;/strong&gt;，但其他外设都要 &lt;code&gt;PWC_FcgxPeriphClockCmd()&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;中断要手动注册&lt;/strong&gt;：用 &lt;code&gt;enIrqRegistration()&lt;/code&gt; 把「中断源」绑到「向量号」和「回调函数」上。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;学习路线&#34;&gt;学习路线
+&lt;/h2&gt;&lt;p&gt;建议按顺序阅读，由易到难，前面是后面的基础：&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th style=&#34;text-align: center&#34;&gt;顺序&lt;/th&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;外设&lt;/th&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;学什么&lt;/th&gt;
+					&lt;th style=&#34;text-align: center&#34;&gt;难度&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;1&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;gpio/&#34; &gt;GPIO&lt;/a&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;点亮 LED，控制引脚高低电平&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;★&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;2&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;usart/&#34; &gt;USART&lt;/a&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;串口收发 + printf 调试打印&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;★★&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;3&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;timer0/&#34; &gt;Timer0&lt;/a&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;定时中断，不再用死等延时&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;★★&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;4&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;key/&#34; &gt;KEY&lt;/a&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;按键输入 + 外部中断 + 消抖&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;★★&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;5&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;qspi/&#34; &gt;QSPI&lt;/a&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;外扩 Flash，映射地址直接读&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;★★★&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;6&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;sdioc/&#34; &gt;SDIOC&lt;/a&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;SD 卡读写，GB 级存储&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;★★★&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;7&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;spi_lcd/&#34; &gt;SPI LCD&lt;/a&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;彩屏显示文字与图形&lt;/td&gt;
+					&lt;td style=&#34;text-align: center&#34;&gt;★★★&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;前四章是&lt;strong&gt;必修基础&lt;/strong&gt;（GPIO / 串口 / 定时器 / 中断），几乎所有项目都用得上。
+后三章是&lt;strong&gt;外设扩展&lt;/strong&gt;（存储 + 显示），做完整产品时按需取用。&lt;/p&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;目录导航&#34;&gt;目录导航
-&lt;/h2&gt;&lt;p&gt;左侧导航按外设模块分类，每个模块下列出所有子示例。
-每个示例包含功能说明、关键配置代码、源文件路径。&lt;/p&gt;
+&lt;/h2&gt;&lt;p&gt;左侧导航按外设模块分类。每个外设目录下有：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;_index.md&lt;/code&gt;&lt;/strong&gt;：该外设的原理讲解、寄存器概念、配置套路、引脚表&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;示例页&lt;/strong&gt;：完整代码（带详细中文注释）+ 逐段讲解 + 实验现象 + 常见问题 + 拓展应用&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;所有代码都来自官方 &lt;code&gt;HC32F460 Demo&lt;/code&gt; SDK 的 &lt;code&gt;example/HC32F460JEUA/&lt;/code&gt; 目录，每篇文档开头标注了对应的源码路径。&lt;/p&gt;
 </description>
         </item>
         <item>
@@ -89,42 +352,6 @@
 			&lt;tr&gt;
 					&lt;td style=&#34;text-align: left&#34;&gt;HB1025B 核心板&lt;/td&gt;
 					&lt;td style=&#34;text-align: left&#34;&gt;V1.3&lt;/td&gt;
-			&lt;/tr&gt;
-	&lt;/tbody&gt;
-&lt;/table&gt;
-&lt;hr&gt;
-&lt;h2 id=&#34;目录导航&#34;&gt;目录导航
-&lt;/h2&gt;&lt;p&gt;左侧导航按外设模块分类，每个模块下列出所有子示例。
-每个示例包含功能说明、关键配置代码、源文件路径。&lt;/p&gt;
-</description>
-        </item>
-        <item>
-        <title>乐鑫 (Espressif) Esp32 MCU 示例代码库</title>
-        <link>https://clingyang.github.io/post/mcu_esp32/</link>
-        <pubDate>Tue, 08 Sep 2026 14:52:21 +0800</pubDate>
-        
-        <guid>https://clingyang.github.io/post/mcu_esp32/</guid>
-        <description>&lt;h1 id=&#34;esp32-mcu-示例代码库&#34;&gt;Esp32 MCU 示例代码库
-&lt;/h1&gt;&lt;blockquote&gt;
-&lt;p&gt;&lt;strong&gt;厂商&lt;/strong&gt;: 乐鑫 (Espressif)&lt;br&gt;
-&lt;strong&gt;芯片&lt;/strong&gt;: ESP32&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;乐鑫 ESP32 系列，WiFi + 蓝牙双模 SoC，基于 Xtensa LX6 双核。&lt;/p&gt;
-&lt;hr&gt;
-&lt;h2 id=&#34;固件库版本一览&#34;&gt;固件库版本一览
-&lt;/h2&gt;&lt;table&gt;
-	&lt;thead&gt;
-			&lt;tr&gt;
-					&lt;th style=&#34;text-align: left&#34;&gt;固件库名称&lt;/th&gt;
-					&lt;th style=&#34;text-align: left&#34;&gt;版本&lt;/th&gt;
-					&lt;th style=&#34;text-align: left&#34;&gt;芯片&lt;/th&gt;
-			&lt;/tr&gt;
-	&lt;/thead&gt;
-	&lt;tbody&gt;
-			&lt;tr&gt;
-					&lt;td style=&#34;text-align: left&#34;&gt;ESP-IDF project_test&lt;/td&gt;
-					&lt;td style=&#34;text-align: left&#34;&gt;—&lt;/td&gt;
-					&lt;td style=&#34;text-align: left&#34;&gt;ESP32&lt;/td&gt;
 			&lt;/tr&gt;
 	&lt;/tbody&gt;
 &lt;/table&gt;

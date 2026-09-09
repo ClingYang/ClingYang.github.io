@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="en-us" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="CIU32 CIU32F003_STDLib V1.0.3 I2C GPIO 模拟 I2C 主机 示例教学">
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="CIU32 CIU32F003_STDLib V1.0.3 GPIO 模拟 I2C 主机收发示例教学">
 <title>CIU32 I2C — GPIO 模拟 I2C 主机</title>
 
 <link rel='canonical' href='https://clingyang.github.io/p/ciu32-i2c-gpio-%E6%A8%A1%E6%8B%9F-i2c-%E4%B8%BB%E6%9C%BA/'>
 
 <link rel="stylesheet" href="/scss/style.min.e14f3ba93baae65b2aef2339f32b6f25d7a0184785ebf4f6bd7d3376ae5dc2d4.css"><meta property='og:title' content="CIU32 I2C — GPIO 模拟 I2C 主机">
-<meta property='og:description' content="CIU32 CIU32F003_STDLib V1.0.3 I2C GPIO 模拟 I2C 主机 示例教学">
+<meta property='og:description' content="CIU32 CIU32F003_STDLib V1.0.3 GPIO 模拟 I2C 主机收发示例教学">
 <meta property='og:url' content='https://clingyang.github.io/p/ciu32-i2c-gpio-%E6%A8%A1%E6%8B%9F-i2c-%E4%B8%BB%E6%9C%BA/'>
 <meta property='og:site_name' content='CLing'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='GPIO_Simulate_I2C_Master' /><meta property='article:tag' content='i2c' /><meta property='article:tag' content='V1.0.3' /><meta property='article:published_time' content='2026-09-08T14:52:21&#43;08:00'/><meta property='article:modified_time' content='2026-09-08T16:03:27&#43;08:00'/>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='GPIO_Simulate_I2C_Master' /><meta property='article:tag' content='i2c' /><meta property='article:tag' content='V1.0.3' /><meta property='article:published_time' content='2026-09-08T14:52:21&#43;08:00'/><meta property='article:modified_time' content='2026-09-09T09:51:13&#43;08:00'/>
 <meta name="twitter:title" content="CIU32 I2C — GPIO 模拟 I2C 主机">
-<meta name="twitter:description" content="CIU32 CIU32F003_STDLib V1.0.3 I2C GPIO 模拟 I2C 主机 示例教学">
+<meta name="twitter:description" content="CIU32 CIU32F003_STDLib V1.0.3 GPIO 模拟 I2C 主机收发示例教学">
     </head>
     <body class="
     article-page
@@ -244,12 +244,20 @@
         <div class="widget--toc">
             <nav id="TableOfContents">
   <ol>
-    <li><a href="#功能简介">功能简介</a></li>
-    <li><a href="#硬件准备">硬件准备</a></li>
-    <li><a href="#完整代码">完整代码</a></li>
-    <li><a href="#代码讲解">代码讲解</a></li>
-    <li><a href="#实验现象">实验现象</a></li>
-    <li><a href="#注意事项">注意事项</a></li>
+    <li><a href="#一功能简介">一、功能简介</a></li>
+    <li><a href="#二硬件准备">二、硬件准备</a></li>
+    <li><a href="#三完整代码">三、完整代码</a>
+      <ol>
+        <li><a href="#31-主流程-mainc">3.1 主流程 <code>main.c</code></a></li>
+        <li><a href="#32-引脚与延时-commonc节选">3.2 引脚与延时 <code>common.c</code>（节选）</a></li>
+        <li><a href="#33-底层时序-i2c_bspc核心">3.3 底层时序 <code>i2c_bsp.c</code>（核心）</a></li>
+      </ol>
+    </li>
+    <li><a href="#四代码分段讲解">四、代码分段讲解</a></li>
+    <li><a href="#五实验现象">五、实验现象</a></li>
+    <li><a href="#六常见问题">六、常见问题</a></li>
+    <li><a href="#七小结">七、小结</a></li>
+    <li><a href="#八拓展应用">八、拓展应用</a></li>
   </ol>
 </nav>
         </div>
@@ -286,7 +294,7 @@
     
         
         <h3 class="article-subtitle">
-            CIU32 CIU32F003_STDLib V1.0.3 I2C GPIO 模拟 I2C 主机 示例教学
+            CIU32 CIU32F003_STDLib V1.0.3 GPIO 模拟 I2C 主机收发示例教学
         </h3>
         
     </div>
@@ -322,7 +330,7 @@
 
 
                 <time class="article-time--reading">
-                    阅读时长: 1 分钟
+                    阅读时长: 5 分钟
                 </time>
             </div>
         
@@ -337,22 +345,87 @@
     <section class="article-content">
     
     
-    <h1 id="i2c--gpio-模拟-i2c-主机">I2C — GPIO 模拟 I2C 主机
+    <h1 id="i2c--gpio-模拟-i2c-主机gpio_simulate_i2c_master">I2C — GPIO 模拟 I2C 主机（GPIO_Simulate_I2C_Master）
 </h1><blockquote>
-<p><strong>固件库</strong>: CIU32F003_STDLib V1.0.3<br>
-<strong>芯片</strong>: CIU32<br>
-<strong>源文件</strong>: <code>CIU32/CIU32F003_STDLib_V1.0.3/Projects/I2C/GPIO_Simulate_I2C_Master/Source/main.c</code></p>
+<p><strong>固件库</strong>: CIU32F003_STDLib V1.0.3
+<strong>芯片</strong>: CIU32F003（Cortex-M0）
+<strong>源文件</strong>: <code>CIU32/CIU32F003_STDLib_V1.0.3/Projects/I2C/GPIO_Simulate_I2C_Master/Source/</code></p>
 </blockquote>
 <hr>
-<h2 id="功能简介">功能简介
-</h2><p>本示例演示 I2C 总线通信。I2C 只需两根线（SCL+SDA）就能连接多个设备，是最常用的低速通信总线。</p>
-<h2 id="硬件准备">硬件准备
+<h2 id="一功能简介">一、功能简介
+</h2><p>本示例用<strong>普通 GPIO 引脚“模拟”出 I2C 主机时序</strong>（俗称 bit-bang / 软 I2C），
+不依赖芯片内部的硬件 I2C 外设。程序依次完成：</p>
+<ol>
+<li>作为主机向从机 <code>0x5C</code> <strong>发送</strong> 8 字节数据；</li>
+<li>再向同一从机 <strong>接收</strong> 8 字节数据。</li>
+</ol>
+<p>通过这段代码，你能看清 I2C 每个比特是怎么靠“拉高/拉低 SCL、SDA + 延时”拼出来的。
+注意：该实现<strong>不支持时钟延长（clock stretching）</strong>，通信速率约 150Kbps。</p>
+<h2 id="二硬件准备">二、硬件准备
 </h2><ul>
-<li>I2C 从设备（如 EEPROM、传感器模块）</li>
-<li>SCL/SDA 线上需要 4.7K 上拉电阻</li>
+<li>CIU32F003 开发板</li>
+<li>一个 I2C 从设备（如 EEPROM、传感器），地址为 <code>0x5C</code></li>
+<li>引脚（本示例）：</li>
 </ul>
-<h2 id="完整代码">完整代码
-</h2><div class="highlight"><div class="chroma">
+<div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">信号</th>
+					<th style="text-align: left">引脚</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left">SCL</td>
+					<td style="text-align: left">PB3</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">SDA</td>
+					<td style="text-align: left">PB4</td>
+			</tr>
+	</tbody>
+</table></div>
+<ul>
+<li><strong>SCL、SDA 必须各接一个 4.7kΩ 上拉电阻到 VDD</strong>（开漏总线靠上拉拉高）</li>
+<li>主从设备共地</li>
+</ul>
+<blockquote>
+<p>没有真实从机时，可先用“逻辑分析仪/示波器”观察 PB3/PB4 上的波形来验证时序是否正确。</p>
+</blockquote>
+<h2 id="三完整代码">三、完整代码
+</h2><h3 id="31-主流程-mainc">3.1 主流程 <code>main.c</code>
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;main.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">system_clock_config</span><span class="p">();</span>   <span class="cm">/* 系统时钟 RCH 48MHz */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">gpio_init</span><span class="p">();</span>             <span class="cm">/* SCL/SDA 配置为开漏输出，默认高 */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">bsp_i2c_master_send</span><span class="p">();</span>   <span class="cm">/* 主机发送 8 字节给从机 0x5C */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">bsp_i2c_master_receive</span><span class="p">();</span><span class="cm">/* 主机从从机 0x5C 接收 8 字节 */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="32-引脚与延时-commonc节选">3.2 引脚与延时 <code>common.c</code>（节选）
+</h3><div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
@@ -374,43 +447,351 @@
 </span><span class="lnt">18
 </span><span class="lnt">19
 </span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;main.h&#34;</span><span class="cp">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#define I2C_PIN_PORT   GPIOB
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define SCL_PIN        GPIO_PIN_3
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define SDA_PIN        GPIO_PIN_4
 </span></span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="p">{</span>    
-</span></span><span class="line"><span class="cl">    <span class="cm">/* ϵͳʱ */</span>
-</span></span><span class="line"><span class="cl">    <span class="nf">system_clock_config</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">    
-</span></span><span class="line"><span class="cl">    <span class="cm">/* GPIOʼ */</span>
-</span></span><span class="line"><span class="cl">    <span class="nf">gpio_init</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">    
-</span></span><span class="line"><span class="cl">    <span class="cm">/* I2C */</span>
-</span></span><span class="line"><span class="cl">    <span class="nf">bsp_i2c_master_send</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">    
-</span></span><span class="line"><span class="cl">    <span class="cm">/* I2C */</span>
-</span></span><span class="line"><span class="cl">    <span class="nf">bsp_i2c_master_receive</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">    
-</span></span><span class="line"><span class="cl">    <span class="k">while</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">    <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="cm">/* GPIO 初始化：SCL/SDA 默认输出高，开漏，无上下拉（靠外部上拉电阻拉高） */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">gpio_init</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">std_gpio_init_t</span> <span class="n">gpio_config</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">std_rcc_gpio_clk_enable</span><span class="p">(</span><span class="n">RCC_PERIPH_CLK_GPIOB</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">std_gpio_set_pin</span><span class="p">(</span><span class="n">I2C_PIN_PORT</span><span class="p">,</span> <span class="p">(</span><span class="n">SCL_PIN</span> <span class="o">|</span> <span class="n">SDA_PIN</span><span class="p">));</span>  <span class="cm">/* 先置高，避免起始毛刺 */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">gpio_config</span><span class="p">.</span><span class="n">pin</span>         <span class="o">=</span> <span class="p">(</span><span class="n">SCL_PIN</span> <span class="o">|</span> <span class="n">SDA_PIN</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">gpio_config</span><span class="p">.</span><span class="n">mode</span>        <span class="o">=</span> <span class="n">GPIO_MODE_OUTPUT</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">gpio_config</span><span class="p">.</span><span class="n">output_type</span> <span class="o">=</span> <span class="n">GPIO_OUTPUT_OPENDRAIN</span><span class="p">;</span>  <span class="cm">/* 开漏：只能拉低或释放(高) */</span>
+</span></span><span class="line"><span class="cl">    <span class="n">gpio_config</span><span class="p">.</span><span class="n">pull</span>        <span class="o">=</span> <span class="n">GPIO_NOPULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">std_gpio_init</span><span class="p">(</span><span class="n">I2C_PIN_PORT</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">gpio_config</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 简单软件延时，改 delay_time 可调通信速率 */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">i2c_delay_time</span><span class="p">(</span><span class="kt">uint32_t</span> <span class="n">delay_time</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint32_t</span> <span class="n">delay_cnt</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="n">delay_cnt</span> <span class="o">=</span> <span class="n">delay_time</span><span class="p">;</span> <span class="n">delay_cnt</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">;</span> <span class="n">delay_cnt</span><span class="o">--</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="代码讲解">代码讲解
-</h2><p><strong>系统时钟初始化</strong>：配置 MCU 的主频和时钟树。不同芯片的时钟配置不同，一般由工具生成。</p>
-<p><strong>GPIO 配置</strong>：设置引脚为输出/输入模式，选择推挽/开漏输出，配置上拉/下拉。</p>
-<h2 id="实验现象">实验现象
-</h2><ul>
-<li>主机和从机完成数据收发</li>
-<li>校验通过 LED 指示成功</li>
+</div><h3 id="33-底层时序-i2c_bspc核心">3.3 底层时序 <code>i2c_bsp.c</code>（核心）
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span><span class="lnt">113
+</span><span class="lnt">114
+</span><span class="lnt">115
+</span><span class="lnt">116
+</span><span class="lnt">117
+</span><span class="lnt">118
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#define BUFF_SIZE     (8U)
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define SLAVE_ADDRESS (0x5C)
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define CLK_DELAY     (16U)   </span><span class="cm">/* SCL 半周期延时 */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define ACK_DELAY     (6U)    </span><span class="cm">/* 采样 ACK 前的建立延时 */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define USER_DELAY    (5U)    </span><span class="cm">/* 地址匹配后的额外延时 */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define REQ_WRITE     (0U)
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define REQ_READ      (1U)
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define RET_ACK       (0U)
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define RET_NACK      (1U)
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="n">g_tx_buffer</span><span class="p">[</span><span class="n">BUFF_SIZE</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mh">0x01</span><span class="p">,</span><span class="mh">0x02</span><span class="p">,</span><span class="mh">0x03</span><span class="p">,</span><span class="mh">0x04</span><span class="p">,</span><span class="mh">0x05</span><span class="p">,</span><span class="mh">0x06</span><span class="p">,</span><span class="mh">0x07</span><span class="p">,</span><span class="mh">0x08</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="n">g_rx_buffer</span><span class="p">[</span><span class="n">BUFF_SIZE</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 起始条件：SCL 高时，SDA 由高变低 */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">bsp_i2c_generate_start</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">std_gpio_set_pin</span><span class="p">(</span><span class="n">I2C_PIN_PORT</span><span class="p">,</span> <span class="p">(</span><span class="n">SCL_PIN</span> <span class="o">|</span> <span class="n">SDA_PIN</span><span class="p">));</span>   <span class="cm">/* SDA/SCL 先高 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">std_gpio_set_pin_mode</span><span class="p">(</span><span class="n">I2C_PIN_PORT</span><span class="p">,</span> <span class="n">SDA_PIN</span><span class="p">,</span> <span class="n">GPIO_MODE_OUTPUT</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">i2c_delay_time</span><span class="p">(</span><span class="n">CLK_DELAY</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">std_gpio_reset_pin</span><span class="p">(</span><span class="n">I2C_PIN_PORT</span><span class="p">,</span> <span class="n">SDA_PIN</span><span class="p">);</span>             <span class="cm">/* SDA 拉低 = 起始 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">i2c_delay_time</span><span class="p">(</span><span class="n">CLK_DELAY</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">std_gpio_reset_pin</span><span class="p">(</span><span class="n">I2C_PIN_PORT</span><span class="p">,</span> <span class="n">SCL_PIN</span><span class="p">);</span>             <span class="cm">/* 拉低 SCL，准备传数据 */</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 停止条件：SCL 高时，SDA 由低变高 */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">bsp_i2c_generate_stop</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">std_gpio_reset_pin</span><span class="p">(</span><span class="n">I2C_PIN_PORT</span><span class="p">,</span> <span class="p">(</span><span class="n">SCL_PIN</span> <span class="o">|</span> <span class="n">SDA_PIN</span><span class="p">));</span> <span class="cm">/* SDA/SCL 先低 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">std_gpio_set_pin_mode</span><span class="p">(</span><span class="n">I2C_PIN_PORT</span><span class="p">,</span> <span class="n">SDA_PIN</span><span class="p">,</span> <span class="n">GPIO_MODE_OUTPUT</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">i2c_delay_time</span><span class="p">(</span><span class="n">CLK_DELAY</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">std_gpio_set_pin</span><span class="p">(</span><span class="n">I2C_PIN_PORT</span><span class="p">,</span> <span class="n">SCL_PIN</span><span class="p">);</span>               <span class="cm">/* SCL 拉高 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">i2c_delay_time</span><span class="p">(</span><span class="n">CLK_DELAY</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">std_gpio_set_pin</span><span class="p">(</span><span class="n">I2C_PIN_PORT</span><span class="p">,</span> <span class="n">SDA_PIN</span><span class="p">);</span>               <span class="cm">/* SDA 拉高 = 停止 */</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 发送 1 字节（高位先），返回从机 ACK 状态 */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">uint32_t</span> <span class="nf">bsp_i2c_master_send_byte</span><span class="p">(</span><span class="kt">uint8_t</span> <span class="n">send_data</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint32_t</span> <span class="n">bit_cnt</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ack_type</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 设置 SDA 初始电平并切输出 */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">send_data</span> <span class="o">&amp;</span> <span class="mh">0x80</span><span class="p">)</span> <span class="nf">std_gpio_set_pin</span><span class="p">(</span><span class="n">I2C_PIN_PORT</span><span class="p">,</span> <span class="n">SDA_PIN</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">else</span>                  <span class="nf">std_gpio_reset_pin</span><span class="p">(</span><span class="n">I2C_PIN_PORT</span><span class="p">,</span> <span class="n">SDA_PIN</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">std_gpio_set_pin_mode</span><span class="p">(</span><span class="n">I2C_PIN_PORT</span><span class="p">,</span> <span class="n">SDA_PIN</span><span class="p">,</span> <span class="n">GPIO_MODE_OUTPUT</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="n">bit_cnt</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">bit_cnt</span> <span class="o">&lt;</span> <span class="mi">8</span><span class="p">;</span> <span class="n">bit_cnt</span><span class="o">++</span><span class="p">)</span>   <span class="cm">/* 逐位发送 */</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">((</span><span class="n">send_data</span> <span class="o">&lt;&lt;</span> <span class="n">bit_cnt</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x80</span><span class="p">)</span> <span class="nf">std_gpio_set_pin</span><span class="p">(</span><span class="n">I2C_PIN_PORT</span><span class="p">,</span> <span class="n">SDA_PIN</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">else</span>                                 <span class="nf">std_gpio_reset_pin</span><span class="p">(</span><span class="n">I2C_PIN_PORT</span><span class="p">,</span> <span class="n">SDA_PIN</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">i2c_delay_time</span><span class="p">(</span><span class="n">CLK_DELAY</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">std_gpio_set_pin</span><span class="p">(</span><span class="n">I2C_PIN_PORT</span><span class="p">,</span> <span class="n">SCL_PIN</span><span class="p">);</span>   <span class="cm">/* SCL 高，从机采样 */</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">i2c_delay_time</span><span class="p">(</span><span class="n">CLK_DELAY</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">std_gpio_reset_pin</span><span class="p">(</span><span class="n">I2C_PIN_PORT</span><span class="p">,</span> <span class="n">SCL_PIN</span><span class="p">);</span> <span class="cm">/* SCL 低，准备下一位 */</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 第 9 个时钟读 ACK：SDA 设为输入，主机释放 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">std_gpio_set_pin_mode</span><span class="p">(</span><span class="n">I2C_PIN_PORT</span><span class="p">,</span> <span class="n">SDA_PIN</span><span class="p">,</span> <span class="n">GPIO_MODE_INPUT</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">i2c_delay_time</span><span class="p">(</span><span class="n">CLK_DELAY</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">std_gpio_set_pin</span><span class="p">(</span><span class="n">I2C_PIN_PORT</span><span class="p">,</span> <span class="n">SCL_PIN</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">i2c_delay_time</span><span class="p">(</span><span class="n">ACK_DELAY</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ack_type</span> <span class="o">=</span> <span class="nf">std_gpio_get_input_pin</span><span class="p">(</span><span class="n">I2C_PIN_PORT</span><span class="p">,</span> <span class="n">SDA_PIN</span><span class="p">)</span> <span class="o">?</span> <span class="nl">RET_NACK</span> <span class="p">:</span> <span class="n">RET_ACK</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">std_gpio_reset_pin</span><span class="p">(</span><span class="n">I2C_PIN_PORT</span><span class="p">,</span> <span class="n">SCL_PIN</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">i2c_delay_time</span><span class="p">(</span><span class="n">CLK_DELAY</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">ack_type</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 接收 1 字节（高位先） */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="nf">bsp_i2c_master_receive_byte</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint32_t</span> <span class="n">bit_cnt</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint8_t</span>  <span class="n">receive_data</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">std_gpio_set_pin_mode</span><span class="p">(</span><span class="n">I2C_PIN_PORT</span><span class="p">,</span> <span class="n">SDA_PIN</span><span class="p">,</span> <span class="n">GPIO_MODE_INPUT</span><span class="p">);</span> <span class="cm">/* 主机释放 SDA */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="n">bit_cnt</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">bit_cnt</span> <span class="o">&lt;</span> <span class="mi">8</span><span class="p">;</span> <span class="n">bit_cnt</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">std_gpio_reset_pin</span><span class="p">(</span><span class="n">I2C_PIN_PORT</span><span class="p">,</span> <span class="n">SCL_PIN</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">i2c_delay_time</span><span class="p">(</span><span class="n">CLK_DELAY</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">std_gpio_set_pin</span><span class="p">(</span><span class="n">I2C_PIN_PORT</span><span class="p">,</span> <span class="n">SCL_PIN</span><span class="p">);</span>  <span class="cm">/* SCL 高，从机驱动 SDA */</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">i2c_delay_time</span><span class="p">(</span><span class="n">CLK_DELAY</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">receive_data</span> <span class="o">&lt;&lt;=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="nf">std_gpio_get_input_pin</span><span class="p">(</span><span class="n">I2C_PIN_PORT</span><span class="p">,</span> <span class="n">SDA_PIN</span><span class="p">)</span> <span class="o">==</span> <span class="nb">true</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="n">receive_data</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">std_gpio_reset_pin</span><span class="p">(</span><span class="n">I2C_PIN_PORT</span><span class="p">,</span> <span class="n">SCL_PIN</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">i2c_delay_time</span><span class="p">(</span><span class="n">CLK_DELAY</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">receive_data</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 主机完整发送流程 */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">bsp_i2c_master_send</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint32_t</span> <span class="n">ack_type</span><span class="p">,</span> <span class="n">index</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">bsp_i2c_generate_start</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ack_type</span> <span class="o">=</span> <span class="nf">bsp_i2c_master_send_byte</span><span class="p">(</span><span class="n">SLAVE_ADDRESS</span> <span class="o">|</span> <span class="n">REQ_WRITE</span><span class="p">);</span> <span class="cm">/* 地址 + 写 */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">ack_type</span> <span class="o">!=</span> <span class="n">RET_ACK</span><span class="p">)</span> <span class="nf">error_process</span><span class="p">();</span>   <span class="cm">/* 无 ACK 则异常处理 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">i2c_delay_time</span><span class="p">(</span><span class="n">USER_DELAY</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="n">index</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="n">BUFF_SIZE</span><span class="p">;</span> <span class="n">index</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">ack_type</span> <span class="o">=</span> <span class="nf">bsp_i2c_master_send_byte</span><span class="p">(</span><span class="n">g_tx_buffer</span><span class="p">[</span><span class="n">index</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">ack_type</span> <span class="o">!=</span> <span class="n">RET_ACK</span><span class="p">)</span> <span class="nf">error_process</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">bsp_i2c_generate_stop</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 主机完整接收流程（倒数第 2 字节回 ACK，最后 1 字节回 NACK） */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">bsp_i2c_master_receive</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint32_t</span> <span class="n">ack_type</span><span class="p">,</span> <span class="n">index</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">bsp_i2c_generate_start</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ack_type</span> <span class="o">=</span> <span class="nf">bsp_i2c_master_send_byte</span><span class="p">(</span><span class="n">SLAVE_ADDRESS</span> <span class="o">|</span> <span class="n">REQ_READ</span><span class="p">);</span>  <span class="cm">/* 地址 + 读 */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">ack_type</span> <span class="o">!=</span> <span class="n">RET_ACK</span><span class="p">)</span> <span class="nf">error_process</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">i2c_delay_time</span><span class="p">(</span><span class="n">USER_DELAY</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="p">(</span><span class="n">index</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="n">BUFF_SIZE</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span> <span class="n">index</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">g_rx_buffer</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="nf">bsp_i2c_master_receive_byte</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">bsp_i2c_generate_ack</span><span class="p">(</span><span class="n">RET_ACK</span><span class="p">);</span>    <span class="cm">/* 主机回 ACK，告诉从机继续发 */</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">g_rx_buffer</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="nf">bsp_i2c_master_receive_byte</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">bsp_i2c_generate_ack</span><span class="p">(</span><span class="n">RET_NACK</span><span class="p">);</span>       <span class="cm">/* 最后一字节回 NACK，结束 */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">bsp_i2c_generate_stop</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="四代码分段讲解">四、代码分段讲解
+</h2><p><strong>① 开漏 + 上拉</strong>
+I2C 总线用<strong>开漏输出</strong>：MCU 只能把线“拉低”或“释放”。释放后靠外部上拉电阻把线拉高。
+因此 SCL/SDA 必须配置为 <code>GPIO_OUTPUT_OPENDRAIN</code>，且板子上要有上拉电阻，否则总线永远为低、无法通信。</p>
+<p><strong>② 起始/停止条件</strong></p>
+<ul>
+<li>起始：SCL 保持高，<strong>SDA 由高变低</strong>；</li>
+<li>停止：SCL 保持高，<strong>SDA 由低变高</strong>。
+切换引脚方向前先固定电平，是为了避免产生误触发毛刺。</li>
 </ul>
-<h2 id="注意事项">注意事项
+<p><strong>③ 字节发送与 ACK</strong>
+每字节 8 位、高位先发；SCL 高电平时从机采样 SDA。第 9 个时钟由<strong>接收方</strong>把 SDA 拉低表示 ACK。
+本例把 SDA 切回输入（主机释放）去读从机应答。</p>
+<p><strong>④ 接收时的 ACK/NACK</strong>
+主机每收到一字节要回 ACK 让从机继续发；<strong>读到最后一字节改回 NACK</strong>，从机就知道“不用再发了”，随后主机发停止条件。</p>
+<p><strong>⑤ 速率控制</strong>
+<code>i2c_delay_time()</code> 是纯软件延时，<code>CLK_DELAY</code> 等数值决定每位宽度（约 150Kbps）。
+改这些宏即可调速率，但纯软件延时占用 CPU、且不支持时钟延长。</p>
+<h2 id="五实验现象">五、实验现象
 </h2><ul>
-<li>I2C 总线需要上拉电阻（一般 4.7K）</li>
-<li>从机地址要与设备手册一致（注意 7 位/8 位地址的区别）</li>
-<li>写 EEPROM 后需要等待 5ms 以上再读</li>
+<li>逻辑分析仪/示波器可见标准 I2C 波形：起始 → <code>0x5C+W</code> → ACK → 8 字节 → 停止 → 起始 → <code>0x5C+R</code> → ACK → 收 8 字节（末字节前 ACK、末字节 NACK）→ 停止；</li>
+<li>接真实从机且地址匹配时，<code>g_rx_buffer</code> 收到从机返回的数据。</li>
+</ul>
+<h2 id="六常见问题">六、常见问题
+</h2><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th style="text-align: left">现象</th>
+					<th style="text-align: left">可能原因</th>
+					<th style="text-align: left">解决办法</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td style="text-align: left">总线一直为低</td>
+					<td style="text-align: left">没加上拉电阻 / 引脚非开漏</td>
+					<td style="text-align: left">SCL/SDA 加 4.7k 上拉，确认 <code>GPIO_OUTPUT_OPENDRAIN</code></td>
+			</tr>
+			<tr>
+					<td style="text-align: left">地址发完收不到 ACK</td>
+					<td style="text-align: left">从机地址/接线错</td>
+					<td style="text-align: left">确认 7 位地址，R/W 位由库自动拼接；检查 SDA/SCL 未接反</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">通信偶尔失败</td>
+					<td style="text-align: left">速率过快 / 从机需时钟延长</td>
+					<td style="text-align: left">增大 <code>CLK_DELAY</code>；本实现不支持 clock stretching</td>
+			</tr>
+			<tr>
+					<td style="text-align: left">写完 EEPROM 读不到</td>
+					<td style="text-align: left">从机内部写周期未结束</td>
+					<td style="text-align: left">写后延时（如 5ms）再发起读</td>
+			</tr>
+	</tbody>
+</table></div>
+<h2 id="七小结">七、小结
+</h2><p>软 I2C 的关键是理解“<strong>开漏 + 上拉 + 起始/停止 + 每字节 ACK</strong>”四件事：</p>
+<ul>
+<li>引脚必须开漏、总线必须有上拉；</li>
+<li>起始 = SCL 高时 SDA 下降，停止 = SCL 高时 SDA 上升；</li>
+<li>每字节后第 9 个时钟是应答位；</li>
+<li>接收最后一字节回 NACK 表示结束。</li>
+</ul>
+<h2 id="八拓展应用">八、拓展应用
+</h2><ul>
+<li>把这套函数封装成 <code>i2c_write(reg, buf, len)</code> / <code>i2c_read()</code>，对接具体传感器；</li>
+<li>改用<strong>硬件 I2C 外设</strong>（见 <code>I2C1_Slave_Poll</code> / <code>I2C1_Slave_Interrupt</code>），释放 CPU 并支持时钟延长；</li>
+<li>加上超时判断，避免从机无响应时死等。</li>
 </ul>
 
 </section>
@@ -422,7 +803,7 @@
         
             <a href="/tags/gpio_simulate_i2c_master/">GPIO_Simulate_I2C_Master</a>
         
-            <a href="/tags/i2c/">I2C</a>
+            <a href="/tags/i2c/">I2c</a>
         
             <a href="/tags/v1.0.3/">V1.0.3</a>
         
@@ -439,7 +820,7 @@
 
 
         <span>
-            最后更新于 Sep 08, 2026 16:03 &#43;0800
+            最后更新于 Sep 09, 2026 09:51 &#43;0800
         </span>
     </section></footer>
 

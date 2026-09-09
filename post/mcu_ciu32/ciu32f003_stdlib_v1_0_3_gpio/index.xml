@@ -7,28 +7,37 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>CLing</copyright>
-        <lastBuildDate>Tue, 08 Sep 2026 16:03:27 +0800</lastBuildDate><atom:link href="https://clingyang.github.io/post/mcu_ciu32/ciu32f003_stdlib_v1_0_3_gpio/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Wed, 09 Sep 2026 09:51:13 +0800</lastBuildDate><atom:link href="https://clingyang.github.io/post/mcu_ciu32/ciu32f003_stdlib_v1_0_3_gpio/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>CIU32 GPIO — GPIO 翻转输出</title>
         <link>https://clingyang.github.io/p/ciu32-gpio-gpio-%E7%BF%BB%E8%BD%AC%E8%BE%93%E5%87%BA/</link>
         <pubDate>Tue, 08 Sep 2026 14:52:21 +0800</pubDate>
         
         <guid>https://clingyang.github.io/p/ciu32-gpio-gpio-%E7%BF%BB%E8%BD%AC%E8%BE%93%E5%87%BA/</guid>
-        <description>&lt;h1 id=&#34;gpio--gpio-翻转输出&#34;&gt;GPIO — GPIO 翻转输出
+        <description>&lt;h1 id=&#34;gpio--gpio-翻转输出gpio_toggle&#34;&gt;GPIO — GPIO 翻转输出（GPIO_Toggle）
 &lt;/h1&gt;&lt;blockquote&gt;
-&lt;p&gt;&lt;strong&gt;固件库&lt;/strong&gt;: CIU32F003_STDLib V1.0.3&lt;br&gt;
-&lt;strong&gt;芯片&lt;/strong&gt;: CIU32&lt;br&gt;
+&lt;p&gt;&lt;strong&gt;固件库&lt;/strong&gt;: CIU32F003_STDLib V1.0.3
+&lt;strong&gt;芯片&lt;/strong&gt;: CIU32F003（Cortex-M0）
 &lt;strong&gt;源文件&lt;/strong&gt;: &lt;code&gt;CIU32/CIU32F003_STDLib_V1.0.3/Projects/GPIO/GPIO_Toggle/Source/main.c&lt;/code&gt;&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;hr&gt;
-&lt;h2 id=&#34;功能简介&#34;&gt;功能简介
-&lt;/h2&gt;&lt;p&gt;本示例演示如何配置 GPIO 引脚为输出模式，并通过软件翻转引脚电平。GPIO 是 MCU 最基本的外设，几乎所有项目都会用到。&lt;/p&gt;
-&lt;h2 id=&#34;硬件准备&#34;&gt;硬件准备
+&lt;h2 id=&#34;一功能简介&#34;&gt;一、功能简介
+&lt;/h2&gt;&lt;p&gt;本示例演示如何把 GPIO 引脚配置为&lt;strong&gt;输出模式&lt;/strong&gt;，并在主循环里周期性地翻转引脚电平。
+示例每 300 毫秒翻转一次 LED 对应的引脚，LED 随之闪烁。
+这是 MCU 世界里最经典的“点灯”程序，目的是让你掌握外设开发的通用套路：
+&lt;strong&gt;开时钟 → 配引脚 → 在循环里操作&lt;/strong&gt;。&lt;/p&gt;
+&lt;h2 id=&#34;二硬件准备&#34;&gt;二、硬件准备
 &lt;/h2&gt;&lt;ul&gt;
-&lt;li&gt;开发板上的 LED 灯（通常连接在 PA5、PB0、PB1 等引脚）&lt;/li&gt;
-&lt;li&gt;无需额外接线&lt;/li&gt;
+&lt;li&gt;一块 CIU32F003 开发板（如 HB1025B 核心板）&lt;/li&gt;
+&lt;li&gt;板载 LED（本示例连接 &lt;strong&gt;PB1&lt;/strong&gt;，即 &lt;code&gt;LED_GPIO_PORT = GPIOB&lt;/code&gt;，&lt;code&gt;LED_PIN = GPIO_PIN_1&lt;/code&gt;）&lt;/li&gt;
+&lt;li&gt;一根 USB 线用于供电与下载程序&lt;/li&gt;
+&lt;li&gt;无需额外外接元件&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h2 id=&#34;完整代码&#34;&gt;完整代码
-&lt;/h2&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;blockquote&gt;
+&lt;p&gt;提示：如果你的板子 LED 接在不同引脚，只需修改 &lt;code&gt;common.h&lt;/code&gt; 里的 &lt;code&gt;LED_GPIO_PORT&lt;/code&gt; / &lt;code&gt;LED_PIN&lt;/code&gt; 即可。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;三完整代码&#34;&gt;三、完整代码
+&lt;/h2&gt;&lt;h3 id=&#34;31-主流程-mainc&#34;&gt;3.1 主流程 &lt;code&gt;main.c&lt;/code&gt;
+&lt;/h3&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
 &lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
@@ -49,41 +58,165 @@
 &lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
 &lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;18
 &lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;19
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;20
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;21
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;22
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
 &lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#include&lt;/span&gt; &lt;span class=&#34;cpf&#34;&gt;&amp;#34;main.h&amp;#34;&lt;/span&gt;&lt;span class=&#34;cp&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;main&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;      
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;cm&#34;&gt;/* ϵͳʱ */&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nf&#34;&gt;system_clock_config&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;();&lt;/span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;cm&#34;&gt;/* 配置系统时钟：使能内部高速时钟 RCH(48MHz)，并设为系统时钟源 */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nf&#34;&gt;system_clock_config&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;();&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;cm&#34;&gt;/* Systickʼ */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;cm&#34;&gt;/* Systick 初始化：为后面的 std_delayms 提供毫秒级延时 */&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nf&#34;&gt;std_delay_init&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;();&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;cm&#34;&gt;/* GPIOʼ */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;cm&#34;&gt;/* GPIO 初始化：把 LED 引脚配置为推挽输出 */&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nf&#34;&gt;gpio_init&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;();&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;while&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;while&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;nf&#34;&gt;std_gpio_toggle_pin&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;LED_GPIO_PORT&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;LED_PIN&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;cm&#34;&gt;/* 翻转 LED 引脚电平（亮 &amp;lt;-&amp;gt; 灭） */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;nf&#34;&gt;std_gpio_toggle_pin&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;LED_GPIO_PORT&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;LED_PIN&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;cm&#34;&gt;/* 延时 300 毫秒，肉眼可见闪烁 */&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;nf&#34;&gt;std_delayms&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;300&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h2 id=&#34;代码讲解&#34;&gt;代码讲解
-&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;系统时钟初始化&lt;/strong&gt;：配置 MCU 的主频和时钟树。不同芯片的时钟配置不同，一般由工具生成。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;GPIO 配置&lt;/strong&gt;：设置引脚为输出/输入模式，选择推挽/开漏输出，配置上拉/下拉。&lt;/p&gt;
-&lt;h2 id=&#34;实验现象&#34;&gt;实验现象
-&lt;/h2&gt;&lt;ul&gt;
-&lt;li&gt;对应 GPIO 引脚电平交替翻转&lt;/li&gt;
-&lt;li&gt;可用示波器或 LED 观察&lt;/li&gt;
+&lt;/div&gt;&lt;h3 id=&#34;32-关键初始化-commonc节选&#34;&gt;3.2 关键初始化 &lt;code&gt;common.c&lt;/code&gt;（节选）
+&lt;/h3&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;18
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;19
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;20
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;21
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;22
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;23
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;24
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;25
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;26
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;27
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;28
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;29
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;30
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cm&#34;&gt;/* LED 引脚定义，位于 common.h */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#define LED_GPIO_PORT   GPIOB
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#define LED_PIN         GPIO_PIN_1
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cm&#34;&gt;/* 系统时钟配置：RCH 48MHz 作为系统时钟 */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;system_clock_config&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nf&#34;&gt;std_flash_set_latency&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;FLASH_LATENCY_1CLK&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;          &lt;span class=&#34;cm&#34;&gt;/* Flash 读等待 1 个时钟 */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nf&#34;&gt;std_rcc_rch_enable&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;();&lt;/span&gt;                               &lt;span class=&#34;cm&#34;&gt;/* 使能内部高速时钟 RCH */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;while&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;std_rcc_get_rch_ready&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;!=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;RCC_CSR1_RCHRDY&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt; &lt;span class=&#34;cm&#34;&gt;/* 等待 RCH 稳定 */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nf&#34;&gt;std_rcc_set_sysclk_source&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;RCC_SYSCLK_SRC_RCH&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;      &lt;span class=&#34;cm&#34;&gt;/* 系统时钟源选择 RCH */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;while&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;std_rcc_get_sysclk_source&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;!=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;RCC_SYSCLK_SRC_STATUS_RCH&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nf&#34;&gt;std_rcc_set_ahbdiv&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;RCC_HCLK_DIV1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;                  &lt;span class=&#34;cm&#34;&gt;/* AHB 不分频 */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nf&#34;&gt;std_rcc_set_apbdiv&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;RCC_PCLK_DIV1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;                  &lt;span class=&#34;cm&#34;&gt;/* APB 不分频 */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;SystemCoreClock&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;RCH_VALUE&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;                        &lt;span class=&#34;cm&#34;&gt;/* 记录内核时钟 = 48MHz */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cm&#34;&gt;/* GPIO 初始化：使能 GPIOB 时钟并配置 PB1 为推挽输出 */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;gpio_init&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;kt&#34;&gt;std_gpio_init_t&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;gpio_config&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;};&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nf&#34;&gt;std_rcc_gpio_clk_enable&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;RCC_PERIPH_CLK_GPIOB&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;      &lt;span class=&#34;cm&#34;&gt;/* ① 开 GPIOB 外设时钟 */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;gpio_config&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;pin&lt;/span&gt;         &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;LED_PIN&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;                  &lt;span class=&#34;cm&#34;&gt;/* ② 选择引脚 PB1 */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;gpio_config&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;mode&lt;/span&gt;        &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;GPIO_MODE_OUTPUT&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;         &lt;span class=&#34;cm&#34;&gt;/* ③ 输出模式 */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;gpio_config&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;pull&lt;/span&gt;        &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;GPIO_PULLUP&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;              &lt;span class=&#34;cm&#34;&gt;/* ④ 上拉 */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;gpio_config&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;output_type&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;GPIO_OUTPUT_PUSHPULL&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;     &lt;span class=&#34;cm&#34;&gt;/* ⑤ 推挽输出 */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nf&#34;&gt;std_gpio_init&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;LED_GPIO_PORT&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;gpio_config&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;         &lt;span class=&#34;cm&#34;&gt;/* ⑥ 写入配置 */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id=&#34;四代码分段讲解&#34;&gt;四、代码分段讲解
+&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;① 系统时钟（system_clock_config）&lt;/strong&gt;
+任何外设工作前，内核时钟必须先就绪。示例把内部 RCH 振荡器（48MHz）作为系统时钟源，
+AHB / APB 均 1 分频，因此外设总线时钟也是 48MHz。配置完用 &lt;code&gt;SystemCoreClock&lt;/code&gt; 记录真实频率，供库函数计算波特率、定时器等使用。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;② 延时初始化（std_delay_init）&lt;/strong&gt;
+基于 Cortex-M0 的 SysTick 定时器实现毫秒延时，后面的 &lt;code&gt;std_delayms(300)&lt;/code&gt; 依赖它。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;③ GPIO 配置（gpio_init）&lt;/strong&gt;
+这是本示例的核心，也适用于所有 GPIO：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;必须先&lt;strong&gt;开启对应 GPIO 端口的时钟&lt;/strong&gt;（库里很多外设都有独立的时钟开关，忘记开时钟是最常见的“配置不生效”原因）；&lt;/li&gt;
+&lt;li&gt;用 &lt;code&gt;std_gpio_init_t&lt;/code&gt; 结构体描述引脚模式、上下拉、输出类型，再调用 &lt;code&gt;std_gpio_init()&lt;/code&gt; 提交。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h2 id=&#34;注意事项&#34;&gt;注意事项
+&lt;p&gt;&lt;strong&gt;④ 主循环翻转&lt;/strong&gt;
+&lt;code&gt;std_gpio_toggle_pin()&lt;/code&gt; 把引脚当前电平取反，配合 300ms 延时即得稳定闪烁。&lt;/p&gt;
+&lt;h2 id=&#34;五实验现象&#34;&gt;五、实验现象
 &lt;/h2&gt;&lt;ul&gt;
-&lt;li&gt;确认 LED 连接的引脚与代码中一致&lt;/li&gt;
-&lt;li&gt;输出模式一般选择推挽输出（Push-Pull）&lt;/li&gt;
+&lt;li&gt;开发板上的 LED 以约 3.3 次/秒（每 300ms 一次）的频率稳定闪烁。&lt;/li&gt;
+&lt;li&gt;用示波器/逻辑分析仪测量 PB1，可看到占空比 50%、周期 600ms 的方波。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;六常见问题&#34;&gt;六、常见问题
+&lt;/h2&gt;&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;现象&lt;/th&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;可能原因&lt;/th&gt;
+					&lt;th style=&#34;text-align: left&#34;&gt;解决办法&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;LED 完全不亮&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;引脚定义与板子不符&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;确认 &lt;code&gt;LED_GPIO_PORT&lt;/code&gt;/&lt;code&gt;LED_PIN&lt;/code&gt; 与原理图一致&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;灯常亮不闪&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;忘了调用 &lt;code&gt;std_delay_init&lt;/code&gt;&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;确保在 &lt;code&gt;while(1)&lt;/code&gt; 前初始化 SysTick&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;配置后引脚无反应&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;没开 GPIO 时钟&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;检查是否调用 &lt;code&gt;std_rcc_gpio_clk_enable()&lt;/code&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;闪烁太快/太慢&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;延时参数问题&lt;/td&gt;
+					&lt;td style=&#34;text-align: left&#34;&gt;调整 &lt;code&gt;std_delayms()&lt;/code&gt; 的实参&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id=&#34;七小结&#34;&gt;七、小结
+&lt;/h2&gt;&lt;p&gt;GPIO 输出是嵌入式开发的“Hello World”。请记住三个要点：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;先开时钟，再配外设&lt;/strong&gt;；&lt;/li&gt;
+&lt;li&gt;输出模式常用&lt;strong&gt;推挽&lt;/strong&gt;（驱动能力强），开漏多用于 I2C 等需要线与的场合；&lt;/li&gt;
+&lt;li&gt;翻转用 &lt;code&gt;std_gpio_toggle_pin()&lt;/code&gt;，置高/置低分别用 &lt;code&gt;std_gpio_set_pin()&lt;/code&gt; / &lt;code&gt;std_gpio_reset_pin()&lt;/code&gt;。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id=&#34;八拓展应用&#34;&gt;八、拓展应用
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;把 &lt;code&gt;std_delayms&lt;/code&gt; 改成定时器中断翻转，主循环可去做别的事（降低 CPU 空转）；&lt;/li&gt;
+&lt;li&gt;改为读取按键（输入模式 + 上拉），实现“按键按下灯亮、松开灯灭”；&lt;/li&gt;
+&lt;li&gt;用多个引脚做跑马灯，理解 &lt;code&gt;pin&lt;/code&gt; 用 &lt;code&gt;GPIO_PIN_x | GPIO_PIN_y&lt;/code&gt; 按位或组合。&lt;/li&gt;
 &lt;/ul&gt;
 </description>
         </item>

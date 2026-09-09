@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="PUYA PY32F403 HAL 库 V1.4.5 GPIO_Toggle 示例逐行讲解：推挽输出、HAL_Delay、时钟树配置">
+<title>PY32F403 GPIO — GPIO_Toggle 点灯（2Hz 闪烁）</title>
+
+<link rel='canonical' href='https://clingyang.github.io/p/py32f403-gpio-gpio_toggle-%E7%82%B9%E7%81%AF2hz-%E9%97%AA%E7%83%81/'>
+
+<link rel="stylesheet" href="/scss/style.min.e14f3ba93baae65b2aef2339f32b6f25d7a0184785ebf4f6bd7d3376ae5dc2d4.css"><meta property='og:title' content="PY32F403 GPIO — GPIO_Toggle 点灯（2Hz 闪烁）">
+<meta property='og:description' content="PUYA PY32F403 HAL 库 V1.4.5 GPIO_Toggle 示例逐行讲解：推挽输出、HAL_Delay、时钟树配置">
+<meta property='og:url' content='https://clingyang.github.io/p/py32f403-gpio-gpio_toggle-%E7%82%B9%E7%81%AF2hz-%E9%97%AA%E7%83%81/'>
+<meta property='og:site_name' content='CLing'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='GPIO_Toggle' /><meta property='article:tag' content='gpio' /><meta property='article:tag' content='V1.4.5' /><meta property='article:tag' content='PY32F403' /><meta property='article:published_time' content='2026-09-08T14:52:21&#43;08:00'/><meta property='article:modified_time' content='2026-09-09T10:25:00&#43;08:00'/>
+<meta name="twitter:title" content="PY32F403 GPIO — GPIO_Toggle 点灯（2Hz 闪烁）">
+<meta name="twitter:description" content="PUYA PY32F403 HAL 库 V1.4.5 GPIO_Toggle 示例逐行讲解：推挽输出、HAL_Delay、时钟树配置">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                            height="290" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🏀</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">CLing</a></h1>
+            <h2 class="site-description">你好 欢迎来到我的博客</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>档案</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E6%8A%80%E6%9C%AF%E9%93%BE%E6%8E%A5/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>技术链接</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/excel/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+                
+                <span>Excel教程</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#1-功能简介">1. 功能简介</a></li>
+    <li><a href="#2-硬件准备">2. 硬件准备</a></li>
+    <li><a href="#3-完整代码带中文注释">3. 完整代码（带中文注释）</a></li>
+    <li><a href="#4-代码分段讲解">4. 代码分段讲解</a>
+      <ol>
+        <li><a href="#41-为什么-hal_init-必须放最前面">4.1 为什么 <code>HAL_Init()</code> 必须放最前面</a></li>
+        <li><a href="#42-gpio_inittypedef-gpio_initstruct--0-为什么要清零">4.2 <code>GPIO_InitTypeDef GPIO_InitStruct = {0};</code> 为什么要清零</a></li>
+        <li><a href="#43-推挽输出-vs-开漏输出">4.3 推挽输出 vs 开漏输出</a></li>
+        <li><a href="#44-led-是灌电流还是拉电流">4.4 LED 是&quot;灌电流&quot;还是&quot;拉电流&quot;</a></li>
+        <li><a href="#45-时钟树8mhz-是怎么来的">4.5 时钟树：8MHz 是怎么来的</a></li>
+        <li><a href="#46-hal_gpio_togglepin-底层做了什么">4.6 <code>HAL_GPIO_TogglePin()</code> 底层做了什么</a></li>
+      </ol>
+    </li>
+    <li><a href="#5-实验现象">5. 实验现象</a></li>
+    <li><a href="#6-常见问题">6. 常见问题</a></li>
+    <li><a href="#7-小结">7. 小结</a></li>
+    <li><a href="#8-拓展应用">8. 拓展应用</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/puya/" >
+                PUYA
+            </a>
+        
+            <a href="/categories/gpio/" >
+                GPIO
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/py32f403-gpio-gpio_toggle-%E7%82%B9%E7%81%AF2hz-%E9%97%AA%E7%83%81/">PY32F403 GPIO — GPIO_Toggle 点灯（2Hz 闪烁）</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            PUYA PY32F403 HAL 库 V1.4.5 GPIO_Toggle 示例逐行讲解：推挽输出、HAL_Delay、时钟树配置
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2026-09-08</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 6 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="gpio_toggle--点亮第一颗-led">GPIO_Toggle — 点亮第一颗 LED
+</h1><blockquote>
+<p><strong>芯片</strong>: PY32F403（Cortex-M4，最高 72MHz）
+<strong>固件库</strong>: PY32F403_Firmware V1.4.5
+<strong>源文件</strong>: <code>PY32F403_Firmware_V1.4.5/Projects/PY32F403-STK/Example/GPIO/GPIO_Toggle/Src/main.c</code>
+<strong>难度</strong>: ★☆☆☆☆ 入门必做</p>
+</blockquote>
+<hr>
+<h2 id="1-功能简介">1. 功能简介
+</h2><p>这是嵌入式世界的 &ldquo;Hello World&rdquo;。</p>
+<p>程序做的事情非常简单：把开发板上绿色 LED 对应的那个引脚（<strong>PA1</strong>）配置成<strong>推挽输出</strong>，然后在 <code>while(1)</code> 里不停地做两件事——等 250 毫秒、把引脚电平翻个面。</p>
+<p>翻转一次是 250ms，翻两次（亮一次+灭一次）才是一个完整周期，也就是 500ms，所以肉眼看到的闪烁频率是：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">f = 1 / (250ms × 2) = 1 / 0.5s = 2 Hz
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>别小看这个程序。它能跑起来，说明你的<strong>工程配置、时钟、下载器、启动文件、LED 接线</strong>全部是对的。后面所有复杂外设都建立在这个基础上。</p>
+<h2 id="2-硬件准备">2. 硬件准备
+</h2><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>需要的东西</th>
+					<th>说明</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>PY32F403-STK 开发板</td>
+					<td>板载绿色 LED 已经接在 <strong>PA1</strong> 上</td>
+			</tr>
+			<tr>
+					<td>下载器</td>
+					<td>J-Link / DAP-Link，接 SWD（SWDIO / SWCLK / GND / 3V3）</td>
+			</tr>
+			<tr>
+					<td>USB 线</td>
+					<td>供电</td>
+			</tr>
+	</tbody>
+</table></div>
+<p><strong>接线：不用接任何线</strong>。LED 是板载的，直接下载就能看效果。</p>
+<p>板上 LED 的宏定义写在 BSP 头文件 <code>py32f403xx_Start_Kit.h</code> 里：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#define LED3_PIN                 GPIO_PIN_1        </span><span class="cm">/* PA1 */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define LED3_GPIO_PORT           GPIOA
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define LED3_GPIO_CLK_ENABLE()   __HAL_RCC_GPIOA_CLK_ENABLE()
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p>如果你用的是自己画的板子，LED 接在别的脚上，只要改 <code>main.c</code> 顶部那三个宏就行，代码其它地方一个字都不用动——这就是 BSP 抽象的好处。</p>
+</blockquote>
+<h2 id="3-完整代码带中文注释">3. 完整代码（带中文注释）
+</h2><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cm">/* ==========================================================================
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * PY32F403 GPIO_Toggle —— LED 以 2Hz 闪烁
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * ========================================================================== */</span>
+</span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;main.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* ---- 把&#34;哪个引脚是 LED&#34;抽出来，换板子只改这三行 ---------------------- */</span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define LED_GPIO_PIN                 LED3_PIN              </span><span class="cm">/* PA1     */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define LED_GPIO_PORT                LED3_GPIO_PORT        </span><span class="cm">/* GPIOA   */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define LED_GPIO_CLK_ENABLE()        LED3_GPIO_CLK_ENABLE()</span><span class="cm">/* AHB2 时钟 */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">APP_SystemClockConfig</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">APP_GpioConfig</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 第 1 步：HAL 库初始化。
+</span></span></span><span class="line"><span class="cl"><span class="cm">   *   内部做了两件关键事：
+</span></span></span><span class="line"><span class="cl"><span class="cm">   *     ① 配置 Flash 预取/等待周期
+</span></span></span><span class="line"><span class="cl"><span class="cm">   *     ② 初始化 SysTick 为 1ms 中断 —— HAL_Delay() 就靠它计时
+</span></span></span><span class="line"><span class="cl"><span class="cm">   *   不调用它，HAL_Delay() 会死等，程序卡住不动。               */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">HAL_Init</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 第 2 步：配置系统时钟（本例用内部 HSI 8MHz） */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">APP_SystemClockConfig</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 第 3 步：把 PA1 配成推挽输出 */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">APP_GpioConfig</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 延时 250ms（阻塞式，CPU 在这里空转数 SysTick 节拍） */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">HAL_Delay</span><span class="p">(</span><span class="mi">250</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 翻转 PA1 电平：高变低、低变高
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * 底层就一句：GPIOA-&gt;ODR ^= GPIO_PIN_1;  */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">HAL_GPIO_TogglePin</span><span class="p">(</span><span class="n">LED_GPIO_PORT</span><span class="p">,</span> <span class="n">LED_GPIO_PIN</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm">  * @brief  GPIO 配置：PA1 → 推挽输出
+</span></span></span><span class="line"><span class="cl"><span class="cm">  */</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">APP_GpioConfig</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitTypeDef</span>  <span class="n">GPIO_InitStruct</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">};</span>   <span class="cm">/* 一定要清零！残留值会配错模式 */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* ★ 关键第一步：打开 GPIOA 的时钟。
+</span></span></span><span class="line"><span class="cl"><span class="cm">   *   PY32F403 的 GPIO 挂在 AHB2 总线上。
+</span></span></span><span class="line"><span class="cl"><span class="cm">   *   时钟没开 → 寄存器写进去读出来还是 0 → LED 死活不亮，
+</span></span></span><span class="line"><span class="cl"><span class="cm">   *   这是新手最常踩的坑。                                    */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">LED_GPIO_CLK_ENABLE</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Pin</span>   <span class="o">=</span> <span class="n">LED_GPIO_PIN</span><span class="p">;</span>             <span class="cm">/* 要配置的引脚：PA1        */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Mode</span>  <span class="o">=</span> <span class="n">GPIO_MODE_OUTPUT_PP</span><span class="p">;</span>      <span class="cm">/* 推挽输出：能拉高也能拉低 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Pull</span>  <span class="o">=</span> <span class="n">GPIO_PULLUP</span><span class="p">;</span>              <span class="cm">/* 内部上拉（输出模式下影响很小）*/</span>
+</span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Speed</span> <span class="o">=</span> <span class="n">GPIO_SPEED_FREQ_HIGH</span><span class="p">;</span>     <span class="cm">/* 输出翻转速率档位         */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 把结构体里的配置真正写进 GPIOA 的 MODER/OTYPER/OSPEEDR/PUPDR 寄存器 */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">HAL_GPIO_Init</span><span class="p">(</span><span class="n">LED_GPIO_PORT</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">GPIO_InitStruct</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm">  * @brief  系统时钟配置
+</span></span></span><span class="line"><span class="cl"><span class="cm">  *         本例最简单：只开 HSI（内部 8MHz RC），不用 PLL
+</span></span></span><span class="line"><span class="cl"><span class="cm">  *         结果：SYSCLK = HCLK = PCLK1 = 8MHz，PCLK2 = 4MHz
+</span></span></span><span class="line"><span class="cl"><span class="cm">  */</span>
+</span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">APP_SystemClockConfig</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">RCC_OscInitTypeDef</span>  <span class="n">OscInitstruct</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">  <span class="n">RCC_ClkInitTypeDef</span>  <span class="n">ClkInitstruct</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* ---- ① 配置振荡器：告诉 HAL 每个时钟源开还是关 ---- */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">OscInitstruct</span><span class="p">.</span><span class="n">OscillatorType</span>  <span class="o">=</span> <span class="n">RCC_OSCILLATORTYPE_HSE</span> <span class="o">|</span> <span class="n">RCC_OSCILLATORTYPE_HSI</span>
+</span></span><span class="line"><span class="cl">                                <span class="o">|</span> <span class="n">RCC_OSCILLATORTYPE_LSE</span> <span class="o">|</span> <span class="n">RCC_OSCILLATORTYPE_LSI</span>
+</span></span><span class="line"><span class="cl">                                <span class="o">|</span> <span class="n">RCC_OSCILLATORTYPE_HSI48M</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">OscInitstruct</span><span class="p">.</span><span class="n">HSEState</span>        <span class="o">=</span> <span class="n">RCC_HSE_OFF</span><span class="p">;</span>      <span class="cm">/* 外部晶振      关 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">OscInitstruct</span><span class="p">.</span><span class="n">HSI48MState</span>     <span class="o">=</span> <span class="n">RCC_HSI48M_OFF</span><span class="p">;</span>   <span class="cm">/* 内部 48M（USB）关 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">OscInitstruct</span><span class="p">.</span><span class="n">HSIState</span>        <span class="o">=</span> <span class="n">RCC_HSI_ON</span><span class="p">;</span>       <span class="cm">/* 内部 8M RC    开 ← 本例时钟源 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">OscInitstruct</span><span class="p">.</span><span class="n">LSEState</span>        <span class="o">=</span> <span class="n">RCC_LSE_OFF</span><span class="p">;</span>      <span class="cm">/* 外部 32.768k  关 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">OscInitstruct</span><span class="p">.</span><span class="n">LSIState</span>        <span class="o">=</span> <span class="n">RCC_LSI_OFF</span><span class="p">;</span>      <span class="cm">/* 内部低速 RC   关 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">OscInitstruct</span><span class="p">.</span><span class="n">PLL</span><span class="p">.</span><span class="n">PLLState</span>    <span class="o">=</span> <span class="n">RCC_PLL_OFF</span><span class="p">;</span>      <span class="cm">/* PLL 倍频器    关 */</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="nf">HAL_RCC_OscConfig</span><span class="p">(</span><span class="o">&amp;</span><span class="n">OscInitstruct</span><span class="p">)</span> <span class="o">!=</span> <span class="n">HAL_OK</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">APP_ErrorHandler</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="cm">/* ---- ② 配置时钟树：选谁当系统时钟 + 各总线怎么分频 ---- */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">ClkInitstruct</span><span class="p">.</span><span class="n">ClockType</span>      <span class="o">=</span> <span class="n">RCC_CLOCKTYPE_SYSCLK</span> <span class="o">|</span> <span class="n">RCC_CLOCKTYPE_HCLK</span>
+</span></span><span class="line"><span class="cl">                               <span class="o">|</span> <span class="n">RCC_CLOCKTYPE_PCLK1</span>  <span class="o">|</span> <span class="n">RCC_CLOCKTYPE_PCLK2</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">ClkInitstruct</span><span class="p">.</span><span class="n">SYSCLKSource</span>   <span class="o">=</span> <span class="n">RCC_SYSCLKSOURCE_HSI</span><span class="p">;</span> <span class="cm">/* 系统时钟 = HSI = 8MHz */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">ClkInitstruct</span><span class="p">.</span><span class="n">AHBCLKDivider</span>  <span class="o">=</span> <span class="n">RCC_SYSCLK_DIV1</span><span class="p">;</span>      <span class="cm">/* HCLK  = 8MHz  */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">ClkInitstruct</span><span class="p">.</span><span class="n">APB1CLKDivider</span> <span class="o">=</span> <span class="n">RCC_HCLK_DIV1</span><span class="p">;</span>        <span class="cm">/* PCLK1 = 8MHz  */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">ClkInitstruct</span><span class="p">.</span><span class="n">APB2CLKDivider</span> <span class="o">=</span> <span class="n">RCC_HCLK_DIV2</span><span class="p">;</span>        <span class="cm">/* PCLK2 = 4MHz  */</span>
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 第二个参数是 Flash 等待周期。8MHz 很慢，0 等待就够 */</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="nf">HAL_RCC_ClockConfig</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ClkInitstruct</span><span class="p">,</span> <span class="n">FLASH_LATENCY_0</span><span class="p">)</span> <span class="o">!=</span> <span class="n">HAL_OK</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">APP_ErrorHandler</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm">  * @brief  出错时进死循环（方便打断点抓现场）
+</span></span></span><span class="line"><span class="cl"><span class="cm">  */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">APP_ErrorHandler</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="4-代码分段讲解">4. 代码分段讲解
+</h2><h3 id="41-为什么-hal_init-必须放最前面">4.1 为什么 <code>HAL_Init()</code> 必须放最前面
+</h3><p><code>HAL_Init()</code> 里做了这些事：</p>
+<ol>
+<li>配置 Flash 的预取缓冲和等待周期；</li>
+<li><strong>把 SysTick 配成 1ms 中断</strong>，并把优先级设好；</li>
+<li>调用 <code>HAL_MspInit()</code>（在 <code>py32f403_hal_msp.c</code> 里，本例只开了 SYSCFG 和 PWR 时钟）。</li>
+</ol>
+<p>第 2 点最关键：<code>HAL_Delay()</code> 的原理是读一个全局变量 <code>uwTick</code>，而 <code>uwTick</code> 是在 SysTick 中断里 <code>++</code> 的。如果你没调 <code>HAL_Init()</code>，SysTick 不跑，<code>uwTick</code> 永远是 0，<code>HAL_Delay()</code> 就变成死循环。</p>
+<blockquote>
+<p><strong>调试技巧</strong>：程序卡在 <code>HAL_Delay()</code> 出不来，99% 是 SysTick 没跑或者中断被全局关掉了（<code>__disable_irq()</code> 之后忘了开）。</p>
+</blockquote>
+<h3 id="42-gpio_inittypedef-gpio_initstruct--0-为什么要清零">4.2 <code>GPIO_InitTypeDef GPIO_InitStruct = {0};</code> 为什么要清零
+</h3><p>这是个局部变量，放在栈上。栈上的内容是上次函数调用留下的垃圾数据。如果不清零：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">GPIO_InitTypeDef</span> <span class="n">s</span><span class="p">;</span>          <span class="c1">// s.Alternate 可能是随机值 0x0B
+</span></span></span><span class="line"><span class="cl"><span class="n">s</span><span class="p">.</span><span class="n">Pin</span>  <span class="o">=</span> <span class="n">GPIO_PIN_1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">s</span><span class="p">.</span><span class="n">Mode</span> <span class="o">=</span> <span class="n">GPIO_MODE_OUTPUT_PP</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="nf">HAL_GPIO_Init</span><span class="p">(</span><span class="n">GPIOA</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">);</span>    <span class="c1">// Alternate 字段虽然输出模式不用，但某些外设会读它 → 玄学 bug
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>养成习惯：所有 HAL 的 Init 结构体，声明时一律 <code>= {0}</code>。</strong></p>
+<h3 id="43-推挽输出-vs-开漏输出">4.3 推挽输出 vs 开漏输出
+</h3><p>这是初学最容易糊涂的地方，用一张表说清：</p>
+<div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th></th>
+					<th>推挽 <code>OUTPUT_PP</code></th>
+					<th>开漏 <code>OUTPUT_OD</code></th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>输出高电平</td>
+					<td>内部 PMOS 导通，<strong>主动拉到 VDD</strong></td>
+					<td>PMOS 不存在，<strong>高阻态</strong>（靠外部上拉电阻拉高）</td>
+			</tr>
+			<tr>
+					<td>输出低电平</td>
+					<td>内部 NMOS 导通，拉到 GND</td>
+					<td>NMOS 导通，拉到 GND</td>
+			</tr>
+			<tr>
+					<td>驱动能力</td>
+					<td>强，高低都能驱动</td>
+					<td>只能&quot;往下拉&quot;</td>
+			</tr>
+			<tr>
+					<td>典型用途</td>
+					<td>LED、蜂鸣器、SPI、普通控制信号</td>
+					<td>I2C 总线、多个器件&quot;线与&quot;、5V 电平转换</td>
+			</tr>
+	</tbody>
+</table></div>
+<p><strong>点灯就用推挽</strong>，不用犹豫。</p>
+<h3 id="44-led-是灌电流还是拉电流">4.4 LED 是&quot;灌电流&quot;还是&quot;拉电流&quot;
+</h3><p>板上 LED 有两种接法，直接影响你写高还是写低才亮：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">接法 A（拉电流 / 高电平点亮）：
+</span></span><span class="line"><span class="cl">   PA1 ──►|── 电阻 ── GND      写 1 亮，写 0 灭
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">接法 B（灌电流 / 低电平点亮）：
+</span></span><span class="line"><span class="cl">   3V3 ──►|── 电阻 ── PA1      写 0 亮，写 1 灭
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>本例用 <code>TogglePin</code> 翻转，两种接法都能看到闪烁，所以不用管。但如果你要写&quot;开机就亮&quot;，就得先确认板子是哪种接法。</p>
+<h3 id="45-时钟树8mhz-是怎么来的">4.5 时钟树：8MHz 是怎么来的
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">                         ┌──── AHB /1 ────► HCLK  = 8MHz  ── CPU / GPIO / DMA / SysTick
+</span></span><span class="line"><span class="cl">HSI (内部 8MHz RC) ──►SYSCLK 8MHz ─┤
+</span></span><span class="line"><span class="cl">                         ├──── APB1 /1 ───► PCLK1 = 8MHz  ── TIM2/3/4、USART2、I2C1、SPI2
+</span></span><span class="line"><span class="cl">                         └──── APB2 /2 ───► PCLK2 = 4MHz  ── TIM1、USART1、SPI1、ADC、GPIO 配置
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>本例没用 PLL，跑的是最保守的 8MHz。PY32F403 最高能跑 <strong>72MHz</strong>（需要开 HSE + PLL 倍频，并把 <code>FLASH_LATENCY</code> 调到合适的值），但点灯完全没必要。</p>
+<blockquote>
+<p><strong>注意</strong>：<code>HAL_Delay()</code> 的精度只跟 SysTick 有关，SysTick 又是从 HCLK 分频来的。所以<strong>改了时钟配置，延时依然准确</strong>，因为 <code>HAL_RCC_ClockConfig()</code> 内部会重新算 SysTick 的重装值。</p>
+</blockquote>
+<h3 id="46-hal_gpio_togglepin-底层做了什么">4.6 <code>HAL_GPIO_TogglePin()</code> 底层做了什么
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cm">/* HAL 库里的实现（简化） */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">HAL_GPIO_TogglePin</span><span class="p">(</span><span class="n">GPIO_TypeDef</span> <span class="o">*</span><span class="n">GPIOx</span><span class="p">,</span> <span class="kt">uint16_t</span> <span class="n">GPIO_Pin</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">uint32_t</span> <span class="n">odr</span> <span class="o">=</span> <span class="n">GPIOx</span><span class="o">-&gt;</span><span class="n">ODR</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 高 16 位写 1 = 复位对应位，低 16 位写 1 = 置位对应位 */</span>
+</span></span><span class="line"><span class="cl">  <span class="n">GPIOx</span><span class="o">-&gt;</span><span class="n">BSRR</span> <span class="o">=</span> <span class="p">((</span><span class="n">odr</span> <span class="o">&amp;</span> <span class="n">GPIO_Pin</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">16u</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="o">~</span><span class="n">odr</span> <span class="o">&amp;</span> <span class="n">GPIO_Pin</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>用的是 <strong>BSRR 原子置位/复位寄存器</strong>，而不是 <code>ODR ^= x</code> 这种&quot;读-改-写&quot;。好处是：即使翻转过程中来了中断，中断里也操作同一个端口的别的引脚，也不会互相覆盖。这是嵌入式里很重要的<strong>原子操作</strong>思想。</p>
+<h2 id="5-实验现象">5. 实验现象
+</h2><ol>
+<li>编译、下载（MDK / IAR / GCC-Makefile 三套工程都在示例目录里）；</li>
+<li>复位或直接运行；</li>
+<li>开发板上的<strong>绿色 LED 稳定闪烁，亮 250ms、灭 250ms</strong>，肉眼看是每秒闪 2 次。</li>
+</ol>
+<p>用示波器或逻辑分析仪夹在 PA1 上，能看到一个漂亮的方波：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">       ┌─────┐     ┌─────┐     ┌─────┐
+</span></span><span class="line"><span class="cl">PA1    │250ms│250ms│     │     │     │      周期 500ms，占空比 50%
+</span></span><span class="line"><span class="cl">   ────┘     └─────┘     └─────┘     └────
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="6-常见问题">6. 常见问题
+</h2><p><strong>Q1：下载成功了，但 LED 一点反应都没有？</strong></p>
+<p>按这个顺序排查：</p>
+<ol>
+<li><strong>时钟有没有开</strong>？<code>LED_GPIO_CLK_ENABLE()</code> 这行在不在 <code>HAL_GPIO_Init()</code> <strong>之前</strong>？</li>
+<li><strong>引脚对不对</strong>？拿万用表直流电压档量 PA1，应该在 0V / 3.3V 之间来回跳。如果一直不变，是引脚配置问题；如果在跳但灯不亮，是硬件/接法问题。</li>
+<li><strong>LED 有没有焊反</strong>？LED 是有极性的二极管，反了绝对不亮。</li>
+<li><strong>限流电阻是不是虚焊/开路</strong>？</li>
+<li><strong>是不是根本没跑到 main</strong>？在 <code>main()</code> 第一行打断点，看能不能停住。</li>
+</ol>
+<p><strong>Q2：LED 常亮或常灭，不闪？</strong></p>
+<p>大概率卡在 <code>HAL_Delay()</code> 里出不来：</p>
+<ul>
+<li>检查 <code>HAL_Init()</code> 是否被调用；</li>
+<li>检查 <code>SysTick_Handler()</code> 里有没有 <code>HAL_IncTick();</code>（在 <code>py32f403_it.c</code>）；</li>
+<li>检查有没有在别处调 <code>__disable_irq()</code> 关了全局中断。</li>
+</ul>
+<p><strong>Q3：闪烁频率跟算的不一样，比如慢了一倍？</strong></p>
+<p><code>HAL_Delay(n)</code> 的实际延时是 <code>n ~ n+1</code> ms（因为不知道当前 tick 走到哪了）。250ms 里这 1ms 误差可以忽略。如果差了一倍以上，检查：</p>
+<ul>
+<li>时钟配置是否和你以为的一致，可以 <code>printf(&quot;%lu\r\n&quot;, HAL_RCC_GetHCLKFreq());</code> 打出来看；</li>
+<li><code>HSI_VALUE</code> 宏是否被改过（PY32F403 默认 <code>8000000</code>）。</li>
+</ul>
+<p><strong>Q4：我想让 LED 亮的时间和灭的时间不一样怎么办？</strong></p>
+<p>别用 Toggle，改成显式控制：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">HAL_GPIO_WritePin</span><span class="p">(</span><span class="n">LED_GPIO_PORT</span><span class="p">,</span> <span class="n">LED_GPIO_PIN</span><span class="p">,</span> <span class="n">GPIO_PIN_SET</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">HAL_Delay</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span>                                                  <span class="cm">/* 亮 100ms */</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">HAL_GPIO_WritePin</span><span class="p">(</span><span class="n">LED_GPIO_PORT</span><span class="p">,</span> <span class="n">LED_GPIO_PIN</span><span class="p">,</span> <span class="n">GPIO_PIN_RESET</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">HAL_Delay</span><span class="p">(</span><span class="mi">900</span><span class="p">);</span>                                                  <span class="cm">/* 灭 900ms */</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>Q5：<code>HAL_Delay()</code> 阻塞了 CPU，能不能不阻塞？</strong></p>
+<p>可以，用&quot;时间戳比较法&quot;，这是实际项目里的标准做法：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">uint32_t</span> <span class="n">last</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="nf">HAL_GetTick</span><span class="p">()</span> <span class="o">-</span> <span class="n">last</span> <span class="o">&gt;=</span> <span class="mi">250</span><span class="p">)</span>   <span class="cm">/* 无符号减法，自动处理 49 天后的溢出 */</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">last</span> <span class="o">=</span> <span class="nf">HAL_GetTick</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">HAL_GPIO_TogglePin</span><span class="p">(</span><span class="n">LED_GPIO_PORT</span><span class="p">,</span> <span class="n">LED_GPIO_PIN</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="cm">/* 这里可以干别的活，不会被延时挡住 */</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="7-小结">7. 小结
+</h2><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>要点</th>
+					<th>内容</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>GPIO 三步套路</td>
+					<td><strong>开时钟 → 填结构体 → HAL_GPIO_Init()</strong>，顺序不能乱</td>
+			</tr>
+			<tr>
+					<td>点灯用什么模式</td>
+					<td><code>GPIO_MODE_OUTPUT_PP</code> 推挽输出</td>
+			</tr>
+			<tr>
+					<td>结构体必须清零</td>
+					<td><code>GPIO_InitTypeDef s = {0};</code></td>
+			</tr>
+			<tr>
+					<td><code>HAL_Init()</code> 的作用</td>
+					<td>配 Flash + <strong>启动 SysTick</strong>（HAL_Delay 的命根子）</td>
+			</tr>
+			<tr>
+					<td>本例时钟</td>
+					<td>HSI 8MHz，HCLK=8M / PCLK1=8M / PCLK2=4M</td>
+			</tr>
+			<tr>
+					<td>翻转的原子性</td>
+					<td><code>TogglePin</code> 用 BSRR，中断安全</td>
+			</tr>
+			<tr>
+					<td>常见失败原因</td>
+					<td>忘开 GPIO 时钟（第一名）、LED 装反、没调 <code>HAL_Init()</code></td>
+			</tr>
+	</tbody>
+</table></div>
+<h2 id="8-拓展应用">8. 拓展应用
+</h2><p>掌握了 GPIO 输出，下面这些项目立刻就能做：</p>
+<p><strong>入门级</strong></p>
+<ul>
+<li><strong>流水灯</strong>：接 8 个 LED 到 PB0~PB7，用 <code>GPIOB-&gt;ODR = 1 &lt;&lt; i</code> 循环左移。</li>
+<li><strong>蜂鸣器报警</strong>：无源蜂鸣器接 GPIO，用不同频率的方波发出不同音调（进一步就该用 PWM 了 → 看 <a class="link" href="../../PY32F403_Firmware_V1_4_5_tim/TIM1_PWM/" >TIM1_PWM</a>）。</li>
+<li><strong>继电器控制</strong>：GPIO 经三极管/MOS 驱动继电器，做智能插座。注意加续流二极管。</li>
+</ul>
+<p><strong>进阶级</strong></p>
+<ul>
+<li><strong>按键 + LED 联动</strong>：把 PA0 配成 <code>GPIO_MODE_INPUT</code> + 上拉，读按键状态控制 LED。加上 20ms 消抖、长按/短按/双击识别。</li>
+<li><strong>软件模拟单总线</strong>：DS18B20 温度传感器、DHT11 湿度传感器都是单线协议，用一个 GPIO 在输入/输出模式之间来回切换就能驱动。这是练时序的最佳题目。</li>
+<li><strong>软件 I2C / SPI</strong>：当硬件外设引脚被占用时，用两三个普通 GPIO 手动打时序，能挂任何 I2C/SPI 器件。</li>
+<li><strong>驱动 74HC595</strong>：3 根 GPIO 扩展出 8 路输出，级联可以扩到几十路，做大型点阵屏。</li>
+</ul>
+<p><strong>工程级</strong></p>
+<ul>
+<li><strong>代码执行时间测量</strong>：进函数拉高 GPIO、出函数拉低，用逻辑分析仪量脉宽，比 <code>printf</code> 打时间戳精确得多，而且几乎零开销。这是排查实时性问题的利器。</li>
+<li><strong>看门狗喂狗指示</strong>：主循环每跑一圈翻转一次 GPIO，接示波器就能一眼看出程序有没有跑飞、周期是否稳定。</li>
+<li><strong>上电自检指示</strong>：用不同的闪烁次数/节奏表示不同错误码（类似硬盘故障灯），产品没有屏幕时非常实用。</li>
+</ul>
+<p><strong>下一步建议</strong></p>
+<p>先做 <a class="link" href="../../PY32F403_Firmware_V1_4_5_exti/" >EXTI 外部中断</a>（按键中断点灯），再学 <a class="link" href="../../PY32F403_Firmware_V1_4_5_usart/USART_HyperTerminal_Polling/" >USART</a> 把 <code>printf</code> 打通——有了串口输出，后面调试所有外设都会轻松十倍。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/gpio_toggle/">GPIO_Toggle</a>
+        
+            <a href="/tags/gpio/">GPIO</a>
+        
+            <a href="/tags/v1.4.5/">V1.4.5</a>
+        
+            <a href="/tags/py32f403/">PY32F403</a>
+        
+    </section>
+
+
+    <section class="article-lastmod">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+        <span>
+            最后更新于 Sep 09, 2026 10:25 &#43;0800
+        </span>
+    </section></footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/puya-gpio-gpio-%E7%BF%BB%E8%BD%AC%E8%BE%93%E5%87%BA/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA GPIO — GPIO 翻转输出</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/puya-gpio-gpio-%E7%BF%BB%E8%BD%AC%E8%BE%93%E5%87%BA/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA GPIO — GPIO 翻转输出</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/puya-gpio-gpio-%E7%BF%BB%E8%BD%AC%E8%BE%93%E5%87%BAhal-%E5%BA%93/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA GPIO — GPIO 翻转输出（HAL 库）</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/puya-gpio-gpio-%E7%BF%BB%E8%BD%AC%E8%BE%93%E5%87%BAll-%E5%BA%93/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA GPIO — GPIO 翻转输出（LL 库）</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/puya-gpio-gpio_fastio/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PUYA GPIO — GPIO_FastIO</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <script src="https://utteranc.es/client.js" 
+        repo="ClingYang/ClingYang.github.io"
+        issue-term="pathname"
+        
+        label="💬comment"
+        
+        crossorigin="anonymous"
+        async
+        >
+</script>
+
+<style>
+    .utterances {
+        max-width: unset;
+    }
+</style>
+
+<script>
+    let utterancesLoaded = false;
+
+    function setUtterancesTheme(theme) {
+        let utterances = document.querySelector('.utterances iframe');
+        if (utterances) {
+            utterances.contentWindow.postMessage(
+                {
+                    type: 'set-theme',
+                    theme: `github-${theme}`
+                },
+                'https://utteranc.es'
+            );
+        }
+    }
+
+    addEventListener('message', event => {
+        if (event.origin !== 'https://utteranc.es') return;
+
+        
+        utterancesLoaded = true;
+        setUtterancesTheme(document.documentElement.dataset.scheme)
+    });
+
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (!utterancesLoaded) return;
+        setUtterancesTheme(e.detail)
+    })
+</script>
+
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2026 CLing
+    </section>
+    
+    <section class="powerby">
+        
+            世界是你们 <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+<style>
+    #TableOfContents > ul, ol {
+        ul, ol {
+            display: none;
+        }
+        .open {
+            display: block;
+        }
+    }
+</style>
+
+<script>
+    function initTocHide() {
+        
+        let toc = document.querySelector(".widget--toc");
+        if (!toc) {
+            return;
+        }
+        
+        window.addEventListener('scroll', function() {
+            
+            let currentLi = document.querySelector(".active-class");
+            if (!currentLi) {
+                return
+            }
+            
+            let elementsByClassName = document.querySelectorAll(".open");
+            if (elementsByClassName.length > 0) {
+                elementsByClassName.forEach((ul) => {
+                    ul.classList.remove("open")
+                })
+            }
+            
+            if (currentLi.children.length > 1) {
+                currentLi.children[1].classList.add("open")
+            }
+            
+            let ul = currentLi.parentElement;
+            do {
+                ul.classList.add("open");
+                ul = ul.parentElement.parentElement
+            } while (ul !== undefined && (ul.localName === 'ul' || ul.localName === 'ol'))
+        });
+    }
+    initTocHide()
+</script>
+
+    </body>
+</html>
