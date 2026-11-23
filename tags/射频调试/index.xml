@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>射频调试 on CLing</title>
+        <link>https://clingyang.github.io/tags/%E5%B0%84%E9%A2%91%E8%B0%83%E8%AF%95/</link>
+        <description>Recent content in 射频调试 on CLing</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>zh-cn</language>
+        <copyright>CLing</copyright>
+        <lastBuildDate>Mon, 23 Nov 2026 20:20:09 +0800</lastBuildDate><atom:link href="https://clingyang.github.io/tags/%E5%B0%84%E9%A2%91%E8%B0%83%E8%AF%95/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>ESP32-S3 Wi-Fi 连不上：把发射功率降到 2 dBm 后发生了什么</title>
+        <link>https://clingyang.github.io/p/esp32s3-wifi-tx-power-debug/</link>
+        <pubDate>Mon, 23 Nov 2026 08:00:00 +0800</pubDate>
+        
+        <guid>https://clingyang.github.io/p/esp32s3-wifi-tx-power-debug/</guid>
+        <description>&lt;p&gt;ESP32-S3 能扫到手机热点，发起连接后却卡在初始认证。关闭热点密码做对照，板子仍然报 &lt;code&gt;reason=2&lt;/code&gt;。同一块板、同一根天线、同一个热点，把 Wi-Fi 最大发射功率限制在 2 dBm 后，串口出现了 &lt;code&gt;STA_CONNECTED&lt;/code&gt; 和 &lt;code&gt;STA_GOT_IP&lt;/code&gt;，随后 Ping 也通过了。&lt;/p&gt;
+&lt;h2 id=&#34;先看连接失败在哪一步&#34;&gt;先看连接失败在哪一步
+&lt;/h2&gt;&lt;p&gt;这次日志停在初始 802.11 认证，&lt;code&gt;reason=2&lt;/code&gt; 对应 &lt;code&gt;AUTH_EXPIRE&lt;/code&gt;。WPA2 四次握手发生在后面。既然临时开放热点也能复现，继续更换密码的价值就很低了。开放热点只用于短时对照。&lt;/p&gt;
+&lt;p&gt;除了核对驱动实际收到的配置，还试了关闭省电、固定信道带宽、重试，以及跳过屏幕、触控和音频初始化。默认发射功率上限下，认证超时仍然能复现。随后做了两个对照：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;测试&lt;/th&gt;
+          &lt;th&gt;默认上限档&lt;/th&gt;
+          &lt;th&gt;2 dBm 上限档&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;板子作 STA，连接同一热点&lt;/td&gt;
+          &lt;td&gt;初始认证超时&lt;/td&gt;
+          &lt;td&gt;成功关联、获取 IP，Ping 通过&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;板子作 SoftAP，电脑扫描信道 11&lt;/td&gt;
+          &lt;td&gt;对照时未扫描到信标&lt;/td&gt;
+          &lt;td&gt;扫到信标，RSSI 约 −51 至 −54 dBm&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;电脑看到的 RSSI 是接收端读数。SoftAP 对照里，默认档未被扫描到这一结果也只能说明该轮测试的观察，不能据此计算板子的实际发射功率。&lt;/p&gt;
+&lt;h2 id=&#34;在-esp-idf-里怎样做功率对照&#34;&gt;在 ESP-IDF 里怎样做功率对照
+&lt;/h2&gt;&lt;p&gt;Wi-Fi 启动后、发起连接前设置功率上限。参数单位是 &lt;strong&gt;0.25 dBm&lt;/strong&gt;，所以写入 &lt;code&gt;8&lt;/code&gt; 对应 2 dBm。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nf&#34;&gt;ESP_ERROR_CHECK&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;esp_wifi_set_max_tx_power&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;8&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;));&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;int8_t&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;power_cap&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nf&#34;&gt;ESP_ERROR_CHECK&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nf&#34;&gt;esp_wifi_get_max_tx_power&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;power_cap&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;));&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nf&#34;&gt;ESP_LOGI&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;TAG&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;#34;Wi-Fi TX power cap: %d quarter-dBm&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;power_cap&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;测试时先读取原始配置，分别记录默认档和低功率档的结果，结束后恢复原配置。尽量固定热点、信道、天线位置和 Wi-Fi 协议，每次只改变功率上限。判断连接可用时至少等到 &lt;code&gt;IP_EVENT_STA_GOT_IP&lt;/code&gt;，再检查实际网络连通性。 &lt;a class=&#34;link&#34; href=&#34;https://docs.espressif.com/projects/esp-idf/en/stable/esp32s3/api-reference/network/esp_wifi.html#_CPPv425esp_wifi_set_max_tx_power6int8_t&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;ESP-IDF 发射功率 API&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;临时方案和后续排查&#34;&gt;临时方案和后续排查
+&lt;/h2&gt;&lt;p&gt;这块样板暂时用 2 dBm 上限配合 802.11b/g。首次启动由用户从扫描列表选网，获得 IP 后才保存这组连接配置。已验证设备复位后能用保存的配置重新入网。&lt;/p&gt;
+&lt;p&gt;根因还待测。下一轮优先比较发射瞬间的供电波形，再用已知正常的天线和另一块板做交叉验证。距离稍远或者换了天线时，也要重新测低功率档的连接余量。&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

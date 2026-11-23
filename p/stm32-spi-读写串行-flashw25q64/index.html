@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en-us" dir="ltr">
+<html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
 <meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="野火 EBF STM32F103 Mini HAL 库：用 SPI1 驱动 W25Q64 串行 Flash，实现读 ID、扇区擦除、页写、缓冲区读写全流程。">
 <title>STM32 SPI — 读写串行 FLASH（W25Q64）</title>
@@ -56,7 +56,7 @@
                     
                     
                         
-                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                        <img src="/img/avatar_hu1200063259539398638.png" width="300"
                             height="290" class="site-logo" loading="lazy" alt="Avatar">
                     
                 
@@ -382,34 +382,34 @@
 <hr>
 <h2 id="二硬件准备">二、硬件准备
 </h2><div class="table-wrapper"><table>
-	<thead>
-			<tr>
-					<th style="text-align: left">项目</th>
-					<th style="text-align: left">说明</th>
-			</tr>
-	</thead>
-	<tbody>
-			<tr>
-					<td style="text-align: left">开发板</td>
-					<td style="text-align: left">野火 EBF STM32F103 Mini</td>
-			</tr>
-			<tr>
-					<td style="text-align: left">SPI 外设</td>
-					<td style="text-align: left">SPI1</td>
-			</tr>
-			<tr>
-					<td style="text-align: left">引脚</td>
-					<td style="text-align: left">SCK → PA5，MISO → PA6，MOSI → PA7，CS → PA4</td>
-			</tr>
-			<tr>
-					<td style="text-align: left">器件</td>
-					<td style="text-align: left">W25Q64（8MB，SPI 接口串行 NOR Flash）</td>
-			</tr>
-			<tr>
-					<td style="text-align: left">调试输出</td>
-					<td style="text-align: left">USART1（115200）打印 ID 与读写结果</td>
-			</tr>
-	</tbody>
+  <thead>
+      <tr>
+          <th style="text-align: left">项目</th>
+          <th style="text-align: left">说明</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">开发板</td>
+          <td style="text-align: left">野火 EBF STM32F103 Mini</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">SPI 外设</td>
+          <td style="text-align: left">SPI1</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">引脚</td>
+          <td style="text-align: left">SCK → PA5，MISO → PA6，MOSI → PA7，CS → PA4</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">器件</td>
+          <td style="text-align: left">W25Q64（8MB，SPI 接口串行 NOR Flash）</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">调试输出</td>
+          <td style="text-align: left">USART1（115200）打印 ID 与读写结果</td>
+      </tr>
+  </tbody>
 </table></div>
 <blockquote>
 <p><strong>接线要点</strong>：SPI 主机的 MOSI 接从机 MOSI，MISO 接 MISO，SCK 接 SCK，CS 由主机用任意一个 GPIO 软件拉低/拉高来选通从机。</p>
@@ -482,36 +482,36 @@
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#ifndef __SPI_FLASH_H
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define __SPI_FLASH_H
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;stm32f1xx.h&#34;</span><span class="cp">
 </span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cm">/* W25Q64 的 JEDEC ID = 0xEF4017（厂商 0xEF / 类型 0x40 / 容量 0x17=8MB） */</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define  sFLASH_ID             0XEF4017
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define SPI_FLASH_PageSize     256        </span><span class="c1">// 一页 256 字节
-</span></span></span><span class="line"><span class="cl"><span class="cp">#define SPI_FLASH_PerWritePageSize  256
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="cp">#define SPI_FLASH_PerWritePageSize  256
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cm">/* ---- W25Q64 指令集（部分常用） ---- */</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define W25X_WriteEnable       0x06      </span><span class="c1">// 写使能
-</span></span></span><span class="line"><span class="cl"><span class="cp">#define W25X_WriteDisable      0x04
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="cp">#define W25X_WriteDisable      0x04
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define W25X_ReadStatusReg     0x05      </span><span class="c1">// 读状态寄存器
-</span></span></span><span class="line"><span class="cl"><span class="cp">#define W25X_ReadData          0x03      </span><span class="c1">// 读数据
-</span></span></span><span class="line"><span class="cl"><span class="cp">#define W25X_PageProgram       0x02      </span><span class="c1">// 页编程（写）
-</span></span></span><span class="line"><span class="cl"><span class="cp">#define W25X_SectorErase       0x20      </span><span class="c1">// 扇区擦除（4KB）
-</span></span></span><span class="line"><span class="cl"><span class="cp">#define W25X_ChipErase         0xC7      </span><span class="c1">// 整片擦除
-</span></span></span><span class="line"><span class="cl"><span class="cp">#define W25X_PowerDown         0xB9      </span><span class="c1">// 掉电
-</span></span></span><span class="line"><span class="cl"><span class="cp">#define W25X_ReleasePowerDown  0xAB
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="cp">#define W25X_ReadData          0x03      </span><span class="c1">// 读数据
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="cp">#define W25X_PageProgram       0x02      </span><span class="c1">// 页编程（写）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="cp">#define W25X_SectorErase       0x20      </span><span class="c1">// 扇区擦除（4KB）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="cp">#define W25X_ChipErase         0xC7      </span><span class="c1">// 整片擦除
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="cp">#define W25X_PowerDown         0xB9      </span><span class="c1">// 掉电
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="cp">#define W25X_ReleasePowerDown  0xAB
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define W25X_DeviceID          0xAB      </span><span class="c1">// 读 Device ID
-</span></span></span><span class="line"><span class="cl"><span class="cp">#define W25X_JedecDeviceID     0x9F      </span><span class="c1">// 读 JEDEC ID
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="cp">#define W25X_JedecDeviceID     0x9F      </span><span class="c1">// 读 JEDEC ID
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define WIP_Flag               0x01       </span><span class="c1">// 状态寄存器 bit0：Write In Progress
-</span></span></span><span class="line"><span class="cl"><span class="cp">#define Dummy_Byte             0xFF       </span><span class="c1">// 读操作时发送的无意义填充字节
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="cp">#define Dummy_Byte             0xFF       </span><span class="c1">// 读操作时发送的无意义填充字节
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
 </span></span><span class="line"><span class="cl"><span class="cm">/* ---- SPI 与 GPIO 引脚定义 ---- */</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define SPIx                   SPI1
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define SPIx_CLK_ENABLE()      __HAL_RCC_SPI1_CLK_ENABLE()
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define SPIx_SCK_PIN           GPIO_PIN_5
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define SPIx_SCK_GPIO_PORT     GPIOA
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define SPIx_MISO_PIN          GPIO_PIN_6
@@ -520,13 +520,13 @@
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define SPIx_MOSI_GPIO_PORT    GPIOA
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define FLASH_CS_PIN           GPIO_PIN_4
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define FLASH_CS_GPIO_PORT     GPIOA
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cm">/* 用寄存器直接操作 CS，速度最快 */</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define digitalHi(p,i)  {p-&gt;BSRR = i;}
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define digitalLo(p,i)  {p-&gt;BSRR = (uint32_t)i &lt;&lt; 16;}
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define SPI_FLASH_CS_LOW()   digitalLo(FLASH_CS_GPIO_PORT, FLASH_CS_PIN)   </span><span class="c1">// 选通
-</span></span></span><span class="line"><span class="cl"><span class="cp">#define SPI_FLASH_CS_HIGH()  digitalHi(FLASH_CS_GPIO_PORT, FLASH_CS_PIN)   </span><span class="c1">// 取消选通
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="cp">#define SPI_FLASH_CS_HIGH()  digitalHi(FLASH_CS_GPIO_PORT, FLASH_CS_PIN)   </span><span class="c1">// 取消选通
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
 </span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">SPI_FLASH_Init</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">SPI_FLASH_SectorErase</span><span class="p">(</span><span class="kt">uint32_t</span> <span class="n">SectorAddr</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">SPI_FLASH_BufferWrite</span><span class="p">(</span><span class="kt">uint8_t</span><span class="o">*</span> <span class="n">pBuffer</span><span class="p">,</span> <span class="kt">uint32_t</span> <span class="n">WriteAddr</span><span class="p">,</span> <span class="kt">uint16_t</span> <span class="n">NumByteToWrite</span><span class="p">);</span>
@@ -728,7 +728,7 @@
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;./flash/bsp_spi_flash.h&#34;</span><span class="cp">
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="n">SPI_HandleTypeDef</span> <span class="n">SpiHandle</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="cm">/* MSP：开时钟 + 配 GPIO（SCK/MOSI/MISO 复用，CS 普通推挽输出） */</span>
@@ -744,19 +744,19 @@
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Pin</span>   <span class="o">=</span> <span class="n">SPIx_SCK_PIN</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Mode</span>  <span class="o">=</span> <span class="n">GPIO_MODE_AF_PP</span><span class="p">;</span>       <span class="c1">// 复用推挽
-</span></span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Pull</span>  <span class="o">=</span> <span class="n">GPIO_PULLUP</span><span class="p">;</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Pull</span>  <span class="o">=</span> <span class="n">GPIO_PULLUP</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Speed</span> <span class="o">=</span> <span class="n">GPIO_SPEED_FREQ_HIGH</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">  <span class="nf">HAL_GPIO_Init</span><span class="p">(</span><span class="n">SPIx_SCK_GPIO_PORT</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">GPIO_InitStruct</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Pin</span> <span class="o">=</span> <span class="n">SPIx_MISO_PIN</span><span class="p">;</span>           <span class="c1">// MISO 同样复用
-</span></span></span><span class="line"><span class="cl">  <span class="nf">HAL_GPIO_Init</span><span class="p">(</span><span class="n">SPIx_MISO_GPIO_PORT</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">GPIO_InitStruct</span><span class="p">);</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nf">HAL_GPIO_Init</span><span class="p">(</span><span class="n">SPIx_MISO_GPIO_PORT</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">GPIO_InitStruct</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Pin</span> <span class="o">=</span> <span class="n">SPIx_MOSI_PIN</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">  <span class="nf">HAL_GPIO_Init</span><span class="p">(</span><span class="n">SPIx_MOSI_GPIO_PORT</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">GPIO_InitStruct</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Pin</span>  <span class="o">=</span> <span class="n">FLASH_CS_PIN</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Mode</span> <span class="o">=</span> <span class="n">GPIO_MODE_OUTPUT_PP</span><span class="p">;</span>     <span class="c1">// CS 用软件普通 GPIO 控制
-</span></span></span><span class="line"><span class="cl">  <span class="nf">HAL_GPIO_Init</span><span class="p">(</span><span class="n">FLASH_CS_GPIO_PORT</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">GPIO_InitStruct</span><span class="p">);</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nf">HAL_GPIO_Init</span><span class="p">(</span><span class="n">FLASH_CS_GPIO_PORT</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">GPIO_InitStruct</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="cm">/* SPI 参数配置：主模式、8 位、MSB 先行、模式 3、软件 NSS、4 分频 */</span>
@@ -764,15 +764,15 @@
 </span></span><span class="line"><span class="cl"><span class="p">{</span>
 </span></span><span class="line"><span class="cl">  <span class="n">SpiHandle</span><span class="p">.</span><span class="n">Instance</span>               <span class="o">=</span> <span class="n">SPIx</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">  <span class="n">SpiHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">BaudRatePrescaler</span> <span class="o">=</span> <span class="n">SPI_BAUDRATEPRESCALER_4</span><span class="p">;</span>  <span class="c1">// 72M/4=18MHz
-</span></span></span><span class="line"><span class="cl">  <span class="n">SpiHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">Direction</span>         <span class="o">=</span> <span class="n">SPI_DIRECTION_2LINES</span><span class="p">;</span>     <span class="c1">// 全双工
-</span></span></span><span class="line"><span class="cl">  <span class="n">SpiHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">CLKPhase</span>          <span class="o">=</span> <span class="n">SPI_PHASE_2EDGE</span><span class="p">;</span>          <span class="c1">// CPHA=1
-</span></span></span><span class="line"><span class="cl">  <span class="n">SpiHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">CLKPolarity</span>       <span class="o">=</span> <span class="n">SPI_POLARITY_HIGH</span><span class="p">;</span>        <span class="c1">// CPOL=1（模式3）
-</span></span></span><span class="line"><span class="cl">  <span class="n">SpiHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">CRCCalculation</span>    <span class="o">=</span> <span class="n">SPI_CRCCALCULATION_DISABLE</span><span class="p">;</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">SpiHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">Direction</span>         <span class="o">=</span> <span class="n">SPI_DIRECTION_2LINES</span><span class="p">;</span>     <span class="c1">// 全双工
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">SpiHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">CLKPhase</span>          <span class="o">=</span> <span class="n">SPI_PHASE_2EDGE</span><span class="p">;</span>          <span class="c1">// CPHA=1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">SpiHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">CLKPolarity</span>       <span class="o">=</span> <span class="n">SPI_POLARITY_HIGH</span><span class="p">;</span>        <span class="c1">// CPOL=1（模式3）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">SpiHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">CRCCalculation</span>    <span class="o">=</span> <span class="n">SPI_CRCCALCULATION_DISABLE</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">  <span class="n">SpiHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">CRCPolynomial</span>     <span class="o">=</span> <span class="mi">7</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">  <span class="n">SpiHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">DataSize</span>          <span class="o">=</span> <span class="n">SPI_DATASIZE_8BIT</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">  <span class="n">SpiHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">FirstBit</span>          <span class="o">=</span> <span class="n">SPI_FIRSTBIT_MSB</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">  <span class="n">SpiHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">NSS</span>               <span class="o">=</span> <span class="n">SPI_NSS_SOFT</span><span class="p">;</span>             <span class="c1">// 软件管理 CS
-</span></span></span><span class="line"><span class="cl">  <span class="n">SpiHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">TIMode</span>            <span class="o">=</span> <span class="n">SPI_TIMODE_DISABLE</span><span class="p">;</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">SpiHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">TIMode</span>            <span class="o">=</span> <span class="n">SPI_TIMODE_DISABLE</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">  <span class="n">SpiHandle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">Mode</span>              <span class="o">=</span> <span class="n">SPI_MODE_MASTER</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">  <span class="nf">HAL_SPI_Init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">SpiHandle</span><span class="p">);</span>
@@ -785,11 +785,11 @@
 </span></span><span class="line"><span class="cl">  <span class="cm">/* 等待发送缓冲区空 */</span>
 </span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="nf">__HAL_SPI_GET_FLAG</span><span class="p">(</span><span class="o">&amp;</span><span class="n">SpiHandle</span><span class="p">,</span> <span class="n">SPI_FLAG_TXE</span><span class="p">)</span> <span class="o">==</span> <span class="n">RESET</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">  <span class="nf">WRITE_REG</span><span class="p">(</span><span class="n">SpiHandle</span><span class="p">.</span><span class="n">Instance</span><span class="o">-&gt;</span><span class="n">DR</span><span class="p">,</span> <span class="n">byte</span><span class="p">);</span>        <span class="c1">// 写入数据寄存器
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
 </span></span><span class="line"><span class="cl">  <span class="cm">/* 等待接收缓冲区非空 */</span>
 </span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="nf">__HAL_SPI_GET_FLAG</span><span class="p">(</span><span class="o">&amp;</span><span class="n">SpiHandle</span><span class="p">,</span> <span class="n">SPI_FLAG_RXNE</span><span class="p">)</span> <span class="o">==</span> <span class="n">RESET</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="nf">READ_REG</span><span class="p">(</span><span class="n">SpiHandle</span><span class="p">.</span><span class="n">Instance</span><span class="o">-&gt;</span><span class="n">DR</span><span class="p">);</span>        <span class="c1">// 读出收到的数据
-</span></span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="cm">/* 读 JEDEC ID：发 0x9F 后连续收 3 字节 */</span>
 </span></span><span class="line"><span class="cl"><span class="kt">uint32_t</span> <span class="nf">SPI_FLASH_ReadID</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
@@ -802,7 +802,7 @@
 </span></span><span class="line"><span class="cl">  <span class="n">Temp2</span> <span class="o">=</span> <span class="nf">SPI_FLASH_SendByte</span><span class="p">(</span><span class="n">Dummy_Byte</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">  <span class="nf">SPI_FLASH_CS_HIGH</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl">  <span class="n">Temp</span> <span class="o">=</span> <span class="p">(</span><span class="n">Temp0</span> <span class="o">&lt;&lt;</span> <span class="mi">16</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">Temp1</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">|</span> <span class="n">Temp2</span><span class="p">;</span>   <span class="c1">// 组合成 24 位 ID
-</span></span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">Temp</span><span class="p">;</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">return</span> <span class="n">Temp</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="cm">/* 扇区擦除（4KB）：写使能 -&gt; 发指令+3字节地址 -&gt; 等待写完 */</span>
@@ -814,9 +814,9 @@
 </span></span><span class="line"><span class="cl">  <span class="nf">SPI_FLASH_CS_LOW</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl">  <span class="nf">SPI_FLASH_SendByte</span><span class="p">(</span><span class="n">W25X_SectorErase</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">  <span class="nf">SPI_FLASH_SendByte</span><span class="p">((</span><span class="n">SectorAddr</span> <span class="o">&amp;</span> <span class="mh">0xFF0000</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="mi">16</span><span class="p">);</span>  <span class="c1">// 地址高字节
-</span></span></span><span class="line"><span class="cl">  <span class="nf">SPI_FLASH_SendByte</span><span class="p">((</span><span class="n">SectorAddr</span> <span class="o">&amp;</span> <span class="mh">0xFF00</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span><span class="p">);</span>     <span class="c1">// 地址中字节
-</span></span></span><span class="line"><span class="cl">  <span class="nf">SPI_FLASH_SendByte</span><span class="p">(</span><span class="n">SectorAddr</span> <span class="o">&amp;</span> <span class="mh">0xFF</span><span class="p">);</span>              <span class="c1">// 地址低字节
-</span></span></span><span class="line"><span class="cl">  <span class="nf">SPI_FLASH_CS_HIGH</span><span class="p">();</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nf">SPI_FLASH_SendByte</span><span class="p">((</span><span class="n">SectorAddr</span> <span class="o">&amp;</span> <span class="mh">0xFF00</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span><span class="p">);</span>     <span class="c1">// 地址中字节
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nf">SPI_FLASH_SendByte</span><span class="p">(</span><span class="n">SectorAddr</span> <span class="o">&amp;</span> <span class="mh">0xFF</span><span class="p">);</span>              <span class="c1">// 地址低字节
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nf">SPI_FLASH_CS_HIGH</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl">  <span class="nf">SPI_FLASH_WaitForWriteEnd</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span><span class="line"><span class="cl">
@@ -832,10 +832,10 @@
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">NumByteToWrite</span> <span class="o">&gt;</span> <span class="n">SPI_FLASH_PerWritePageSize</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">    <span class="n">NumByteToWrite</span> <span class="o">=</span> <span class="n">SPI_FLASH_PerWritePageSize</span><span class="p">;</span>   <span class="c1">// 超页则截断
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
 </span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="n">NumByteToWrite</span><span class="o">--</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">    <span class="nf">SPI_FLASH_SendByte</span><span class="p">(</span><span class="o">*</span><span class="n">pBuffer</span><span class="o">++</span><span class="p">);</span>               <span class="c1">// 逐字节写入
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
 </span></span><span class="line"><span class="cl">  <span class="nf">SPI_FLASH_CS_HIGH</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl">  <span class="nf">SPI_FLASH_WaitForWriteEnd</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
@@ -845,32 +845,32 @@
 </span></span><span class="line"><span class="cl"><span class="p">{</span>
 </span></span><span class="line"><span class="cl">  <span class="kt">uint8_t</span> <span class="n">NumOfPage</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">NumOfSingle</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">Addr</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">temp</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">  <span class="n">Addr</span> <span class="o">=</span> <span class="n">WriteAddr</span> <span class="o">%</span> <span class="n">SPI_FLASH_PageSize</span><span class="p">;</span>          <span class="c1">// 起始地址在页内的偏移
-</span></span></span><span class="line"><span class="cl">  <span class="n">count</span> <span class="o">=</span> <span class="n">SPI_FLASH_PageSize</span> <span class="o">-</span> <span class="n">Addr</span><span class="p">;</span>              <span class="c1">// 当前页还能写多少
-</span></span></span><span class="line"><span class="cl">  <span class="n">NumOfPage</span> <span class="o">=</span> <span class="n">NumByteToWrite</span> <span class="o">/</span> <span class="n">SPI_FLASH_PageSize</span><span class="p">;</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">count</span> <span class="o">=</span> <span class="n">SPI_FLASH_PageSize</span> <span class="o">-</span> <span class="n">Addr</span><span class="p">;</span>              <span class="c1">// 当前页还能写多少
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">NumOfPage</span> <span class="o">=</span> <span class="n">NumByteToWrite</span> <span class="o">/</span> <span class="n">SPI_FLASH_PageSize</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">  <span class="n">NumOfSingle</span> <span class="o">=</span> <span class="n">NumByteToWrite</span> <span class="o">%</span> <span class="n">SPI_FLASH_PageSize</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">Addr</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>                                 <span class="c1">// 地址正好页对齐
-</span></span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">NumOfPage</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>                          <span class="c1">// 不到一页
-</span></span></span><span class="line"><span class="cl">      <span class="nf">SPI_FLASH_PageWrite</span><span class="p">(</span><span class="n">pBuffer</span><span class="p">,</span> <span class="n">WriteAddr</span><span class="p">,</span> <span class="n">NumByteToWrite</span><span class="p">);</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="nf">SPI_FLASH_PageWrite</span><span class="p">(</span><span class="n">pBuffer</span><span class="p">,</span> <span class="n">WriteAddr</span><span class="p">,</span> <span class="n">NumByteToWrite</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">    <span class="k">else</span>
 </span></span><span class="line"><span class="cl">    <span class="p">{</span>
 </span></span><span class="line"><span class="cl">      <span class="k">while</span> <span class="p">(</span><span class="n">NumOfPage</span><span class="o">--</span><span class="p">)</span>                         <span class="c1">// 整页挨个写
-</span></span></span><span class="line"><span class="cl">      <span class="p">{</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="p">{</span>
 </span></span><span class="line"><span class="cl">        <span class="nf">SPI_FLASH_PageWrite</span><span class="p">(</span><span class="n">pBuffer</span><span class="p">,</span> <span class="n">WriteAddr</span><span class="p">,</span> <span class="n">SPI_FLASH_PageSize</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">        <span class="n">WriteAddr</span> <span class="o">+=</span> <span class="n">SPI_FLASH_PageSize</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">        <span class="n">pBuffer</span>   <span class="o">+=</span> <span class="n">SPI_FLASH_PageSize</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">      <span class="p">}</span>
 </span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="n">NumOfSingle</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span>                      <span class="c1">// 尾巴不足一页
-</span></span></span><span class="line"><span class="cl">        <span class="nf">SPI_FLASH_PageWrite</span><span class="p">(</span><span class="n">pBuffer</span><span class="p">,</span> <span class="n">WriteAddr</span><span class="p">,</span> <span class="n">NumOfSingle</span><span class="p">);</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">SPI_FLASH_PageWrite</span><span class="p">(</span><span class="n">pBuffer</span><span class="p">,</span> <span class="n">WriteAddr</span><span class="p">,</span> <span class="n">NumOfSingle</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
 </span></span><span class="line"><span class="cl">  <span class="p">}</span>
 </span></span><span class="line"><span class="cl">  <span class="k">else</span>                                           <span class="c1">// 地址未对齐
-</span></span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">NumOfPage</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">    <span class="p">{</span>
 </span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="n">NumOfSingle</span> <span class="o">&gt;</span> <span class="n">count</span><span class="p">)</span>                   <span class="c1">// 当前页放不下，拆成两段
-</span></span></span><span class="line"><span class="cl">      <span class="p">{</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="p">{</span>
 </span></span><span class="line"><span class="cl">        <span class="n">temp</span> <span class="o">=</span> <span class="n">NumOfSingle</span> <span class="o">-</span> <span class="n">count</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">        <span class="nf">SPI_FLASH_PageWrite</span><span class="p">(</span><span class="n">pBuffer</span><span class="p">,</span> <span class="n">WriteAddr</span><span class="p">,</span> <span class="n">count</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">        <span class="nf">SPI_FLASH_PageWrite</span><span class="p">(</span><span class="n">pBuffer</span> <span class="o">+</span> <span class="n">count</span><span class="p">,</span> <span class="n">WriteAddr</span> <span class="o">+</span> <span class="n">count</span><span class="p">,</span> <span class="n">temp</span><span class="p">);</span>
@@ -879,7 +879,7 @@
 </span></span><span class="line"><span class="cl">        <span class="nf">SPI_FLASH_PageWrite</span><span class="p">(</span><span class="n">pBuffer</span><span class="p">,</span> <span class="n">WriteAddr</span><span class="p">,</span> <span class="n">NumByteToWrite</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
 </span></span><span class="line"><span class="cl">    <span class="k">else</span>                                         <span class="c1">// 多页情况，先填满当前页再整页写
-</span></span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="p">{</span>
 </span></span><span class="line"><span class="cl">      <span class="n">NumByteToWrite</span> <span class="o">-=</span> <span class="n">count</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">      <span class="n">NumOfPage</span> <span class="o">=</span> <span class="n">NumByteToWrite</span> <span class="o">/</span> <span class="n">SPI_FLASH_PageSize</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">      <span class="n">NumOfSingle</span> <span class="o">=</span> <span class="n">NumByteToWrite</span> <span class="o">%</span> <span class="n">SPI_FLASH_PageSize</span><span class="p">;</span>
@@ -906,7 +906,7 @@
 </span></span><span class="line"><span class="cl">  <span class="nf">SPI_FLASH_SendByte</span><span class="p">(</span><span class="n">ReadAddr</span> <span class="o">&amp;</span> <span class="mh">0xFF</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="n">NumByteToRead</span><span class="o">--</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">    <span class="o">*</span><span class="n">pBuffer</span><span class="o">++</span> <span class="o">=</span> <span class="nf">SPI_FLASH_SendByte</span><span class="p">(</span><span class="n">Dummy_Byte</span><span class="p">);</span> <span class="c1">// 每发 1 个哑字节，收 1 个真实数据
-</span></span></span><span class="line"><span class="cl">  <span class="nf">SPI_FLASH_CS_HIGH</span><span class="p">();</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nf">SPI_FLASH_CS_HIGH</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
@@ -962,7 +962,7 @@
 </span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;./usart/bsp_debug_usart.h&#34;</span><span class="cp">
 </span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;./led/bsp_led.h&#34;</span><span class="cp">
 </span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;./flash/bsp_spi_flash.h&#34;</span><span class="cp">
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="n">Tx_Buffer</span><span class="p">[]</span> <span class="o">=</span> <span class="s">&#34;感谢您选用野火stm32开发板</span><span class="se">\r\n</span><span class="s">http://firestm32.taobao.com&#34;</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="n">Rx_Buffer</span><span class="p">[</span><span class="k">sizeof</span><span class="p">(</span><span class="n">Tx_Buffer</span><span class="p">)];</span>
 </span></span><span class="line"><span class="cl">
@@ -982,11 +982,11 @@
 </span></span><span class="line"><span class="cl">  <span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\r\n</span><span class="s">检测到SPI FLASH W25Q64 !</span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">    <span class="nf">SPI_FLASH_SectorErase</span><span class="p">(</span><span class="mh">0x00000</span><span class="p">);</span>                       <span class="c1">// 写前先擦除
-</span></span></span><span class="line"><span class="cl">    <span class="nf">SPI_FLASH_BufferWrite</span><span class="p">(</span><span class="n">Tx_Buffer</span><span class="p">,</span> <span class="mh">0x00000</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">Tx_Buffer</span><span class="p">));</span>   <span class="c1">// 写入
-</span></span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\r\n</span><span class="s">写入的数据为：</span><span class="se">\r\n</span><span class="s">%s&#34;</span><span class="p">,</span> <span class="n">Tx_Buffer</span><span class="p">);</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">SPI_FLASH_BufferWrite</span><span class="p">(</span><span class="n">Tx_Buffer</span><span class="p">,</span> <span class="mh">0x00000</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">Tx_Buffer</span><span class="p">));</span>   <span class="c1">// 写入
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\r\n</span><span class="s">写入的数据为：</span><span class="se">\r\n</span><span class="s">%s&#34;</span><span class="p">,</span> <span class="n">Tx_Buffer</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">    <span class="nf">SPI_FLASH_BufferRead</span><span class="p">(</span><span class="n">Rx_Buffer</span><span class="p">,</span> <span class="mh">0x00000</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">Tx_Buffer</span><span class="p">));</span>    <span class="c1">// 读出
-</span></span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\r\n</span><span class="s">读出的数据为：</span><span class="se">\r\n</span><span class="s">%s&#34;</span><span class="p">,</span> <span class="n">Rx_Buffer</span><span class="p">);</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\r\n</span><span class="s">读出的数据为：</span><span class="se">\r\n</span><span class="s">%s&#34;</span><span class="p">,</span> <span class="n">Rx_Buffer</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nf">memcmp</span><span class="p">(</span><span class="n">Tx_Buffer</span><span class="p">,</span> <span class="n">Rx_Buffer</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">Tx_Buffer</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">    <span class="p">{</span> <span class="n">LED2_ON</span><span class="p">;</span>  <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\r\n</span><span class="s">8M串行flash(W25Q64)测试成功!</span><span class="se">\n\r</span><span class="s">&#34;</span><span class="p">);</span> <span class="p">}</span>
@@ -1067,7 +1067,7 @@
         
             <a href="/tags/hal%E5%BA%93/">HAL库</a>
         
-            <a href="/tags/spi/">Spi</a>
+            <a href="/tags/spi/">SPI</a>
         
             <a href="/tags/w25q64/">W25Q64</a>
         

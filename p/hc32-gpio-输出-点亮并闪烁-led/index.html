@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en-us" dir="ltr">
+<html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
 <meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="HC32F460 GPIO 输出实验：把 PA0/PA1/PA2 配成推挽输出，用 PORT_Toggle 翻转电平做出三颗 LED 一起闪烁的效果。">
 <title>HC32 GPIO 输出 — 点亮并闪烁 LED</title>
@@ -56,7 +56,7 @@
                     
                     
                         
-                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                        <img src="/img/avatar_hu1200063259539398638.png" width="300"
                             height="290" class="site-logo" loading="lazy" alt="Avatar">
                     
                 
@@ -449,36 +449,36 @@
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;hc32_ddl.h&#34;                   // HC32 ddl 库总头文件，包含它就够了</span><span class="cp">
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cm">/* ---------- LED 引脚定义（改这里就能换引脚，不用动下面的逻辑）---------- */</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define  LED0_PORT        (PortA)       </span><span class="c1">// 红灯：PA0
-</span></span></span><span class="line"><span class="cl"><span class="cp">#define  LED0_PIN         (Pin00)
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="cp">#define  LED0_PIN         (Pin00)
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define  LED1_PORT        (PortA)       </span><span class="c1">// 绿灯：PA1
-</span></span></span><span class="line"><span class="cl"><span class="cp">#define  LED1_PIN         (Pin01)
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="cp">#define  LED1_PIN         (Pin01)
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define  LED2_PORT        (PortA)       </span><span class="c1">// 蓝灯：PA2
-</span></span></span><span class="line"><span class="cl"><span class="cp">#define  LED2_PIN         (Pin02)
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="cp">#define  LED2_PIN         (Pin02)
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cm">/* 用宏把「翻转某颗 LED」包一下，主循环里读起来更清爽 */</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define  LED0_TOGGLE()    (PORT_Toggle(LED0_PORT, LED0_PIN))
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define  LED1_TOGGLE()    (PORT_Toggle(LED1_PORT, LED1_PIN))
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define  LED2_TOGGLE()    (PORT_Toggle(LED2_PORT, LED2_PIN))
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define  DLY_MS           (500ul)       </span><span class="c1">// 延时 500 毫秒，ul 表示无符号长整型常量
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
 </span></span><span class="line"><span class="cl"><span class="kt">int32_t</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="kt">stc_port_init_t</span> <span class="n">stcPortInit</span><span class="p">;</span>        <span class="c1">// GPIO 配置结构体
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
 </span></span><span class="line"><span class="cl">    <span class="cm">/* 第一步：把结构体清零，避免没赋值的成员是随机垃圾值 */</span>
 </span></span><span class="line"><span class="cl">    <span class="nf">MEM_ZERO_STRUCT</span><span class="p">(</span><span class="n">stcPortInit</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">    <span class="cm">/* 第二步：填写配置 */</span>
 </span></span><span class="line"><span class="cl">    <span class="n">stcPortInit</span><span class="p">.</span><span class="n">enPinMode</span> <span class="o">=</span> <span class="n">Pin_Mode_Out</span><span class="p">;</span>   <span class="c1">// 输出模式
-</span></span></span><span class="line"><span class="cl">    <span class="n">stcPortInit</span><span class="p">.</span><span class="n">enExInt</span>   <span class="o">=</span> <span class="n">Enable</span><span class="p">;</span>         <span class="c1">// 外部中断输入使能（输出用不到，保持默认）
-</span></span></span><span class="line"><span class="cl">    <span class="n">stcPortInit</span><span class="p">.</span><span class="n">enPullUp</span>  <span class="o">=</span> <span class="n">Enable</span><span class="p">;</span>         <span class="c1">// 内部上拉使能
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">stcPortInit</span><span class="p">.</span><span class="n">enExInt</span>   <span class="o">=</span> <span class="n">Enable</span><span class="p">;</span>         <span class="c1">// 外部中断输入使能（输出用不到，保持默认）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">stcPortInit</span><span class="p">.</span><span class="n">enPullUp</span>  <span class="o">=</span> <span class="n">Enable</span><span class="p">;</span>         <span class="c1">// 内部上拉使能
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
 </span></span><span class="line"><span class="cl">    <span class="cm">/* 第三步：用同一份配置，逐个初始化三颗 LED 的引脚 */</span>
 </span></span><span class="line"><span class="cl">    <span class="nf">PORT_Init</span><span class="p">(</span><span class="n">LED0_PORT</span><span class="p">,</span> <span class="n">LED0_PIN</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">stcPortInit</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">    <span class="nf">PORT_Init</span><span class="p">(</span><span class="n">LED1_PORT</span><span class="p">,</span> <span class="n">LED1_PIN</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">stcPortInit</span><span class="p">);</span>
@@ -497,7 +497,7 @@
 </span></span><span class="line"><span class="cl">        <span class="nf">LED2_TOGGLE</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">        <span class="nf">Ddl_Delay1ms</span><span class="p">(</span><span class="n">DLY_MS</span><span class="p">);</span>           <span class="c1">// 死等 500 毫秒
-</span></span></span><span class="line"><span class="cl">    <span class="p">};</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="p">};</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
@@ -513,8 +513,8 @@
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">MEM_ZERO_STRUCT</span><span class="p">(</span><span class="n">stcPortInit</span><span class="p">);</span>          <span class="c1">// ① 清零
-</span></span></span><span class="line"><span class="cl"><span class="n">stcPortInit</span><span class="p">.</span><span class="n">enPinMode</span> <span class="o">=</span> <span class="n">Pin_Mode_Out</span><span class="p">;</span>  <span class="c1">// ② 填参数
-</span></span></span><span class="line"><span class="cl"><span class="nf">PORT_Init</span><span class="p">(</span><span class="n">LED0_PORT</span><span class="p">,</span> <span class="n">LED0_PIN</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">stcPortInit</span><span class="p">);</span>  <span class="c1">// ③ 初始化
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">stcPortInit</span><span class="p">.</span><span class="n">enPinMode</span> <span class="o">=</span> <span class="n">Pin_Mode_Out</span><span class="p">;</span>  <span class="c1">// ② 填参数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nf">PORT_Init</span><span class="p">(</span><span class="n">LED0_PORT</span><span class="p">,</span> <span class="n">LED0_PIN</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">stcPortInit</span><span class="p">);</span>  <span class="c1">// ③ 初始化
 </span></span></span></code></pre></td></tr></table>
 </div>
 </div><p><strong>为什么第一步要清零？</strong> 因为 <code>stcPortInit</code> 是定义在栈上的局部变量，C 语言不会帮你自动清零。如果你只填了 <code>enPinMode</code>，剩下的成员（开漏、驱动能力……）就是内存里的随机值。运气好能跑，运气差就出诡异 bug。<code>MEM_ZERO_STRUCT</code> 一句解决。</p>
@@ -545,10 +545,10 @@
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">while</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="nf">LED0_TOGGLE</span><span class="p">();</span>               <span class="c1">// 翻转
-</span></span></span><span class="line"><span class="cl">    <span class="nf">LED1_TOGGLE</span><span class="p">();</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">LED1_TOGGLE</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl">    <span class="nf">LED2_TOGGLE</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl">    <span class="nf">Ddl_Delay1ms</span><span class="p">(</span><span class="n">DLY_MS</span><span class="p">);</span>        <span class="c1">// 延时 500ms
-</span></span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p><code>PORT_Toggle()</code> 是关键。它不用管当前是高还是低，直接反过来。配上 500ms 延时，就是「亮 0.5 秒、灭 0.5 秒」的循环。</p>
@@ -606,7 +606,7 @@
         
             <a href="/tags/gpio/">GPIO</a>
         
-            <a href="/tags/led/">Led</a>
+            <a href="/tags/led/">LED</a>
         
             <a href="/tags/port_toggle/">PORT_Toggle</a>
         

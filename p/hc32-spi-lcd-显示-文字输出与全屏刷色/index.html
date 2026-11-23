@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en-us" dir="ltr">
+<html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
 <meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="HC32F460 SPI LCD 实验：用 SPI3 驱动 ST7789 1.14 寸彩屏，显示四行文字信息，主循环里黑青两色交替全屏刷新并翻转 LED。">
 <title>HC32 SPI LCD 显示 — 文字输出与全屏刷色</title>
@@ -56,7 +56,7 @@
                     
                     
                         
-                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                        <img src="/img/avatar_hu1200063259539398638.png" width="300"
                             height="290" class="site-logo" loading="lazy" alt="Avatar">
                     
                 
@@ -408,50 +408,50 @@
 </div>
 </div><p>接线要点：</p>
 <div class="table-wrapper"><table>
-	<thead>
-			<tr>
-					<th style="text-align: left">线</th>
-					<th style="text-align: left">类型</th>
-					<th style="text-align: left">注意</th>
-			</tr>
-	</thead>
-	<tbody>
-			<tr>
-					<td style="text-align: left">SCK (PB6)</td>
-					<td style="text-align: left">SPI3 复用</td>
-					<td style="text-align: left">时钟</td>
-			</tr>
-			<tr>
-					<td style="text-align: left">MOSI (PB7)</td>
-					<td style="text-align: left">SPI3 复用</td>
-					<td style="text-align: left">只发不收，所以不用接 MISO</td>
-			</tr>
-			<tr>
-					<td style="text-align: left">DC (PB8)</td>
-					<td style="text-align: left">普通 GPIO</td>
-					<td style="text-align: left"><strong>接错必花屏</strong>，最关键的一根</td>
-			</tr>
-			<tr>
-					<td style="text-align: left">RST (PB9)</td>
-					<td style="text-align: left">普通 GPIO</td>
-					<td style="text-align: left">不接屏可能初始化不了</td>
-			</tr>
-			<tr>
-					<td style="text-align: left">PWR/BLK (PB3)</td>
-					<td style="text-align: left">普通 GPIO</td>
-					<td style="text-align: left"><strong>不接屏是黑的</strong>，你会以为程序坏了</td>
-			</tr>
-			<tr>
-					<td style="text-align: left">VCC</td>
-					<td style="text-align: left">电源</td>
-					<td style="text-align: left"><strong>必须 3.3V！接 5V 会烧屏</strong></td>
-			</tr>
-			<tr>
-					<td style="text-align: left">GND</td>
-					<td style="text-align: left">地</td>
-					<td style="text-align: left">必须共地</td>
-			</tr>
-	</tbody>
+  <thead>
+      <tr>
+          <th style="text-align: left">线</th>
+          <th style="text-align: left">类型</th>
+          <th style="text-align: left">注意</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">SCK (PB6)</td>
+          <td style="text-align: left">SPI3 复用</td>
+          <td style="text-align: left">时钟</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">MOSI (PB7)</td>
+          <td style="text-align: left">SPI3 复用</td>
+          <td style="text-align: left">只发不收，所以不用接 MISO</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">DC (PB8)</td>
+          <td style="text-align: left">普通 GPIO</td>
+          <td style="text-align: left"><strong>接错必花屏</strong>，最关键的一根</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">RST (PB9)</td>
+          <td style="text-align: left">普通 GPIO</td>
+          <td style="text-align: left">不接屏可能初始化不了</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">PWR/BLK (PB3)</td>
+          <td style="text-align: left">普通 GPIO</td>
+          <td style="text-align: left"><strong>不接屏是黑的</strong>，你会以为程序坏了</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">VCC</td>
+          <td style="text-align: left">电源</td>
+          <td style="text-align: left"><strong>必须 3.3V！接 5V 会烧屏</strong></td>
+      </tr>
+      <tr>
+          <td style="text-align: left">GND</td>
+          <td style="text-align: left">地</td>
+          <td style="text-align: left">必须共地</td>
+      </tr>
+  </tbody>
 </table></div>
 <blockquote>
 <p>⚠️ <strong>三个必踩的坑</strong></p>
@@ -516,26 +516,26 @@
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;hc32_ddl.h&#34;</span><span class="cp">
 </span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;tftlcd.h&#34;                 // LCD 驱动库头文件</span><span class="cp">
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="kt">char</span> <span class="n">str</span><span class="p">[</span><span class="mi">50</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">};</span>                 <span class="c1">// 备用字符串缓冲区（本例未使用）
-</span></span></span><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="n">t</span><span class="p">;</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">uint8_t</span> <span class="n">t</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="kt">int32_t</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="cm">/* ===== BSP 初始化 ===== */</span>
 </span></span><span class="line"><span class="cl">    <span class="nf">BSP_CLK_Init</span><span class="p">();</span>                 <span class="c1">// 系统时钟
-</span></span></span><span class="line"><span class="cl">    <span class="nf">BSP_LED_Init</span><span class="p">();</span>                 <span class="c1">// LED
-</span></span></span><span class="line"><span class="cl">    <span class="nf">BSP_KEY_Init</span><span class="p">();</span>                 <span class="c1">// 按键
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">BSP_LED_Init</span><span class="p">();</span>                 <span class="c1">// LED
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">BSP_KEY_Init</span><span class="p">();</span>                 <span class="c1">// 按键
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
 </span></span><span class="line"><span class="cl">    <span class="cm">/* ===== LCD 初始化 ===== */</span>
 </span></span><span class="line"><span class="cl">    <span class="nf">LCD_Init</span><span class="p">();</span>                     <span class="c1">// 一句搞定：SPI 初始化 + 屏复位 + 寄存器配置 + 开背光
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
 </span></span><span class="line"><span class="cl">    <span class="nf">LCD_Clear</span><span class="p">(</span><span class="n">BLACK</span><span class="p">);</span>               <span class="c1">// 整屏清成黑色
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
 </span></span><span class="line"><span class="cl">    <span class="cm">/* ===== 设置画笔和背景色 ===== */</span>
 </span></span><span class="line"><span class="cl">    <span class="n">BACK_COLOR</span>  <span class="o">=</span> <span class="n">BLACK</span><span class="p">;</span>            <span class="c1">// 背景色：黑
-</span></span></span><span class="line"><span class="cl">    <span class="n">POINT_COLOR</span> <span class="o">=</span> <span class="n">CYAN</span><span class="p">;</span>             <span class="c1">// 画笔色：青（文字就是这个颜色）
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">POINT_COLOR</span> <span class="o">=</span> <span class="n">CYAN</span><span class="p">;</span>             <span class="c1">// 画笔色：青（文字就是这个颜色）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
 </span></span><span class="line"><span class="cl">    <span class="cm">/* ===== 显示四行文字 =====
 </span></span></span><span class="line"><span class="cl"><span class="cm">     * 参数：(x起点, y起点, 显示区宽, 显示区高, 字体大小, 字符串)
 </span></span></span><span class="line"><span class="cl"><span class="cm">     */</span>
@@ -555,7 +555,7 @@
 </span></span><span class="line"><span class="cl">        <span class="nf">LCD_Fill</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">240</span><span class="p">,</span> <span class="mi">240</span><span class="p">,</span> <span class="n">BLACK</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">        <span class="nf">Ddl_Delay1ms</span><span class="p">(</span><span class="mi">500</span><span class="p">);</span>          <span class="c1">// 等 500 毫秒
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
 </span></span><span class="line"><span class="cl">        <span class="cm">/* 全屏刷成青色 */</span>
 </span></span><span class="line"><span class="cl">        <span class="nf">LCD_Fill</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">240</span><span class="p">,</span> <span class="mi">240</span><span class="p">,</span> <span class="n">CYAN</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
@@ -593,7 +593,7 @@
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">BACK_COLOR</span>  <span class="o">=</span> <span class="n">BLACK</span><span class="p">;</span>    <span class="c1">// 背景色
-</span></span></span><span class="line"><span class="cl"><span class="n">POINT_COLOR</span> <span class="o">=</span> <span class="n">CYAN</span><span class="p">;</span>     <span class="c1">// 前景色（画笔）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">POINT_COLOR</span> <span class="o">=</span> <span class="n">CYAN</span><span class="p">;</span>     <span class="c1">// 前景色（画笔）
 </span></span></span></code></pre></td></tr></table>
 </div>
 </div><p>这是两个<strong>全局变量</strong>，在 <code>tftlcd.h</code> 里 <code>extern</code> 声明。</p>
@@ -609,7 +609,7 @@
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">POINT_COLOR</span> <span class="o">=</span> <span class="n">RED</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl"><span class="nf">LCD_ShowString</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">160</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="s">&#34;Warning!&#34;</span><span class="p">);</span>   <span class="c1">// 这行就是红字了
-</span></span></span><span class="line"><span class="cl"><span class="n">POINT_COLOR</span> <span class="o">=</span> <span class="n">GREEN</span><span class="p">;</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">POINT_COLOR</span> <span class="o">=</span> <span class="n">GREEN</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl"><span class="nf">LCD_ShowString</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">75</span><span class="p">,</span> <span class="mi">160</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="s">&#34;OK&#34;</span><span class="p">);</span>         <span class="c1">// 这行是绿字
 </span></span></span></code></pre></td></tr></table>
 </div>
@@ -675,11 +675,11 @@
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">LCD_ShowString</span><span class="p">(...);</span>          <span class="c1">// 开机显示的四行文字
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
 </span></span><span class="line"><span class="cl"><span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="nf">LCD_Fill</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">240</span><span class="p">,</span> <span class="mi">240</span><span class="p">,</span> <span class="n">BLACK</span><span class="p">);</span>   <span class="c1">// ← 全屏刷黑，文字被盖掉了！
-</span></span></span><span class="line"><span class="cl">    <span class="p">...</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="p">...</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
@@ -702,7 +702,7 @@
 </span></span><span class="line"><span class="cl"><span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="nf">LCD_Fill</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">240</span><span class="p">,</span> <span class="mi">240</span><span class="p">,</span> <span class="n">BLACK</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">    <span class="nf">LCD_ShowString</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">160</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="s">&#34;HC32F460&#34;</span><span class="p">);</span>   <span class="c1">// 刷完重画文字
-</span></span></span><span class="line"><span class="cl">    <span class="nf">Ddl_Delay1ms</span><span class="p">(</span><span class="mi">500</span><span class="p">);</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">Ddl_Delay1ms</span><span class="p">(</span><span class="mi">500</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">    <span class="nf">LCD_Fill</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">240</span><span class="p">,</span> <span class="mi">240</span><span class="p">,</span> <span class="n">CYAN</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">    <span class="nf">LCD_ShowString</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">160</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="s">&#34;HC32F460&#34;</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">    <span class="nf">Ddl_Delay1ms</span><span class="p">(</span><span class="mi">500</span><span class="p">);</span>
@@ -860,7 +860,7 @@ RTC 提供时间、传感器提供温湿度、WiFi 模块（串口通信）抓�
         
             <a href="/tags/hc32f460/">HC32F460</a>
         
-            <a href="/tags/spi/">Spi</a>
+            <a href="/tags/spi/">SPI</a>
         
             <a href="/tags/lcd/">LCD</a>
         

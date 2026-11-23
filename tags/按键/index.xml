@@ -5,7 +5,7 @@
         <link>https://clingyang.github.io/tags/%E6%8C%89%E9%94%AE/</link>
         <description>Recent content in 按键 on CLing</description>
         <generator>Hugo -- gohugo.io</generator>
-        <language>en-us</language>
+        <language>zh-cn</language>
         <copyright>CLing</copyright>
         <lastBuildDate>Wed, 09 Sep 2026 09:51:13 +0800</lastBuildDate><atom:link href="https://clingyang.github.io/tags/%E6%8C%89%E9%94%AE/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>STM32 GPIO 输入 — 按键检测（轮询方式）</title>
@@ -37,30 +37,30 @@
 &lt;hr&gt;
 &lt;h2 id=&#34;二硬件准备&#34;&gt;二、硬件准备
 &lt;/h2&gt;&lt;table&gt;
-	&lt;thead&gt;
-			&lt;tr&gt;
-					&lt;th style=&#34;text-align: left&#34;&gt;项目&lt;/th&gt;
-					&lt;th style=&#34;text-align: left&#34;&gt;说明&lt;/th&gt;
-			&lt;/tr&gt;
-	&lt;/thead&gt;
-	&lt;tbody&gt;
-			&lt;tr&gt;
-					&lt;td style=&#34;text-align: left&#34;&gt;开发板&lt;/td&gt;
-					&lt;td style=&#34;text-align: left&#34;&gt;野火 EBF STM32F103 Mini&lt;/td&gt;
-			&lt;/tr&gt;
-			&lt;tr&gt;
-					&lt;td style=&#34;text-align: left&#34;&gt;按键引脚&lt;/td&gt;
-					&lt;td style=&#34;text-align: left&#34;&gt;KEY1 → PA0（按下为高电平），KEY2 → PC13（按下为高电平）&lt;/td&gt;
-			&lt;/tr&gt;
-			&lt;tr&gt;
-					&lt;td style=&#34;text-align: left&#34;&gt;LED 引脚&lt;/td&gt;
-					&lt;td style=&#34;text-align: left&#34;&gt;LED1 → PC2，LED2 → PC3（低电平点亮）&lt;/td&gt;
-			&lt;/tr&gt;
-			&lt;tr&gt;
-					&lt;td style=&#34;text-align: left&#34;&gt;调试器&lt;/td&gt;
-					&lt;td style=&#34;text-align: left&#34;&gt;ST-Link V2&lt;/td&gt;
-			&lt;/tr&gt;
-	&lt;/tbody&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th style=&#34;text-align: left&#34;&gt;项目&lt;/th&gt;
+          &lt;th style=&#34;text-align: left&#34;&gt;说明&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;开发板&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;野火 EBF STM32F103 Mini&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;按键引脚&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;KEY1 → PA0（按下为高电平），KEY2 → PC13（按下为高电平）&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;LED 引脚&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;LED1 → PC2，LED2 → PC3（低电平点亮）&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;调试器&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;ST-Link V2&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;blockquote&gt;
 &lt;p&gt;&lt;strong&gt;硬件原理&lt;/strong&gt;：本板按键一端接地、一端接 GPIO，并外接上拉电阻。按键未按时 GPIO 被上拉为高；按下时 GPIO 直接接地变为低——但野火 Mini 的 KEY 例程里 &lt;code&gt;KEY_ON&lt;/code&gt; 定义为 1（高电平有效），说明该板按键是&amp;quot;按下输出高&amp;quot;的接法（按键另一端接 3.3V）。接线以你的原理图为准，代码里的 &lt;code&gt;KEY_ON&lt;/code&gt; 宏用于适配这种差异。&lt;/p&gt;
@@ -110,7 +110,7 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#include&lt;/span&gt; &lt;span class=&#34;cpf&#34;&gt;&amp;#34;stm32f1xx.h&amp;#34;&lt;/span&gt;&lt;span class=&#34;cp&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#include&lt;/span&gt; &lt;span class=&#34;cpf&#34;&gt;&amp;#34;./led/bsp_led.h&amp;#34;&lt;/span&gt;&lt;span class=&#34;cp&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#include&lt;/span&gt; &lt;span class=&#34;cpf&#34;&gt;&amp;#34;.\key\bsp_key.h&amp;#34;&lt;/span&gt;&lt;span class=&#34;cp&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;main&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;cm&#34;&gt;/* 系统时钟初始化成 72 MHz */&lt;/span&gt;
@@ -129,7 +129,7 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;if&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;Key_Scan&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;KEY1_GPIO_PORT&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;KEY1_PIN&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;==&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;KEY_ON&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;      &lt;span class=&#34;n&#34;&gt;LED1_TOGGLE&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;   &lt;span class=&#34;c1&#34;&gt;// 翻转 LED1（亮&amp;lt;-&amp;gt;灭）
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;cm&#34;&gt;/* 检测 KEY2，按下则 LED2 翻转 */&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;if&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;Key_Scan&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;KEY2_GPIO_PORT&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;KEY2_PIN&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;==&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;KEY_ON&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
@@ -173,24 +173,24 @@
 &lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#ifndef __KEY_H
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#define	__KEY_H
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#include&lt;/span&gt; &lt;span class=&#34;cpf&#34;&gt;&amp;#34;stm32f1xx.h&amp;#34;&lt;/span&gt;&lt;span class=&#34;cp&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#include&lt;/span&gt; &lt;span class=&#34;cpf&#34;&gt;&amp;#34;main.h&amp;#34;&lt;/span&gt;&lt;span class=&#34;cp&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cm&#34;&gt;/* 引脚定义 */&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#define KEY1_PIN                  GPIO_PIN_0
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#define KEY1_GPIO_PORT            GPIOA
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#define KEY1_GPIO_CLK_ENABLE()    __HAL_RCC_GPIOA_CLK_ENABLE()
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#define KEY2_PIN                  GPIO_PIN_13
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#define KEY2_GPIO_PORT            GPIOC
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#define KEY2_GPIO_CLK_ENABLE()    __HAL_RCC_GPIOC_CLK_ENABLE()
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cm&#34;&gt;/* 按键按下标志宏：按下为高电平，故 KEY_ON=1、KEY_OFF=0
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cm&#34;&gt; * 若你的板子是&amp;#34;按下为低电平&amp;#34;，把这里改成 KEY_ON=0、KEY_OFF=1 即可 */&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#define KEY_ON  1
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#define KEY_OFF 0
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;Key_GPIO_Config&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;uint8_t&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;Key_Scan&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;GPIO_TypeDef&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;*&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;GPIOx&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;uint16_t&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;GPIO_Pin&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
@@ -251,7 +251,7 @@
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
 &lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#include&lt;/span&gt; &lt;span class=&#34;cpf&#34;&gt;&amp;#34;.\key\bsp_key.h&amp;#34;&lt;/span&gt;&lt;span class=&#34;cp&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cm&#34;&gt;/**
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cm&#34;&gt;  * @brief  配置按键用到的 I/O 口
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cm&#34;&gt;  */&lt;/span&gt;
@@ -413,28 +413,28 @@
 &lt;hr&gt;
 &lt;h2 id=&#34;两种读按键的方式&#34;&gt;两种读按键的方式
 &lt;/h2&gt;&lt;table&gt;
-	&lt;thead&gt;
-			&lt;tr&gt;
-					&lt;th style=&#34;text-align: left&#34;&gt;方式&lt;/th&gt;
-					&lt;th style=&#34;text-align: left&#34;&gt;做法&lt;/th&gt;
-					&lt;th style=&#34;text-align: left&#34;&gt;优点&lt;/th&gt;
-					&lt;th style=&#34;text-align: left&#34;&gt;缺点&lt;/th&gt;
-			&lt;/tr&gt;
-	&lt;/thead&gt;
-	&lt;tbody&gt;
-			&lt;tr&gt;
-					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;轮询&lt;/strong&gt;&lt;/td&gt;
-					&lt;td style=&#34;text-align: left&#34;&gt;主循环里反复 &lt;code&gt;PORT_GetBit()&lt;/code&gt; 查电平&lt;/td&gt;
-					&lt;td style=&#34;text-align: left&#34;&gt;简单直观&lt;/td&gt;
-					&lt;td style=&#34;text-align: left&#34;&gt;CPU 一直在查，浪费；循环里有耗时操作就可能漏按&lt;/td&gt;
-			&lt;/tr&gt;
-			&lt;tr&gt;
-					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;中断&lt;/strong&gt;&lt;/td&gt;
-					&lt;td style=&#34;text-align: left&#34;&gt;配置引脚为外部中断，按下自动触发回调&lt;/td&gt;
-					&lt;td style=&#34;text-align: left&#34;&gt;CPU 不用查，响应快、不漏按&lt;/td&gt;
-					&lt;td style=&#34;text-align: left&#34;&gt;配置稍复杂&lt;/td&gt;
-			&lt;/tr&gt;
-	&lt;/tbody&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th style=&#34;text-align: left&#34;&gt;方式&lt;/th&gt;
+          &lt;th style=&#34;text-align: left&#34;&gt;做法&lt;/th&gt;
+          &lt;th style=&#34;text-align: left&#34;&gt;优点&lt;/th&gt;
+          &lt;th style=&#34;text-align: left&#34;&gt;缺点&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;轮询&lt;/strong&gt;&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;主循环里反复 &lt;code&gt;PORT_GetBit()&lt;/code&gt; 查电平&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;简单直观&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;CPU 一直在查，浪费；循环里有耗时操作就可能漏按&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;中断&lt;/strong&gt;&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;配置引脚为外部中断，按下自动触发回调&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;CPU 不用查，响应快、不漏按&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;配置稍复杂&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;p&gt;本章重点讲&lt;strong&gt;中断方式&lt;/strong&gt;，因为它是实际项目里的标准做法。&lt;/p&gt;
 &lt;hr&gt;
@@ -449,35 +449,35 @@
 &lt;h2 id=&#34;触发方式边沿选择&#34;&gt;触发方式（边沿选择）
 &lt;/h2&gt;&lt;p&gt;&lt;code&gt;stcExtiConfig.enExtiLvl&lt;/code&gt; 决定「什么时候算触发」：&lt;/p&gt;
 &lt;table&gt;
-	&lt;thead&gt;
-			&lt;tr&gt;
-					&lt;th style=&#34;text-align: left&#34;&gt;取值&lt;/th&gt;
-					&lt;th style=&#34;text-align: left&#34;&gt;含义&lt;/th&gt;
-					&lt;th style=&#34;text-align: left&#34;&gt;什么时候用&lt;/th&gt;
-			&lt;/tr&gt;
-	&lt;/thead&gt;
-	&lt;tbody&gt;
-			&lt;tr&gt;
-					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;ExIntFallingEdge&lt;/code&gt;&lt;/td&gt;
-					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;下降沿&lt;/strong&gt;（高→低）&lt;/td&gt;
-					&lt;td style=&#34;text-align: left&#34;&gt;按键按下的瞬间（最常用）&lt;/td&gt;
-			&lt;/tr&gt;
-			&lt;tr&gt;
-					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;ExIntRisingEdge&lt;/code&gt;&lt;/td&gt;
-					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;上升沿&lt;/strong&gt;（低→高）&lt;/td&gt;
-					&lt;td style=&#34;text-align: left&#34;&gt;按键松开的瞬间&lt;/td&gt;
-			&lt;/tr&gt;
-			&lt;tr&gt;
-					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;ExIntBothEdge&lt;/code&gt;&lt;/td&gt;
-					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;双边沿&lt;/strong&gt;（按下和松开都触发）&lt;/td&gt;
-					&lt;td style=&#34;text-align: left&#34;&gt;需要测按下时长时&lt;/td&gt;
-			&lt;/tr&gt;
-			&lt;tr&gt;
-					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;ExIntLowLevel&lt;/code&gt;&lt;/td&gt;
-					&lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;低电平&lt;/strong&gt;（只要是低就一直触发）&lt;/td&gt;
-					&lt;td style=&#34;text-align: left&#34;&gt;慎用，会疯狂进中断&lt;/td&gt;
-			&lt;/tr&gt;
-	&lt;/tbody&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th style=&#34;text-align: left&#34;&gt;取值&lt;/th&gt;
+          &lt;th style=&#34;text-align: left&#34;&gt;含义&lt;/th&gt;
+          &lt;th style=&#34;text-align: left&#34;&gt;什么时候用&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;ExIntFallingEdge&lt;/code&gt;&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;下降沿&lt;/strong&gt;（高→低）&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;按键按下的瞬间（最常用）&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;ExIntRisingEdge&lt;/code&gt;&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;上升沿&lt;/strong&gt;（低→高）&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;按键松开的瞬间&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;ExIntBothEdge&lt;/code&gt;&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;双边沿&lt;/strong&gt;（按下和松开都触发）&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;需要测按下时长时&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;ExIntLowLevel&lt;/code&gt;&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;低电平&lt;/strong&gt;（只要是低就一直触发）&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;慎用，会疯狂进中断&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;p&gt;上拉输入的按键，「按下」就是高变低，所以选 &lt;code&gt;ExIntFallingEdge&lt;/code&gt;。&lt;/p&gt;
 &lt;hr&gt;
@@ -511,7 +511,7 @@ EXINT 模块内置数字滤波器，把宽度小于滤波周期的毛刺直接�
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
 &lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;stcExtiConfig&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;enFilterEn&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Enable&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;      &lt;span class=&#34;c1&#34;&gt;// 使能滤波
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;stcExtiConfig&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;enFltClk&lt;/span&gt;   &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Pclk3Div8&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;   &lt;span class=&#34;c1&#34;&gt;// 滤波时钟 = PCLK3/8
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;stcExtiConfig&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;enFltClk&lt;/span&gt;   &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Pclk3Div8&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;   &lt;span class=&#34;c1&#34;&gt;// 滤波时钟 = PCLK3/8
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;/li&gt;
@@ -586,10 +586,10 @@ EXINT 模块内置数字滤波器，把宽度小于滤波周期的毛刺直接�
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;Key_Callback&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Set&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;==&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;EXINT_IrqFlgGet&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;ExtiCh13&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;   &lt;span class=&#34;c1&#34;&gt;// 确认真的是这个通道触发的
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;    &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;cm&#34;&gt;/* ... 你的处理 ... */&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;nf&#34;&gt;EXINT_IrqFlgClr&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;ExtiCh13&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;          &lt;span class=&#34;c1&#34;&gt;// 清标志！不清会反复进中断
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
@@ -597,40 +597,40 @@ EXINT 模块内置数字滤波器，把宽度小于滤波周期的毛刺直接�
 &lt;hr&gt;
 &lt;h2 id=&#34;本章示例&#34;&gt;本章示例
 &lt;/h2&gt;&lt;table&gt;
-	&lt;thead&gt;
-			&lt;tr&gt;
-					&lt;th style=&#34;text-align: left&#34;&gt;示例&lt;/th&gt;
-					&lt;th style=&#34;text-align: left&#34;&gt;学到什么&lt;/th&gt;
-			&lt;/tr&gt;
-	&lt;/thead&gt;
-	&lt;tbody&gt;
-			&lt;tr&gt;
-					&lt;td style=&#34;text-align: left&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;../key_irq/&#34; &gt;按键中断：按下触发回调&lt;/a&gt;&lt;/td&gt;
-					&lt;td style=&#34;text-align: left&#34;&gt;EXINT 配置、硬件滤波消抖、中断标志清除、&lt;code&gt;volatile&lt;/code&gt; 标志位与主循环协作&lt;/td&gt;
-			&lt;/tr&gt;
-	&lt;/tbody&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th style=&#34;text-align: left&#34;&gt;示例&lt;/th&gt;
+          &lt;th style=&#34;text-align: left&#34;&gt;学到什么&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;../key_irq/&#34; &gt;按键中断：按下触发回调&lt;/a&gt;&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;EXINT 配置、硬件滤波消抖、中断标志清除、&lt;code&gt;volatile&lt;/code&gt; 标志位与主循环协作&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;开发板按键在哪&#34;&gt;开发板按键在哪
 &lt;/h2&gt;&lt;table&gt;
-	&lt;thead&gt;
-			&lt;tr&gt;
-					&lt;th style=&#34;text-align: left&#34;&gt;按键&lt;/th&gt;
-					&lt;th style=&#34;text-align: left&#34;&gt;引脚&lt;/th&gt;
-					&lt;th style=&#34;text-align: left&#34;&gt;ddl 写法&lt;/th&gt;
-					&lt;th style=&#34;text-align: left&#34;&gt;EXINT 通道&lt;/th&gt;
-					&lt;th style=&#34;text-align: left&#34;&gt;中断源&lt;/th&gt;
-			&lt;/tr&gt;
-	&lt;/thead&gt;
-	&lt;tbody&gt;
-			&lt;tr&gt;
-					&lt;td style=&#34;text-align: left&#34;&gt;K1&lt;/td&gt;
-					&lt;td style=&#34;text-align: left&#34;&gt;PC13&lt;/td&gt;
-					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;PortC, Pin13&lt;/code&gt;&lt;/td&gt;
-					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;ExtiCh13&lt;/code&gt;&lt;/td&gt;
-					&lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;INT_PORT_EIRQ13&lt;/code&gt;&lt;/td&gt;
-			&lt;/tr&gt;
-	&lt;/tbody&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th style=&#34;text-align: left&#34;&gt;按键&lt;/th&gt;
+          &lt;th style=&#34;text-align: left&#34;&gt;引脚&lt;/th&gt;
+          &lt;th style=&#34;text-align: left&#34;&gt;ddl 写法&lt;/th&gt;
+          &lt;th style=&#34;text-align: left&#34;&gt;EXINT 通道&lt;/th&gt;
+          &lt;th style=&#34;text-align: left&#34;&gt;中断源&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;K1&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;PC13&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;PortC, Pin13&lt;/code&gt;&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;ExtiCh13&lt;/code&gt;&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;&lt;code&gt;INT_PORT_EIRQ13&lt;/code&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;p&gt;SDK 的 BSP 已封装好：调一次 &lt;code&gt;BSP_KEY_Init()&lt;/code&gt; 就完成上面所有配置，按下按键后全局变量 &lt;code&gt;u8GlobalKey&lt;/code&gt; 会被置 1。&lt;/p&gt;
 &lt;p&gt;BSP 文件位置：&lt;code&gt;bsp/ev_hc32f460_lqfp100_v2/ev_hc32f460_lqfp100_v2.c&lt;/code&gt;&lt;/p&gt;

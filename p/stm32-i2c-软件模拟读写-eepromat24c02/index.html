@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en-us" dir="ltr">
+<html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
 <meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="野火 EBF STM32F103 Mini HAL 库：用普通 GPIO 模拟 I2C 时序，读写 AT24C02 串行 EEPROM，保存小数与长整型数据。">
 <title>STM32 I2C — 软件模拟读写 EEPROM（AT24C02）</title>
@@ -56,7 +56,7 @@
                     
                     
                         
-                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                        <img src="/img/avatar_hu1200063259539398638.png" width="300"
                             height="290" class="site-logo" loading="lazy" alt="Avatar">
                     
                 
@@ -382,30 +382,30 @@
 <hr>
 <h2 id="二硬件准备">二、硬件准备
 </h2><div class="table-wrapper"><table>
-	<thead>
-			<tr>
-					<th style="text-align: left">项目</th>
-					<th style="text-align: left">说明</th>
-			</tr>
-	</thead>
-	<tbody>
-			<tr>
-					<td style="text-align: left">开发板</td>
-					<td style="text-align: left">野火 EBF STM32F103 Mini</td>
-			</tr>
-			<tr>
-					<td style="text-align: left">I2C 引脚</td>
-					<td style="text-align: left">SCL → PA2，SDA → PA3（普通 GPIO，开漏输出）</td>
-			</tr>
-			<tr>
-					<td style="text-align: left">从机</td>
-					<td style="text-align: left">AT24C02，设备地址 <code>0xA0</code>（写）/ <code>0xA1</code>（读）</td>
-			</tr>
-			<tr>
-					<td style="text-align: left">调试输出</td>
-					<td style="text-align: left">USART1（115200）</td>
-			</tr>
-	</tbody>
+  <thead>
+      <tr>
+          <th style="text-align: left">项目</th>
+          <th style="text-align: left">说明</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">开发板</td>
+          <td style="text-align: left">野火 EBF STM32F103 Mini</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">I2C 引脚</td>
+          <td style="text-align: left">SCL → PA2，SDA → PA3（普通 GPIO，开漏输出）</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">从机</td>
+          <td style="text-align: left">AT24C02，设备地址 <code>0xA0</code>（写）/ <code>0xA1</code>（读）</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">调试输出</td>
+          <td style="text-align: left">USART1（115200）</td>
+      </tr>
+  </tbody>
 </table></div>
 <blockquote>
 <p>AT24C02 地址 <code>1 0 1 0 A2 A1 A0 R/W</code>，板上 A2/A1/A0 接地 → <code>1010000</code>，左移 1 位加 R/W 位 → 写 <code>0xA0</code>、读 <code>0xA1</code>。</p>
@@ -452,27 +452,27 @@
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#ifndef _BSP_I2C_GPIO_H
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define _BSP_I2C_GPIO_H
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;inttypes.h&gt;</span><span class="cp">
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define EEPROM_I2C_WR   0   </span><span class="cm">/* 写控制 bit */</span><span class="cp">
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define EEPROM_I2C_RD   1   </span><span class="cm">/* 读控制 bit */</span><span class="cp">
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cm">/* 只需改这 4 行，就能把 I2C 搬到任意 GPIO */</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define I2Cx_SDA_GPIO_CLK_ENABLE()   __HAL_RCC_GPIOA_CLK_ENABLE()
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define I2Cx_SCL_GPIO_CLK_ENABLE()   __HAL_RCC_GPIOA_CLK_ENABLE()
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define EEPROM_GPIO_PORT_I2C   GPIOA
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define EEPROM_I2C_SCL_PIN     GPIO_PIN_2   </span><span class="cm">/* 时钟线 */</span><span class="cp">
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define EEPROM_I2C_SDA_PIN     GPIO_PIN_3   </span><span class="cm">/* 数据线 */</span><span class="cp">
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cm">/* 直接操作寄存器翻转 IO（比库函数快，满足 I2C 时序） */</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define EEPROM_I2C_SCL_1()  EEPROM_GPIO_PORT_I2C-&gt;BSRR = EEPROM_I2C_SCL_PIN
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define EEPROM_I2C_SCL_0()  EEPROM_GPIO_PORT_I2C-&gt;BRR  = EEPROM_I2C_SCL_PIN
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define EEPROM_I2C_SDA_1()  EEPROM_GPIO_PORT_I2C-&gt;BSRR = EEPROM_I2C_SDA_PIN
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define EEPROM_I2C_SDA_0()  EEPROM_GPIO_PORT_I2C-&gt;BRR  = EEPROM_I2C_SDA_PIN
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define EEPROM_I2C_SDA_READ()  ((EEPROM_GPIO_PORT_I2C-&gt;IDR &amp; EEPROM_I2C_SDA_PIN) != 0)
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">i2c_CfgGpio</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">i2c_Start</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">i2c_Stop</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
@@ -616,7 +616,7 @@
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;bsp_i2c_gpio.h&#34;</span><span class="cp">
 </span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;stm32f1xx.h&#34;</span><span class="cp">
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cm">/* 简单延时：循环 10 次约产生 200KHz 的 SCL（72MHz 主频下经验值） */</span>
 </span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">i2c_Delay</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="p">{</span>
@@ -633,7 +633,7 @@
 </span></span><span class="line"><span class="cl">  <span class="nf">EEPROM_I2C_SDA_0</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl">  <span class="nf">i2c_Delay</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl">  <span class="nf">EEPROM_I2C_SCL_0</span><span class="p">();</span>   <span class="c1">// 拉低 SCL，准备发数据
-</span></span></span><span class="line"><span class="cl">  <span class="nf">i2c_Delay</span><span class="p">();</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nf">i2c_Delay</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="cm">/* 停止信号：SCL 高时，SDA 出现上升沿 */</span>
@@ -657,11 +657,11 @@
 </span></span><span class="line"><span class="cl">      <span class="nf">EEPROM_I2C_SDA_0</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl">    <span class="nf">i2c_Delay</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl">    <span class="nf">EEPROM_I2C_SCL_1</span><span class="p">();</span>   <span class="c1">// 上升沿锁存
-</span></span></span><span class="line"><span class="cl">    <span class="nf">i2c_Delay</span><span class="p">();</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">i2c_Delay</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl">    <span class="nf">EEPROM_I2C_SCL_0</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="mi">7</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">      <span class="nf">EEPROM_I2C_SDA_1</span><span class="p">();</span> <span class="c1">// 第 8 位发完释放 SDA 总线
-</span></span></span><span class="line"><span class="cl">    <span class="n">_ucByte</span> <span class="o">&lt;&lt;=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">_ucByte</span> <span class="o">&lt;&lt;=</span> <span class="mi">1</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="nf">i2c_Delay</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl">  <span class="p">}</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
@@ -688,12 +688,12 @@
 </span></span><span class="line"><span class="cl"><span class="p">{</span>
 </span></span><span class="line"><span class="cl">  <span class="kt">uint8_t</span> <span class="n">re</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">  <span class="nf">EEPROM_I2C_SDA_1</span><span class="p">();</span>   <span class="c1">// 释放 SDA，交由从机拉低
-</span></span></span><span class="line"><span class="cl">  <span class="nf">i2c_Delay</span><span class="p">();</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nf">i2c_Delay</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl">  <span class="nf">EEPROM_I2C_SCL_1</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl">  <span class="nf">i2c_Delay</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="nf">EEPROM_I2C_SDA_READ</span><span class="p">())</span>
 </span></span><span class="line"><span class="cl">    <span class="n">re</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>             <span class="c1">// 没拉低 =&gt; 无应答
-</span></span></span><span class="line"><span class="cl">  <span class="k">else</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">else</span>
 </span></span><span class="line"><span class="cl">    <span class="n">re</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">  <span class="nf">EEPROM_I2C_SCL_0</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl">  <span class="nf">i2c_Delay</span><span class="p">();</span>
@@ -732,12 +732,12 @@
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Pin</span>   <span class="o">=</span> <span class="n">EEPROM_I2C_SCL_PIN</span> <span class="o">|</span> <span class="n">EEPROM_I2C_SDA_PIN</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Mode</span>  <span class="o">=</span> <span class="n">GPIO_MODE_OUTPUT_OD</span><span class="p">;</span>   <span class="c1">// 开漏输出
-</span></span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Pull</span>  <span class="o">=</span> <span class="n">GPIO_NOPULL</span><span class="p">;</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Pull</span>  <span class="o">=</span> <span class="n">GPIO_NOPULL</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">  <span class="n">GPIO_InitStruct</span><span class="p">.</span><span class="n">Speed</span> <span class="o">=</span> <span class="n">GPIO_SPEED_FREQ_HIGH</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">  <span class="nf">HAL_GPIO_Init</span><span class="p">(</span><span class="n">EEPROM_GPIO_PORT_I2C</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">GPIO_InitStruct</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">  <span class="nf">i2c_Stop</span><span class="p">();</span>   <span class="c1">// 复位 I2C 总线上所有设备到待机态
-</span></span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><h3 id="3-bsp_i2c_eeceeprom-读写节选">3. bsp_i2c_ee.c（EEPROM 读写，节选）
@@ -815,33 +815,33 @@
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;bsp_i2c_ee.h&#34;</span><span class="cp">
 </span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;bsp_i2c_gpio.h&#34;</span><span class="cp">
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define EEPROM_DEV_ADDR   0xA0   </span><span class="cm">/* 设备地址（写） */</span><span class="cp">
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define EEPROM_PAGE_SIZE  8      </span><span class="cm">/* 24C02 每页 8 字节 */</span><span class="cp">
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define EEPROM_SIZE       256
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cm">/* 随机读取：先写地址，再重复起始读数据 */</span>
 </span></span><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="nf">ee_ReadBytes</span><span class="p">(</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="n">_pReadBuf</span><span class="p">,</span> <span class="kt">uint16_t</span> <span class="n">_usAddress</span><span class="p">,</span> <span class="kt">uint16_t</span> <span class="n">_usSize</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="p">{</span>
 </span></span><span class="line"><span class="cl">  <span class="kt">uint16_t</span> <span class="n">i</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">  <span class="nf">i2c_Start</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl">  <span class="nf">i2c_SendByte</span><span class="p">(</span><span class="n">EEPROM_DEV_ADDR</span> <span class="o">|</span> <span class="n">EEPROM_I2C_WR</span><span class="p">);</span>   <span class="c1">// 写指令+地址
-</span></span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="nf">i2c_WaitAck</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="k">goto</span> <span class="n">cmd_fail</span><span class="p">;</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">if</span> <span class="p">(</span><span class="nf">i2c_WaitAck</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="k">goto</span> <span class="n">cmd_fail</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">  <span class="nf">i2c_SendByte</span><span class="p">((</span><span class="kt">uint8_t</span><span class="p">)</span><span class="n">_usAddress</span><span class="p">);</span>               <span class="c1">// 发送存储地址
-</span></span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="nf">i2c_WaitAck</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="k">goto</span> <span class="n">cmd_fail</span><span class="p">;</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">if</span> <span class="p">(</span><span class="nf">i2c_WaitAck</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="k">goto</span> <span class="n">cmd_fail</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">  <span class="nf">i2c_Start</span><span class="p">();</span>                                      <span class="c1">// 重复起始条件
-</span></span></span><span class="line"><span class="cl">  <span class="nf">i2c_SendByte</span><span class="p">(</span><span class="n">EEPROM_DEV_ADDR</span> <span class="o">|</span> <span class="n">EEPROM_I2C_RD</span><span class="p">);</span>   <span class="c1">// 改为读指令
-</span></span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="nf">i2c_WaitAck</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="k">goto</span> <span class="n">cmd_fail</span><span class="p">;</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nf">i2c_SendByte</span><span class="p">(</span><span class="n">EEPROM_DEV_ADDR</span> <span class="o">|</span> <span class="n">EEPROM_I2C_RD</span><span class="p">);</span>   <span class="c1">// 改为读指令
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">if</span> <span class="p">(</span><span class="nf">i2c_WaitAck</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="k">goto</span> <span class="n">cmd_fail</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">_usSize</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">  <span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="n">_pReadBuf</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nf">i2c_ReadByte</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">!=</span> <span class="n">_usSize</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">      <span class="nf">i2c_Ack</span><span class="p">();</span>      <span class="c1">// 中间字节回 ACK，让从机继续发
-</span></span></span><span class="line"><span class="cl">    <span class="k">else</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">else</span>
 </span></span><span class="line"><span class="cl">      <span class="nf">i2c_NAck</span><span class="p">();</span>     <span class="c1">// 最后一字节回 NACK，结束
-</span></span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="p">}</span>
 </span></span><span class="line"><span class="cl">  <span class="nf">i2c_Stop</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl"><span class="nl">cmd_fail</span><span class="p">:</span>
@@ -860,17 +860,17 @@
 </span></span><span class="line"><span class="cl">    <span class="p">{</span>
 </span></span><span class="line"><span class="cl">      <span class="nf">i2c_Stop</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl">      <span class="k">for</span> <span class="p">(</span><span class="n">m</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">m</span> <span class="o">&lt;</span> <span class="mi">1000</span><span class="p">;</span> <span class="n">m</span><span class="o">++</span><span class="p">)</span>        <span class="c1">// 轮询等待 EEPROM 就绪
-</span></span></span><span class="line"><span class="cl">      <span class="p">{</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="p">{</span>
 </span></span><span class="line"><span class="cl">        <span class="nf">i2c_Start</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl">        <span class="nf">i2c_SendByte</span><span class="p">(</span><span class="n">EEPROM_DEV_ADDR</span> <span class="o">|</span> <span class="n">EEPROM_I2C_WR</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="nf">i2c_WaitAck</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">break</span><span class="p">;</span>  <span class="c1">// 有应答说明内部写已完成
-</span></span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="p">}</span>
 </span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="n">m</span> <span class="o">==</span> <span class="mi">1000</span><span class="p">)</span> <span class="k">goto</span> <span class="n">cmd_fail</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">      <span class="nf">i2c_SendByte</span><span class="p">((</span><span class="kt">uint8_t</span><span class="p">)</span><span class="n">usAddr</span><span class="p">);</span>    <span class="c1">// 发送当前存储地址
-</span></span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="nf">i2c_WaitAck</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="k">goto</span> <span class="n">cmd_fail</span><span class="p">;</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="k">if</span> <span class="p">(</span><span class="nf">i2c_WaitAck</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="k">goto</span> <span class="n">cmd_fail</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
 </span></span><span class="line"><span class="cl">    <span class="nf">i2c_SendByte</span><span class="p">(</span><span class="n">_pWriteBuf</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>        <span class="c1">// 写 1 字节
-</span></span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nf">i2c_WaitAck</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="k">goto</span> <span class="n">cmd_fail</span><span class="p">;</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="nf">i2c_WaitAck</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="k">goto</span> <span class="n">cmd_fail</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="n">usAddr</span><span class="o">++</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">  <span class="p">}</span>
 </span></span><span class="line"><span class="cl">  <span class="nf">i2c_Stop</span><span class="p">();</span>
@@ -940,14 +940,14 @@
 </span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;./usart/bsp_debug_usart.h&#34;</span><span class="cp">
 </span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;./led/bsp_led.h&#34;</span><span class="cp">
 </span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;./i2c/bsp_i2c_ee.h&#34;</span><span class="cp">
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="n">cal_flag</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">int_bufffer</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">};</span>
 </span></span><span class="line"><span class="cl"><span class="kt">long</span> <span class="kt">double</span> <span class="n">double_buffer</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">};</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="cp">#define DOUBLE_ADDR  10
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define LONGINT_ADDR 70
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="p">{</span>
 </span></span><span class="line"><span class="cl">  <span class="nf">HAL_Init</span><span class="p">();</span>
@@ -956,10 +956,10 @@
 </span></span><span class="line"><span class="cl">  <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\r\n</span><span class="s"> 这是一个EEPROM 读写小数和长整数实验 </span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">  <span class="nf">i2c_CfgGpio</span><span class="p">();</span>                    <span class="c1">// 初始化 I2C GPIO（开漏）
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
 </span></span><span class="line"><span class="cl">  <span class="nf">ee_ReadBytes</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cal_flag</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>    <span class="c1">// 读 0 地址的标志位
-</span></span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">cal_flag</span> <span class="o">!=</span> <span class="mh">0xCD</span><span class="p">)</span>             <span class="c1">// 没写过
-</span></span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">if</span> <span class="p">(</span><span class="n">cal_flag</span> <span class="o">!=</span> <span class="mh">0xCD</span><span class="p">)</span>             <span class="c1">// 没写过
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;没有检测到数据标志，即将写入</span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">    <span class="n">cal_flag</span> <span class="o">=</span> <span class="mh">0xCD</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="nf">ee_WriteBytes</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cal_flag</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
@@ -973,7 +973,7 @@
 </span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;已写入，请复位开发板读取验证</span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">  <span class="p">}</span>
 </span></span><span class="line"><span class="cl">  <span class="k">else</span>                               <span class="c1">// 已写过
-</span></span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;检测到数据标志，读出数据：</span><span class="se">\r\n</span><span class="s">&#34;</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">    <span class="nf">ee_ReadBytes</span><span class="p">((</span><span class="kt">void</span><span class="o">*</span><span class="p">)</span><span class="n">double_buffer</span><span class="p">,</span> <span class="n">DOUBLE_ADDR</span><span class="p">,</span>  <span class="k">sizeof</span><span class="p">(</span><span class="n">double_buffer</span><span class="p">));</span>
 </span></span><span class="line"><span class="cl">    <span class="nf">ee_ReadBytes</span><span class="p">((</span><span class="kt">void</span><span class="o">*</span><span class="p">)</span><span class="n">int_bufffer</span><span class="p">,</span>   <span class="n">LONGINT_ADDR</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">int_bufffer</span><span class="p">));</span>
@@ -1053,7 +1053,7 @@
         
             <a href="/tags/hal%E5%BA%93/">HAL库</a>
         
-            <a href="/tags/i2c/">I2c</a>
+            <a href="/tags/i2c/">I2C</a>
         
             <a href="/tags/eeprom/">EEPROM</a>
         

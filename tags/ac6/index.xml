@@ -5,7 +5,7 @@
         <link>https://clingyang.github.io/tags/ac6/</link>
         <description>Recent content in AC6 on CLing</description>
         <generator>Hugo -- gohugo.io</generator>
-        <language>en-us</language>
+        <language>zh-cn</language>
         <copyright>CLing</copyright>
         <lastBuildDate>Mon, 01 Jun 2026 16:14:36 +0800</lastBuildDate><atom:link href="https://clingyang.github.io/tags/ac6/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>MicroLink &#43; SEGGER RTT 打印踩坑：no find _SEGGER_RTT addr</title>
@@ -32,22 +32,22 @@
 &lt;/h3&gt;&lt;p&gt;SEGGER RTT 的核心是一个叫做 &lt;code&gt;_SEGGER_RTT&lt;/code&gt; 的控制块，里面存着 &lt;code&gt;&amp;quot;SEGGER RTT&amp;quot;&lt;/code&gt; 标识字符串。调试器（或 MicroLink 这类工具）需要在 MCU 的内存里找到这个控制块，才能读取打印数据。&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;找控制块的方式有两种：&lt;/strong&gt;&lt;/p&gt;
 &lt;table&gt;
-	&lt;thead&gt;
-			&lt;tr&gt;
-					&lt;th&gt;工具&lt;/th&gt;
-					&lt;th&gt;扫描方式&lt;/th&gt;
-			&lt;/tr&gt;
-	&lt;/thead&gt;
-	&lt;tbody&gt;
-			&lt;tr&gt;
-					&lt;td&gt;&lt;strong&gt;J-Link&lt;/strong&gt;&lt;/td&gt;
-					&lt;td&gt;自动扫描整个 SRAM 范围，找到标识符就停&lt;/td&gt;
-			&lt;/tr&gt;
-			&lt;tr&gt;
-					&lt;td&gt;&lt;strong&gt;MicroLink&lt;/strong&gt;&lt;/td&gt;
-					&lt;td&gt;从&lt;strong&gt;固定地址&lt;/strong&gt; &lt;code&gt;0x20000000&lt;/code&gt; 开始扫描&lt;/td&gt;
-			&lt;/tr&gt;
-	&lt;/tbody&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;工具&lt;/th&gt;
+          &lt;th&gt;扫描方式&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;J-Link&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;自动扫描整个 SRAM 范围，找到标识符就停&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;MicroLink&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;从&lt;strong&gt;固定地址&lt;/strong&gt; &lt;code&gt;0x20000000&lt;/code&gt; 开始扫描&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;p&gt;&lt;strong&gt;问题根源就在这里&lt;/strong&gt; —— MicroLink 不会自己找，它只认 &lt;code&gt;0x20000000&lt;/code&gt;。但 &lt;code&gt;_SEGGER_RTT&lt;/code&gt; 控制块是链接器自由分配的，不一定恰好落在 SRAM 开头。&lt;/p&gt;
 &lt;h3 id=&#34;第二步尝试固定地址&#34;&gt;第二步：尝试固定地址
@@ -115,7 +115,7 @@
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
 &lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#define SEGGER_RTT_SECTION __attribute__((at(0x20000000)))
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cm&#34;&gt;/* 非零初值使链接器识别为 RW，避免 ZI/RW 混合报错。
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cm&#34;&gt;   acID[0]=&amp;#39;\0&amp;#39; 保证 INIT() 宏能触发 _DoInit() */&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;SEGGER_RTT_SECTION&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;SEGGER_RTT_CB_ALIGN&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;SEGGER_RTT_CB&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;_SEGGER_RTT&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{{&lt;/span&gt;&lt;span class=&#34;sc&#34;&gt;&amp;#39;\0&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}};&lt;/span&gt;
@@ -125,26 +125,26 @@
 &lt;/div&gt;
 &lt;/div&gt;&lt;h3 id=&#34;关键点逐个解释&#34;&gt;关键点逐个解释
 &lt;/h3&gt;&lt;table&gt;
-	&lt;thead&gt;
-			&lt;tr&gt;
-					&lt;th&gt;写法&lt;/th&gt;
-					&lt;th&gt;作用&lt;/th&gt;
-			&lt;/tr&gt;
-	&lt;/thead&gt;
-	&lt;tbody&gt;
-			&lt;tr&gt;
-					&lt;td&gt;&lt;code&gt;at(0x20000000)&lt;/code&gt;&lt;/td&gt;
-					&lt;td&gt;AC6 链接器自动从该地址开始依次排列三个变量&lt;/td&gt;
-			&lt;/tr&gt;
-			&lt;tr&gt;
-					&lt;td&gt;&lt;code&gt;{&#39;\0&#39;, 1}&lt;/code&gt;&lt;/td&gt;
-					&lt;td&gt;&lt;code&gt;acID[0]=&#39;\0&#39;&lt;/code&gt; 满足 &lt;code&gt;INIT()&lt;/code&gt; 触发 &lt;code&gt;_DoInit()&lt;/code&gt; 的条件；&lt;code&gt;acID[1]=1&lt;/code&gt; 非零 → RW 类型&lt;/td&gt;
-			&lt;/tr&gt;
-			&lt;tr&gt;
-					&lt;td&gt;&lt;code&gt;{1}&lt;/code&gt;&lt;/td&gt;
-					&lt;td&gt;数组首字节非零 → RW 类型，避开 ZI/RW 混合错误&lt;/td&gt;
-			&lt;/tr&gt;
-	&lt;/tbody&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;写法&lt;/th&gt;
+          &lt;th&gt;作用&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;at(0x20000000)&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;AC6 链接器自动从该地址开始依次排列三个变量&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;{&#39;\0&#39;, 1}&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;&lt;code&gt;acID[0]=&#39;\0&#39;&lt;/code&gt; 满足 &lt;code&gt;INIT()&lt;/code&gt; 触发 &lt;code&gt;_DoInit()&lt;/code&gt; 的条件；&lt;code&gt;acID[1]=1&lt;/code&gt; 非零 → RW 类型&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;{1}&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;数组首字节非零 → RW 类型，避开 ZI/RW 混合错误&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;h3 id=&#34;为什么-acid0-必须是-0&#34;&gt;为什么 &lt;code&gt;acID[0]&lt;/code&gt; 必须是 &lt;code&gt;&#39;\0&#39;&lt;/code&gt;？
 &lt;/h3&gt;&lt;p&gt;RTT 的 &lt;code&gt;INIT()&lt;/code&gt; 宏里面有这样一段逻辑：&lt;/p&gt;
@@ -174,40 +174,40 @@
 &lt;hr&gt;
 &lt;h2 id=&#34;踩坑过程一览&#34;&gt;踩坑过程一览
 &lt;/h2&gt;&lt;table&gt;
-	&lt;thead&gt;
-			&lt;tr&gt;
-					&lt;th&gt;尝试&lt;/th&gt;
-					&lt;th&gt;方案&lt;/th&gt;
-					&lt;th&gt;结果&lt;/th&gt;
-					&lt;th&gt;原因&lt;/th&gt;
-			&lt;/tr&gt;
-	&lt;/thead&gt;
-	&lt;tbody&gt;
-			&lt;tr&gt;
-					&lt;td&gt;❌&lt;/td&gt;
-					&lt;td&gt;&lt;code&gt;__attribute__((section(&amp;quot;.ARM.__at_0x20000000&amp;quot;)))&lt;/code&gt;&lt;/td&gt;
-					&lt;td&gt;ZI/RW 混合报错&lt;/td&gt;
-					&lt;td&gt;ZI 类型与 RW 数据冲突&lt;/td&gt;
-			&lt;/tr&gt;
-			&lt;tr&gt;
-					&lt;td&gt;❌&lt;/td&gt;
-					&lt;td&gt;初值 &lt;code&gt;= {0}&lt;/code&gt;&lt;/td&gt;
-					&lt;td&gt;同上&lt;/td&gt;
-					&lt;td&gt;AC6 优化全零初值为 ZI&lt;/td&gt;
-			&lt;/tr&gt;
-			&lt;tr&gt;
-					&lt;td&gt;⚠️&lt;/td&gt;
-					&lt;td&gt;修改 scatter 文件&lt;/td&gt;
-					&lt;td&gt;可行但麻烦&lt;/td&gt;
-					&lt;td&gt;不想碰链接器脚本&lt;/td&gt;
-			&lt;/tr&gt;
-			&lt;tr&gt;
-					&lt;td&gt;✅&lt;/td&gt;
-					&lt;td&gt;&lt;code&gt;at()&lt;/code&gt; + 非零初值&lt;/td&gt;
-					&lt;td&gt;成功&lt;/td&gt;
-					&lt;td&gt;RW 类型，scatter 不用改&lt;/td&gt;
-			&lt;/tr&gt;
-	&lt;/tbody&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;尝试&lt;/th&gt;
+          &lt;th&gt;方案&lt;/th&gt;
+          &lt;th&gt;结果&lt;/th&gt;
+          &lt;th&gt;原因&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;❌&lt;/td&gt;
+          &lt;td&gt;&lt;code&gt;__attribute__((section(&amp;quot;.ARM.__at_0x20000000&amp;quot;)))&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;ZI/RW 混合报错&lt;/td&gt;
+          &lt;td&gt;ZI 类型与 RW 数据冲突&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;❌&lt;/td&gt;
+          &lt;td&gt;初值 &lt;code&gt;= {0}&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;同上&lt;/td&gt;
+          &lt;td&gt;AC6 优化全零初值为 ZI&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;⚠️&lt;/td&gt;
+          &lt;td&gt;修改 scatter 文件&lt;/td&gt;
+          &lt;td&gt;可行但麻烦&lt;/td&gt;
+          &lt;td&gt;不想碰链接器脚本&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;✅&lt;/td&gt;
+          &lt;td&gt;&lt;code&gt;at()&lt;/code&gt; + 非零初值&lt;/td&gt;
+          &lt;td&gt;成功&lt;/td&gt;
+          &lt;td&gt;RW 类型，scatter 不用改&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;验证&#34;&gt;验证

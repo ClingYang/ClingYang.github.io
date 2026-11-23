@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en-us" dir="ltr">
+<html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
 <meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="PUYA PY32F403_Firmware V1.4.5 ADC_TempSensor 示例教学：用 ADC 采集片内温度传感器">
 <title>PUYA ADC — 内部温度传感器 ADC_TempSensor</title>
@@ -56,7 +56,7 @@
                     
                     
                         
-                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                        <img src="/img/avatar_hu1200063259539398638.png" width="300"
                             height="290" class="site-logo" loading="lazy" alt="Avatar">
                     
                 
@@ -368,26 +368,26 @@
 </blockquote>
 <h2 id="2-硬件准备">2. 硬件准备
 </h2><div class="table-wrapper"><table>
-	<thead>
-			<tr>
-					<th>物品</th>
-					<th>说明</th>
-			</tr>
-	</thead>
-	<tbody>
-			<tr>
-					<td>PY32F403-STK 开发板</td>
-					<td>自带 MCU、LED、调试/串口</td>
-			</tr>
-			<tr>
-					<td>USB 转 TTL 模块</td>
-					<td>接 STK 的 USART2（调试串口）</td>
-			</tr>
-			<tr>
-					<td>杜邦线 ×3</td>
-					<td>TX、RX、GND</td>
-			</tr>
-	</tbody>
+  <thead>
+      <tr>
+          <th>物品</th>
+          <th>说明</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>PY32F403-STK 开发板</td>
+          <td>自带 MCU、LED、调试/串口</td>
+      </tr>
+      <tr>
+          <td>USB 转 TTL 模块</td>
+          <td>接 STK 的 USART2（调试串口）</td>
+      </tr>
+      <tr>
+          <td>杜邦线 ×3</td>
+          <td>TX、RX、GND</td>
+      </tr>
+  </tbody>
 </table></div>
 <p><strong>串口接线</strong>（STK 的 DEBUG_USART = USART2）：</p>
 <div class="highlight"><div class="chroma">
@@ -580,27 +580,27 @@
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cm">/* 头文件：HAL 库 + STK 板级支持包（含 LED、USART printf 等） */</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;main.h&#34;</span><span class="cp">
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cm">/* ============ 温度换算相关的校准常量 ============ */</span>
 </span></span><span class="line"><span class="cl"><span class="cm">/* 这两个地址是芯片出厂时写入的「温度传感器校准值」存放位置，必须按手册来 */</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define HAL_ADC_TSCAL1   (*(uint32_t *)(0x1fff5310))   </span><span class="cm">/* 低温校准值（30℃ 对应）*/</span><span class="cp">
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define HAL_ADC_TSCAL2   (*(uint32_t *)(0x1fff5400))   </span><span class="cm">/* 高温校准值（85℃ 或 105℃ 对应）*/</span><span class="cp">
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define Vcc_Power   3.3l                              </span><span class="cm">/* 实际供电电压，按需修改 */</span><span class="cp">
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define TScal1   (float)((HAL_ADC_TSCAL1) * 3.3 / Vcc_Power)  </span><span class="cm">/* 30℃ 对应的「电压数字」*/</span><span class="cp">
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define TScal2   (float)((HAL_ADC_TSCAL2) * 3.3 / Vcc_Power)  </span><span class="cm">/* 高温对应的「电压数字」*/</span><span class="cp">
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define TStem1   30l                                  </span><span class="cm">/* 低温校准点：30℃ */</span><span class="cp">
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cm">/* 关键！不同芯片高温校准点是 85℃ 还是 105℃，要看数据手册选择 */</span>
 </span></span><span class="line"><span class="cl"><span class="cm">/* #define HighTemp_85 */</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define HighTemp_105
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define TStem2_85   85
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define TStem2_105  105
-</span></span></span><span class="line"><span class="cl"><span class="cm">/* 斜率 k = (高温点 - 30℃) / (高温校准数字 - 低温校准数字) */</span>
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span><span class="cm">/* 斜率 k = (高温点 - 30℃) / (高温校准数字 - 低温校准数字) */</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define Temp_k_85   ((float)(TStem2_85  - TStem1) / (float)(TScal2 - TScal1))
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define Temp_k_105  ((float)(TStem2_105 - TStem1) / (float)(TScal2 - TScal1))
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cm">/* ============ 全局变量 ============ */</span>
 </span></span><span class="line"><span class="cl"><span class="n">ADC_HandleTypeDef</span>  <span class="n">AdcHandle</span><span class="p">;</span>                         <span class="cm">/* ADC 句柄 */</span>
 </span></span><span class="line"><span class="cl"><span class="kt">uint16_t</span>           <span class="n">aADCxConvertedData</span><span class="p">;</span>                <span class="cm">/* 存放一次 ADC 原始值 */</span>
@@ -647,13 +647,13 @@
 </span></span><span class="line"><span class="cl">      <span class="cm">/* 用两点线性公式换算成温度（℃）*/</span>
 </span></span><span class="line"><span class="cl">      <span class="cm">/* 公式：Temp = k × ADC值 - k × TScal1 + 30 */</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#if defined(HighTemp_85)
-</span></span></span><span class="line"><span class="cl">      <span class="n">hADCxConvertedData_Temperature_DegreeCelsius</span> <span class="o">=</span>
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>      <span class="n">hADCxConvertedData_Temperature_DegreeCelsius</span> <span class="o">=</span>
 </span></span><span class="line"><span class="cl">          <span class="p">(</span><span class="kt">int16_t</span><span class="p">)(</span><span class="n">Temp_k_85</span>  <span class="o">*</span> <span class="n">aADCxConvertedData</span> <span class="o">-</span> <span class="n">Temp_k_85</span>  <span class="o">*</span> <span class="n">TScal1</span> <span class="o">+</span> <span class="n">TStem1</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#else
-</span></span></span><span class="line"><span class="cl">      <span class="n">hADCxConvertedData_Temperature_DegreeCelsius</span> <span class="o">=</span>
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>      <span class="n">hADCxConvertedData_Temperature_DegreeCelsius</span> <span class="o">=</span>
 </span></span><span class="line"><span class="cl">          <span class="p">(</span><span class="kt">int16_t</span><span class="p">)(</span><span class="n">Temp_k_105</span> <span class="o">*</span> <span class="n">aADCxConvertedData</span> <span class="o">-</span> <span class="n">Temp_k_105</span> <span class="o">*</span> <span class="n">TScal1</span> <span class="o">+</span> <span class="n">TStem1</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#endif
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl">      <span class="cm">/* 串口打印温度 */</span>
 </span></span><span class="line"><span class="cl">      <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;Temperature: %d&#34;</span><span class="p">,</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">hADCxConvertedData_Temperature_DegreeCelsius</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
@@ -775,7 +775,7 @@
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">RCC_PeriphCLKInit</span><span class="p">.</span><span class="n">AdcClockSelection</span> <span class="o">=</span> <span class="n">RCC_ADCPCLK2_DIV8</span><span class="p">;</span>  <span class="c1">// PCLK2(8M) / 8 = 1MHz
-</span></span></span><span class="line"><span class="cl"><span class="n">sConfig</span><span class="p">.</span><span class="n">SamplingTime</span> <span class="o">=</span> <span class="n">ADC_SAMPLETIME_239CYCLES_5</span><span class="p">;</span>        <span class="c1">// 239.5 个 ADC 周期采样
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">sConfig</span><span class="p">.</span><span class="n">SamplingTime</span> <span class="o">=</span> <span class="n">ADC_SAMPLETIME_239CYCLES_5</span><span class="p">;</span>        <span class="c1">// 239.5 个 ADC 周期采样
 </span></span></span></code></pre></td></tr></table>
 </div>
 </div><p>温度传感器内阻较大、信号「软」，所以采样时间给到最长的 239.5 周期，保证采样电容充得够满，读数才准。若用外部快速信号可适当缩短。</p>
@@ -801,45 +801,45 @@
 </ol>
 <h2 id="6-常见问题">6. 常见问题
 </h2><div class="table-wrapper"><table>
-	<thead>
-			<tr>
-					<th>现象</th>
-					<th>可能原因</th>
-					<th>解决办法</th>
-			</tr>
-	</thead>
-	<tbody>
-			<tr>
-					<td>串口无任何输出</td>
-					<td>波特率/接线错、未重定向 printf</td>
-					<td>确认 115200-8-N-1；TX↔RX 交叉接；MDK 勾选 Use MicroLIB</td>
-			</tr>
-			<tr>
-					<td>温度恒为 0 或负数</td>
-					<td><code>HighTemp_85/105</code> 选错、校准值地址错</td>
-					<td>核对数据手册高温点；勿改 <code>0x1fff...</code> 地址</td>
-			</tr>
-			<tr>
-					<td>温度明显偏高/偏低</td>
-					<td><code>Vcc_Power</code> 与实际供电不符</td>
-					<td>用万用表量 VDD，改成真实值（如 3.28）</td>
-			</tr>
-			<tr>
-					<td>温度跳动很大</td>
-					<td>采样时间太短、供电噪声</td>
-					<td>改用 <code>ADC_SAMPLETIME_239CYCLES_5</code>；软件多采几次取平均</td>
-			</tr>
-			<tr>
-					<td>读数一直不变</td>
-					<td>忘了 <code>HAL_ADC_Start</code> 或卡在校准</td>
-					<td>确认启动顺序：Init→ConfigChannel→Calibration→Start</td>
-			</tr>
-			<tr>
-					<td>想测环境温度而非内核温度</td>
-					<td>片内传感器只测内核</td>
-					<td>外接 NTC/DS18B20 等，走外部 ADC 通道</td>
-			</tr>
-	</tbody>
+  <thead>
+      <tr>
+          <th>现象</th>
+          <th>可能原因</th>
+          <th>解决办法</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>串口无任何输出</td>
+          <td>波特率/接线错、未重定向 printf</td>
+          <td>确认 115200-8-N-1；TX↔RX 交叉接；MDK 勾选 Use MicroLIB</td>
+      </tr>
+      <tr>
+          <td>温度恒为 0 或负数</td>
+          <td><code>HighTemp_85/105</code> 选错、校准值地址错</td>
+          <td>核对数据手册高温点；勿改 <code>0x1fff...</code> 地址</td>
+      </tr>
+      <tr>
+          <td>温度明显偏高/偏低</td>
+          <td><code>Vcc_Power</code> 与实际供电不符</td>
+          <td>用万用表量 VDD，改成真实值（如 3.28）</td>
+      </tr>
+      <tr>
+          <td>温度跳动很大</td>
+          <td>采样时间太短、供电噪声</td>
+          <td>改用 <code>ADC_SAMPLETIME_239CYCLES_5</code>；软件多采几次取平均</td>
+      </tr>
+      <tr>
+          <td>读数一直不变</td>
+          <td>忘了 <code>HAL_ADC_Start</code> 或卡在校准</td>
+          <td>确认启动顺序：Init→ConfigChannel→Calibration→Start</td>
+      </tr>
+      <tr>
+          <td>想测环境温度而非内核温度</td>
+          <td>片内传感器只测内核</td>
+          <td>外接 NTC/DS18B20 等，走外部 ADC 通道</td>
+      </tr>
+  </tbody>
 </table></div>
 <h2 id="7-小结">7. 小结
 </h2><ul>

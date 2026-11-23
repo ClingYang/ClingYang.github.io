@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en-us" dir="ltr">
+<html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
 <meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="HC32F460 QSPI 实验：按键触发一轮 Flash 操作，标准模式擦除扇区并页写数据，切到四线模式通过 0x98000000 映射地址直接读回，用 memcmp 校验并点灯指示结果。">
 <title>HC32 QSPI Flash 读写 — 擦除、页写与映射读回校验</title>
@@ -56,7 +56,7 @@
                     
                     
                         
-                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                        <img src="/img/avatar_hu1200063259539398638.png" width="300"
                             height="290" class="site-logo" loading="lazy" alt="Avatar">
                     
                 
@@ -703,7 +703,7 @@
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;hc32_ddl.h&#34;</span><span class="cp">
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cm">/* ---------- QSPI 六根引脚定义 ---------- */</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define QSPCK_PORT   (PortB)   </span><span class="cm">/* 时钟   */</span><span class="cp">
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define QSPCK_PIN    (Pin14)
@@ -717,17 +717,17 @@
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define QSIO2_PIN    (Pin10)
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define QSIO3_PORT   (PortB)   </span><span class="cm">/* 数据3  */</span><span class="cp">
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define QSIO3_PIN    (Pin02)
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cm">/* QSPI 映射到系统地址空间的基地址 —— 读 Flash 就靠它 */</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define QSPI_BUS_ADDRESS            (0x98000000ul)
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cm">/* ---------- Flash 参数 ---------- */</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define FLASH_PAGE_SIZE             (0x100u)     </span><span class="cm">/* 页 = 256 字节（写的最大单位）*/</span><span class="cp">
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define FLASH_SECTOR_SIZE           (0x1000u)    </span><span class="cm">/* 扇区 = 4096 字节（擦的最小单位）*/</span><span class="cp">
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define FLASH_MAX_ADDR              (0x800000ul) </span><span class="cm">/* 容量 8MB */</span><span class="cp">
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define FLASH_DUMMY_BYTE_VALUE      (0xffu)
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define FLASH_BUSY_BIT_MASK         (0x01u)      </span><span class="cm">/* 状态寄存器 bit0 = 忙碌位 */</span><span class="cp">
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cm">/* ---------- Flash 标准指令码 ---------- */</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define FLASH_INSTR_WRITE_ENABLE      (0x06u)   </span><span class="cm">/* 写使能 */</span><span class="cp">
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define FLASH_INSTR_PAGE_PROGRAM      (0x02u)   </span><span class="cm">/* 页写 */</span><span class="cp">
@@ -736,7 +736,7 @@
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define FLASH_INSTR_READ_SR1          (0x05u)   </span><span class="cm">/* 读状态寄存器1 */</span><span class="cp">
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define FLASH_INSTR_READ_SR2          (0x35u)
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define FLASH_INSTR_READ_SR3          (0x15u)
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cm">/*==============================================================
 </span></span></span><span class="line"><span class="cl"><span class="cm"> * QSPI 初始化
 </span></span></span><span class="line"><span class="cl"><span class="cm"> *=============================================================*/</span>
@@ -1011,7 +1011,7 @@
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">stcQspiCommProtocol</span><span class="p">.</span><span class="n">enReadMode</span> <span class="o">=</span> <span class="n">QspiReadModeStandard</span><span class="p">;</span>   <span class="c1">// 写之前切单线
-</span></span></span><span class="line"><span class="cl"><span class="nf">QSPI_CommProtocolConfig</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stcQspiCommProtocol</span><span class="p">);</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nf">QSPI_CommProtocolConfig</span><span class="p">(</span><span class="o">&amp;</span><span class="n">stcQspiCommProtocol</span><span class="p">);</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>原因：<strong>四线模式下 IO2/IO3 被当成数据线，但在单线 SPI 模式下它们是 <code>/WP</code>（写保护）和 <code>/HOLD</code> 脚</strong>。写操作的指令序列（写使能、页写）是标准单线 SPI 协议，切成标准模式最稳妥、兼容性最好。</p>
@@ -1025,8 +1025,8 @@
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">QSPI_WriteDirectCommValue</span><span class="p">((</span><span class="kt">uint8_t</span><span class="p">)((</span><span class="n">u32Addr</span> <span class="o">&amp;</span> <span class="mh">0xFF0000ul</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="mi">16</span><span class="p">));</span>  <span class="c1">// 高字节
-</span></span></span><span class="line"><span class="cl"><span class="nf">QSPI_WriteDirectCommValue</span><span class="p">((</span><span class="kt">uint8_t</span><span class="p">)((</span><span class="n">u32Addr</span> <span class="o">&amp;</span> <span class="mh">0xFF00u</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span><span class="p">));</span>      <span class="c1">// 中字节
-</span></span></span><span class="line"><span class="cl"><span class="nf">QSPI_WriteDirectCommValue</span><span class="p">((</span><span class="kt">uint8_t</span><span class="p">)(</span><span class="n">u32Addr</span> <span class="o">&amp;</span> <span class="mh">0xFFu</span><span class="p">));</span>               <span class="c1">// 低字节
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nf">QSPI_WriteDirectCommValue</span><span class="p">((</span><span class="kt">uint8_t</span><span class="p">)((</span><span class="n">u32Addr</span> <span class="o">&amp;</span> <span class="mh">0xFF00u</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span><span class="p">));</span>      <span class="c1">// 中字节
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nf">QSPI_WriteDirectCommValue</span><span class="p">((</span><span class="kt">uint8_t</span><span class="p">)(</span><span class="n">u32Addr</span> <span class="o">&amp;</span> <span class="mh">0xFFu</span><span class="p">));</span>               <span class="c1">// 低字节
 </span></span></span></code></pre></td></tr></table>
 </div>
 </div><p>Flash 指令要求地址<strong>按字节、从高位到低位</strong>依次发送。3 字节地址能表示 2²⁴ = 16MB，够用 8MB 的 Flash。</p>
@@ -1042,7 +1042,7 @@
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">u32Timeout</span> <span class="o">=</span> <span class="n">stcClkFreq</span><span class="p">.</span><span class="n">sysclkFreq</span> <span class="o">/</span> <span class="mi">1000u</span><span class="p">;</span>   <span class="c1">// 算个超时上限
-</span></span></span><span class="line"><span class="cl"><span class="k">do</span> <span class="p">{</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">do</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="n">u8Status</span> <span class="o">=</span> <span class="nf">QSPI_ReadDirectCommValue</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl">    <span class="n">u32Timeout</span><span class="o">--</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="k">while</span> <span class="p">((</span><span class="n">u32Timeout</span> <span class="o">!=</span> <span class="mi">0u</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="p">((</span><span class="n">u8Status</span> <span class="o">&amp;</span> <span class="n">FLASH_BUSY_BIT_MASK</span><span class="p">)</span> <span class="o">==</span> <span class="n">FLASH_BUSY_BIT_MASK</span><span class="p">));</span>

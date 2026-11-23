@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en-us" dir="ltr">
+<html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
 <meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="手把手教你用代码修改 PY32 单片机的选项字节，将 nRST 复位引脚改为通用 GPIO，附带完整代码讲解和恢复方法">
 <title>PY32F002A 选项字节实战：把 RESET 引脚变成普通 GPIO</title>
@@ -56,7 +56,7 @@
                     
                     
                         
-                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                        <img src="/img/avatar_hu1200063259539398638.png" width="300"
                             height="290" class="site-logo" loading="lazy" alt="Avatar">
                     
                 
@@ -370,30 +370,30 @@
 </h2><p>你可以把选项字节理解为芯片的&quot;配置开关&quot;。它存储在 Flash 的一个特殊区域里（地址 <code>0x1FFF 0F00</code> 起），芯片上电时会先读取这些配置，再决定怎么工作。</p>
 <p>选项字节里可以配置的东西包括：</p>
 <div class="table-wrapper"><table>
-	<thead>
-			<tr>
-					<th>配置项</th>
-					<th>作用</th>
-			</tr>
-	</thead>
-	<tbody>
-			<tr>
-					<td><code>NRST_MODE</code></td>
-					<td>复位引脚模式：复位功能 or GPIO</td>
-			</tr>
-			<tr>
-					<td><code>BOR_LEV</code></td>
-					<td>欠压复位电压阈值</td>
-			</tr>
-			<tr>
-					<td><code>IWDG_SW</code></td>
-					<td>独立看门狗：硬件启动 or 软件启动</td>
-			</tr>
-			<tr>
-					<td><code>BOOT1</code></td>
-					<td>启动模式选择</td>
-			</tr>
-	</tbody>
+  <thead>
+      <tr>
+          <th>配置项</th>
+          <th>作用</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>NRST_MODE</code></td>
+          <td>复位引脚模式：复位功能 or GPIO</td>
+      </tr>
+      <tr>
+          <td><code>BOR_LEV</code></td>
+          <td>欠压复位电压阈值</td>
+      </tr>
+      <tr>
+          <td><code>IWDG_SW</code></td>
+          <td>独立看门狗：硬件启动 or 软件启动</td>
+      </tr>
+      <tr>
+          <td><code>BOOT1</code></td>
+          <td>启动模式选择</td>
+      </tr>
+  </tbody>
 </table></div>
 <blockquote>
 <p>注意：修改选项字节后，<strong>必须断电重新上电</strong>才能生效。</p>
@@ -420,7 +420,7 @@
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#define RSTPIN_MODE_GPIO
-</span></span></span><span class="line"><span class="cl"><span class="cm">/* #define RSTPIN_MODE_RST */</span>
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span><span class="cm">/* #define RSTPIN_MODE_RST */</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>这两个宏二选一：</p>
@@ -470,35 +470,35 @@
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="p">{</span>
 </span></span><span class="line"><span class="cl">  <span class="nf">HAL_Init</span><span class="p">();</span>                          <span class="c1">// HAL 库初始化
-</span></span></span><span class="line"><span class="cl">  <span class="nf">BSP_LED_Init</span><span class="p">(</span><span class="n">LED_GREEN</span><span class="p">);</span>             <span class="c1">// 初始化 LED
-</span></span></span><span class="line"><span class="cl">  <span class="nf">BSP_PB_Init</span><span class="p">(</span><span class="n">BUTTON_KEY</span><span class="p">,</span> <span class="n">BUTTON_MODE_GPIO</span><span class="p">);</span>  <span class="c1">// 初始化按键
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nf">BSP_LED_Init</span><span class="p">(</span><span class="n">LED_GREEN</span><span class="p">);</span>             <span class="c1">// 初始化 LED
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nf">BSP_PB_Init</span><span class="p">(</span><span class="n">BUTTON_KEY</span><span class="p">,</span> <span class="n">BUTTON_MODE_GPIO</span><span class="p">);</span>  <span class="c1">// 初始化按键
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
 </span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="nf">BSP_PB_GetState</span><span class="p">(</span><span class="n">BUTTON_USER</span><span class="p">))</span> <span class="c1">// 等待按键按下
-</span></span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="p">{</span>
 </span></span><span class="line"><span class="cl">  <span class="p">}</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">  <span class="c1">// 检查当前 RST 引脚模式
-</span></span></span><span class="line"><span class="cl">  <span class="cp">#if defined(RSTPIN_MODE_GPIO)
-</span></span></span><span class="line"><span class="cl">    <span class="k">if</span><span class="p">(</span><span class="nf">READ_BIT</span><span class="p">(</span><span class="n">FLASH</span><span class="o">-&gt;</span><span class="n">OPTR</span><span class="p">,</span> <span class="n">FLASH_OPTR_NRST_MODE</span><span class="p">)</span> <span class="o">==</span> <span class="n">OB_RESET_MODE_RESET</span><span class="p">)</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="cp">#if defined(RSTPIN_MODE_GPIO)
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>    <span class="k">if</span><span class="p">(</span><span class="nf">READ_BIT</span><span class="p">(</span><span class="n">FLASH</span><span class="o">-&gt;</span><span class="n">OPTR</span><span class="p">,</span> <span class="n">FLASH_OPTR_NRST_MODE</span><span class="p">)</span> <span class="o">==</span> <span class="n">OB_RESET_MODE_RESET</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">  <span class="cp">#else
-</span></span></span><span class="line"><span class="cl">    <span class="k">if</span><span class="p">(</span><span class="nf">READ_BIT</span><span class="p">(</span><span class="n">FLASH</span><span class="o">-&gt;</span><span class="n">OPTR</span><span class="p">,</span> <span class="n">FLASH_OPTR_NRST_MODE</span><span class="p">)</span> <span class="o">==</span> <span class="n">OB_RESET_MODE_GPIO</span><span class="p">)</span>
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>    <span class="k">if</span><span class="p">(</span><span class="nf">READ_BIT</span><span class="p">(</span><span class="n">FLASH</span><span class="o">-&gt;</span><span class="n">OPTR</span><span class="p">,</span> <span class="n">FLASH_OPTR_NRST_MODE</span><span class="p">)</span> <span class="o">==</span> <span class="n">OB_RESET_MODE_GPIO</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">  <span class="cp">#endif
-</span></span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>  <span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="nf">APP_FlashOBProgram</span><span class="p">();</span>  <span class="c1">// 模式不对，执行修改
-</span></span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="p">}</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">  <span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="c1">// 检查修改是否生效，生效则点亮 LED
-</span></span></span><span class="line"><span class="cl">    <span class="cp">#if defined(RST_PIN_MODE_GPIO)
-</span></span></span><span class="line"><span class="cl">      <span class="k">if</span><span class="p">(</span><span class="nf">READ_BIT</span><span class="p">(</span><span class="n">FLASH</span><span class="o">-&gt;</span><span class="n">OPTR</span><span class="p">,</span> <span class="n">FLASH_OPTR_NRST_MODE</span><span class="p">)</span> <span class="o">==</span> <span class="n">OB_RESET_MODE_GPIO</span><span class="p">)</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="cp">#if defined(RST_PIN_MODE_GPIO)
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>      <span class="k">if</span><span class="p">(</span><span class="nf">READ_BIT</span><span class="p">(</span><span class="n">FLASH</span><span class="o">-&gt;</span><span class="n">OPTR</span><span class="p">,</span> <span class="n">FLASH_OPTR_NRST_MODE</span><span class="p">)</span> <span class="o">==</span> <span class="n">OB_RESET_MODE_GPIO</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">    <span class="cp">#else
-</span></span></span><span class="line"><span class="cl">      <span class="k">if</span><span class="p">(</span><span class="nf">READ_BIT</span><span class="p">(</span><span class="n">FLASH</span><span class="o">-&gt;</span><span class="n">OPTR</span><span class="p">,</span> <span class="n">FLASH_OPTR_NRST_MODE</span><span class="p">)</span> <span class="o">==</span> <span class="n">OB_RESET_MODE_RESET</span><span class="p">)</span>
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>      <span class="k">if</span><span class="p">(</span><span class="nf">READ_BIT</span><span class="p">(</span><span class="n">FLASH</span><span class="o">-&gt;</span><span class="n">OPTR</span><span class="p">,</span> <span class="n">FLASH_OPTR_NRST_MODE</span><span class="p">)</span> <span class="o">==</span> <span class="n">OB_RESET_MODE_RESET</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">    <span class="cp">#endif
-</span></span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>    <span class="p">{</span>
 </span></span><span class="line"><span class="cl">      <span class="nf">BSP_LED_On</span><span class="p">(</span><span class="n">LED_GREEN</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">      <span class="k">while</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>  <span class="c1">// LED 常亮，停在这里
-</span></span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="p">}</span>
 </span></span><span class="line"><span class="cl">  <span class="p">}</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
@@ -550,30 +550,30 @@
 </span></span><span class="line"><span class="cl">  <span class="n">FLASH_OBProgramInitTypeDef</span> <span class="n">OBInitCfg</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">};</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">  <span class="nf">HAL_FLASH_Unlock</span><span class="p">();</span>        <span class="c1">// ① 解锁 Flash
-</span></span></span><span class="line"><span class="cl">  <span class="nf">HAL_FLASH_OB_Unlock</span><span class="p">();</span>     <span class="c1">// ② 解锁选项字节区域
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nf">HAL_FLASH_OB_Unlock</span><span class="p">();</span>     <span class="c1">// ② 解锁选项字节区域
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
 </span></span><span class="line"><span class="cl">  <span class="c1">// ③ 配置要修改哪些选项
-</span></span></span><span class="line"><span class="cl">  <span class="n">OBInitCfg</span><span class="p">.</span><span class="n">OptionType</span> <span class="o">=</span> <span class="n">OPTIONBYTE_USER</span><span class="p">;</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">OBInitCfg</span><span class="p">.</span><span class="n">OptionType</span> <span class="o">=</span> <span class="n">OPTIONBYTE_USER</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">  <span class="n">OBInitCfg</span><span class="p">.</span><span class="n">USERType</span> <span class="o">=</span> <span class="n">OB_USER_BOR_EN</span> <span class="o">|</span> <span class="n">OB_USER_BOR_LEV</span>
 </span></span><span class="line"><span class="cl">                       <span class="o">|</span> <span class="n">OB_USER_IWDG_SW</span> <span class="o">|</span> <span class="n">OB_USER_NRST_MODE</span> <span class="o">|</span> <span class="n">OB_USER_nBOOT1</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">  <span class="c1">// ④ 配置具体数值
-</span></span></span><span class="line"><span class="cl">  <span class="cp">#if defined(RSTPIN_MODE_GPIO)
-</span></span></span><span class="line"><span class="cl">    <span class="n">OBInitCfg</span><span class="p">.</span><span class="n">USERConfig</span> <span class="o">=</span> <span class="n">OB_BOR_DISABLE</span> <span class="o">|</span> <span class="n">OB_BOR_LEVEL_3p1_3p2</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="cp">#if defined(RSTPIN_MODE_GPIO)
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>    <span class="n">OBInitCfg</span><span class="p">.</span><span class="n">USERConfig</span> <span class="o">=</span> <span class="n">OB_BOR_DISABLE</span> <span class="o">|</span> <span class="n">OB_BOR_LEVEL_3p1_3p2</span>
 </span></span><span class="line"><span class="cl">                         <span class="o">|</span> <span class="n">OB_IWDG_SW</span> <span class="o">|</span> <span class="n">OB_RESET_MODE_GPIO</span> <span class="o">|</span> <span class="n">OB_BOOT1_SYSTEM</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">  <span class="cp">#else
-</span></span></span><span class="line"><span class="cl">    <span class="n">OBInitCfg</span><span class="p">.</span><span class="n">USERConfig</span> <span class="o">=</span> <span class="n">OB_BOR_DISABLE</span> <span class="o">|</span> <span class="n">OB_BOR_LEVEL_3p1_3p2</span>
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>    <span class="n">OBInitCfg</span><span class="p">.</span><span class="n">USERConfig</span> <span class="o">=</span> <span class="n">OB_BOR_DISABLE</span> <span class="o">|</span> <span class="n">OB_BOR_LEVEL_3p1_3p2</span>
 </span></span><span class="line"><span class="cl">                         <span class="o">|</span> <span class="n">OB_IWDG_SW</span> <span class="o">|</span> <span class="n">OB_RESET_MODE_RESET</span> <span class="o">|</span> <span class="n">OB_BOOT1_SYSTEM</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">  <span class="cp">#endif
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl">  <span class="c1">// ⑤ 写入选项字节
-</span></span></span><span class="line"><span class="cl">  <span class="nf">HAL_FLASH_OBProgram</span><span class="p">(</span><span class="o">&amp;</span><span class="n">OBInitCfg</span><span class="p">);</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nf">HAL_FLASH_OBProgram</span><span class="p">(</span><span class="o">&amp;</span><span class="n">OBInitCfg</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">  <span class="nf">HAL_FLASH_Lock</span><span class="p">();</span>      <span class="c1">// ⑥ 锁定 Flash
-</span></span></span><span class="line"><span class="cl">  <span class="nf">HAL_FLASH_OB_Lock</span><span class="p">();</span>   <span class="c1">// ⑦ 锁定选项字节
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nf">HAL_FLASH_OB_Lock</span><span class="p">();</span>   <span class="c1">// ⑦ 锁定选项字节
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
 </span></span><span class="line"><span class="cl">  <span class="c1">// ⑧ 触发复位加载新选项字节
-</span></span></span><span class="line"><span class="cl">  <span class="nf">HAL_FLASH_OB_Launch</span><span class="p">();</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nf">HAL_FLASH_OB_Launch</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
@@ -586,7 +586,7 @@
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">HAL_FLASH_Unlock</span><span class="p">();</span>     <span class="c1">// 先解锁整个 Flash
-</span></span></span><span class="line"><span class="cl"><span class="nf">HAL_FLASH_OB_Unlock</span><span class="p">();</span>  <span class="c1">// 再解锁选项字节区域
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nf">HAL_FLASH_OB_Unlock</span><span class="p">();</span>  <span class="c1">// 再解锁选项字节区域
 </span></span></span></code></pre></td></tr></table>
 </div>
 </div><p>选项字节是敏感区域，必须双重解锁才能写入。少了任何一步都会写入失败。</p>
@@ -612,35 +612,35 @@
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">OB_RESET_MODE_GPIO</span>   <span class="c1">// 把 RESET 改成 GPIO
-</span></span></span><span class="line"><span class="cl"><span class="n">OB_RESET_MODE_RESET</span>  <span class="c1">// 恢复 RESET 复位功能
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">OB_RESET_MODE_RESET</span>  <span class="c1">// 恢复 RESET 复位功能
 </span></span></span></code></pre></td></tr></table>
 </div>
 </div><p>其他几个配置的含义：</p>
 <div class="table-wrapper"><table>
-	<thead>
-			<tr>
-					<th>宏</th>
-					<th>含义</th>
-			</tr>
-	</thead>
-	<tbody>
-			<tr>
-					<td><code>OB_BOR_DISABLE</code></td>
-					<td>关闭欠压复位</td>
-			</tr>
-			<tr>
-					<td><code>OB_BOR_LEVEL_3p1_3p2</code></td>
-					<td>欠压阈值：上升沿 3.2V，下降沿 3.1V</td>
-			</tr>
-			<tr>
-					<td><code>OB_IWDG_SW</code></td>
-					<td>看门狗由软件启动</td>
-			</tr>
-			<tr>
-					<td><code>OB_BOOT1_SYSTEM</code></td>
-					<td>从 System Memory 启动</td>
-			</tr>
-	</tbody>
+  <thead>
+      <tr>
+          <th>宏</th>
+          <th>含义</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>OB_BOR_DISABLE</code></td>
+          <td>关闭欠压复位</td>
+      </tr>
+      <tr>
+          <td><code>OB_BOR_LEVEL_3p1_3p2</code></td>
+          <td>欠压阈值：上升沿 3.2V，下降沿 3.1V</td>
+      </tr>
+      <tr>
+          <td><code>OB_IWDG_SW</code></td>
+          <td>看门狗由软件启动</td>
+      </tr>
+      <tr>
+          <td><code>OB_BOOT1_SYSTEM</code></td>
+          <td>从 System Memory 启动</td>
+      </tr>
+  </tbody>
 </table></div>
 <p><strong>⑤ 执行写入</strong></p>
 <div class="highlight"><div class="chroma">
@@ -660,7 +660,7 @@
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">HAL_FLASH_Lock</span><span class="p">();</span>      <span class="c1">// 锁定 Flash
-</span></span></span><span class="line"><span class="cl"><span class="nf">HAL_FLASH_OB_Lock</span><span class="p">();</span>   <span class="c1">// 锁定选项字节
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nf">HAL_FLASH_OB_Lock</span><span class="p">();</span>   <span class="c1">// 锁定选项字节
 </span></span></span></code></pre></td></tr></table>
 </div>
 </div><p>写完后记得上锁，防止意外修改。</p>
@@ -807,10 +807,10 @@
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;py32f0xx_hal.h&#34;</span><span class="cp">
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define RSTPIN_MODE_GPIO  </span><span class="c1">// 改成 GPIO
 </span></span></span><span class="line"><span class="cl"><span class="c1">// #define RSTPIN_MODE_RST  // 改回复位功能
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
 </span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">APP_FlashOBProgram</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="p">{</span>
 </span></span><span class="line"><span class="cl">  <span class="n">FLASH_OBProgramInitTypeDef</span> <span class="n">OBInitCfg</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">};</span>
@@ -823,78 +823,78 @@
 </span></span><span class="line"><span class="cl">                       <span class="o">|</span> <span class="n">OB_USER_IWDG_SW</span> <span class="o">|</span> <span class="n">OB_USER_NRST_MODE</span> <span class="o">|</span> <span class="n">OB_USER_nBOOT1</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="cp">#if defined(RSTPIN_MODE_GPIO)
-</span></span></span><span class="line"><span class="cl">  <span class="n">OBInitCfg</span><span class="p">.</span><span class="n">USERConfig</span> <span class="o">=</span> <span class="n">OB_BOR_DISABLE</span> <span class="o">|</span> <span class="n">OB_BOR_LEVEL_3p1_3p2</span>
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>  <span class="n">OBInitCfg</span><span class="p">.</span><span class="n">USERConfig</span> <span class="o">=</span> <span class="n">OB_BOR_DISABLE</span> <span class="o">|</span> <span class="n">OB_BOR_LEVEL_3p1_3p2</span>
 </span></span><span class="line"><span class="cl">                       <span class="o">|</span> <span class="n">OB_IWDG_SW</span> <span class="o">|</span> <span class="n">OB_RESET_MODE_GPIO</span> <span class="o">|</span> <span class="n">OB_BOOT1_SYSTEM</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#else
-</span></span></span><span class="line"><span class="cl">  <span class="n">OBInitCfg</span><span class="p">.</span><span class="n">USERConfig</span> <span class="o">=</span> <span class="n">OB_BOR_DISABLE</span> <span class="o">|</span> <span class="n">OB_BOR_LEVEL_3p1_3p2</span>
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>  <span class="n">OBInitCfg</span><span class="p">.</span><span class="n">USERConfig</span> <span class="o">=</span> <span class="n">OB_BOR_DISABLE</span> <span class="o">|</span> <span class="n">OB_BOR_LEVEL_3p1_3p2</span>
 </span></span><span class="line"><span class="cl">                       <span class="o">|</span> <span class="n">OB_IWDG_SW</span> <span class="o">|</span> <span class="n">OB_RESET_MODE_RESET</span> <span class="o">|</span> <span class="n">OB_BOOT1_SYSTEM</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#endif
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl">  <span class="nf">HAL_FLASH_OBProgram</span><span class="p">(</span><span class="o">&amp;</span><span class="n">OBInitCfg</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">  <span class="nf">HAL_FLASH_Lock</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl">  <span class="nf">HAL_FLASH_OB_Lock</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl">  <span class="nf">HAL_FLASH_OB_Launch</span><span class="p">();</span>  <span class="c1">// 复位加载新选项字节
-</span></span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="p">{</span>
 </span></span><span class="line"><span class="cl">  <span class="nf">HAL_Init</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">  <span class="c1">// ... 你的初始化代码 ...
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
 </span></span><span class="line"><span class="cl">  <span class="c1">// 判断当前模式，如果不对就修改
-</span></span></span><span class="line"><span class="cl"><span class="cp">#if defined(RSTPIN_MODE_GPIO)
-</span></span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="nf">READ_BIT</span><span class="p">(</span><span class="n">FLASH</span><span class="o">-&gt;</span><span class="n">OPTR</span><span class="p">,</span> <span class="n">FLASH_OPTR_NRST_MODE</span><span class="p">)</span> <span class="o">==</span> <span class="n">OB_RESET_MODE_RESET</span><span class="p">)</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="cp">#if defined(RSTPIN_MODE_GPIO)
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>  <span class="k">if</span> <span class="p">(</span><span class="nf">READ_BIT</span><span class="p">(</span><span class="n">FLASH</span><span class="o">-&gt;</span><span class="n">OPTR</span><span class="p">,</span> <span class="n">FLASH_OPTR_NRST_MODE</span><span class="p">)</span> <span class="o">==</span> <span class="n">OB_RESET_MODE_RESET</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#else
-</span></span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="nf">READ_BIT</span><span class="p">(</span><span class="n">FLASH</span><span class="o">-&gt;</span><span class="n">OPTR</span><span class="p">,</span> <span class="n">FLASH_OPTR_NRST_MODE</span><span class="p">)</span> <span class="o">==</span> <span class="n">OB_RESET_MODE_GPIO</span><span class="p">)</span>
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>  <span class="k">if</span> <span class="p">(</span><span class="nf">READ_BIT</span><span class="p">(</span><span class="n">FLASH</span><span class="o">-&gt;</span><span class="n">OPTR</span><span class="p">,</span> <span class="n">FLASH_OPTR_NRST_MODE</span><span class="p">)</span> <span class="o">==</span> <span class="n">OB_RESET_MODE_GPIO</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#endif
-</span></span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>  <span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="nf">APP_FlashOBProgram</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl">  <span class="p">}</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">  <span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="c1">// 正常工作...
-</span></span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="p">}</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><hr>
 <h2 id="七总结">七、总结
 </h2><div class="table-wrapper"><table>
-	<thead>
-			<tr>
-					<th>操作</th>
-					<th>关键函数</th>
-			</tr>
-	</thead>
-	<tbody>
-			<tr>
-					<td>解锁 Flash</td>
-					<td><code>HAL_FLASH_Unlock()</code></td>
-			</tr>
-			<tr>
-					<td>解锁选项字节</td>
-					<td><code>HAL_FLASH_OB_Unlock()</code></td>
-			</tr>
-			<tr>
-					<td>写入选项字节</td>
-					<td><code>HAL_FLASH_OBProgram()</code></td>
-			</tr>
-			<tr>
-					<td>锁定 Flash</td>
-					<td><code>HAL_FLASH_Lock()</code></td>
-			</tr>
-			<tr>
-					<td>锁定选项字节</td>
-					<td><code>HAL_FLASH_OB_Lock()</code></td>
-			</tr>
-			<tr>
-					<td>复位加载新配置</td>
-					<td><code>HAL_FLASH_OB_Launch()</code></td>
-			</tr>
-	</tbody>
+  <thead>
+      <tr>
+          <th>操作</th>
+          <th>关键函数</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>解锁 Flash</td>
+          <td><code>HAL_FLASH_Unlock()</code></td>
+      </tr>
+      <tr>
+          <td>解锁选项字节</td>
+          <td><code>HAL_FLASH_OB_Unlock()</code></td>
+      </tr>
+      <tr>
+          <td>写入选项字节</td>
+          <td><code>HAL_FLASH_OBProgram()</code></td>
+      </tr>
+      <tr>
+          <td>锁定 Flash</td>
+          <td><code>HAL_FLASH_Lock()</code></td>
+      </tr>
+      <tr>
+          <td>锁定选项字节</td>
+          <td><code>HAL_FLASH_OB_Lock()</code></td>
+      </tr>
+      <tr>
+          <td>复位加载新配置</td>
+          <td><code>HAL_FLASH_OB_Launch()</code></td>
+      </tr>
+  </tbody>
 </table></div>
 <p>把 RESET 改成 GPIO 是一个非常实用的技巧，特别是对于 PY32F002A 这种只有 8 个引脚的芯片。但一定要记得：<strong>改完后 RESET 键就不能复位了，改之前想清楚怎么恢复。</strong></p>
 <hr>
@@ -949,12 +949,38 @@
             
                 
 <article class="">
+    <a href="/p/py32f403-ws2812b-din-stuck-high/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PY32F403 驱动 WS2812B 不亮：PB8 下拉后仍然读高</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
     <a href="/p/ina226-%E8%BD%AF%E4%BB%B6-i2c-%E5%88%9D%E5%A7%8B%E5%8C%96%E8%B8%A9%E5%9D%91%E8%AF%BB%E5%8F%96%E8%BF%94%E5%9B%9E-0xffff/">
         
         
 
         <div class="article-details">
             <h2 class="article-title">INA226 软件 I2C 初始化踩坑：读取返回 0xFFFF</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/esp32s3-wifi-tx-power-debug/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">ESP32-S3 Wi-Fi 连不上：把发射功率降到 2 dBm 后发生了什么</h2>
         </div>
     </a>
 </article>
@@ -981,32 +1007,6 @@
 
         <div class="article-details">
             <h2 class="article-title">MicroLink &#43; SEGGER RTT 打印踩坑：no find _SEGGER_RTT addr</h2>
-        </div>
-    </a>
-</article>
-
-            
-                
-<article class="">
-    <a href="/p/esp32-s3-wifi-%E8%BF%9E%E6%8E%A5%E8%B8%A9%E5%9D%91reason15-%E4%B8%8D%E6%98%AF%E5%AF%86%E7%A0%81%E9%94%99%E4%BA%86/">
-        
-        
-
-        <div class="article-details">
-            <h2 class="article-title">ESP32-S3 WiFi 连接踩坑：reason=15 不是密码错了</h2>
-        </div>
-    </a>
-</article>
-
-            
-                
-<article class="">
-    <a href="/p/pyocd-pack-%E5%AE%89%E8%A3%85%E4%B8%8E%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97/">
-        
-        
-
-        <div class="article-details">
-            <h2 class="article-title">pyocd Pack 安装与使用指南</h2>
         </div>
     </a>
 </article>

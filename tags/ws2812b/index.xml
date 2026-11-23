@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>WS2812B on CLing</title>
+        <link>https://clingyang.github.io/tags/ws2812b/</link>
+        <description>Recent content in WS2812B on CLing</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>zh-cn</language>
+        <copyright>CLing</copyright>
+        <lastBuildDate>Mon, 23 Nov 2026 20:21:42 +0800</lastBuildDate><atom:link href="https://clingyang.github.io/tags/ws2812b/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>PY32F403 驱动 WS2812B 不亮：PB8 下拉后仍然读高</title>
+        <link>https://clingyang.github.io/p/py32f403-ws2812b-din-stuck-high/</link>
+        <pubDate>Mon, 23 Nov 2026 08:05:00 +0800</pubDate>
+        
+        <guid>https://clingyang.github.io/p/py32f403-ws2812b-din-stuck-high/</guid>
+        <description>&lt;p&gt;在一块 PY32F403 样板上，板载 WS2812B 由 5 V 供电，DIN 接 MCU 的 PB8。RGB 页面工作正常，灯始终不亮。排查中先发现了时钟配置问题，修正后又发现另一条更直接的线索：&lt;strong&gt;PB8 配成输入下拉，GPIO 读回仍然是高电平。&lt;/strong&gt;&lt;/p&gt;
+&lt;h2 id=&#34;先核对时钟再看引脚电平&#34;&gt;先核对时钟，再看引脚电平
+&lt;/h2&gt;&lt;p&gt;最初驱动按 144 MHz 计算定时器参数，实板主频却约为 48 MHz。修正时钟来源后，板上估算主频约为 136 MHz，固件据此重新计算发送时序。灯还是不亮，于是我先停用发送，把问题缩小到 PB8 的电平能否被控制。&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;PB8 配置&lt;/th&gt;
+          &lt;th&gt;GPIO 输入寄存器读回&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;推挽输出，写低&lt;/td&gt;
+          &lt;td&gt;高&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;输入，启用内部下拉&lt;/td&gt;
+          &lt;td&gt;高&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;输入，无上拉、无下拉&lt;/td&gt;
+          &lt;td&gt;高&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;GPIO 读回反映的是 MCU 识别到的数字状态，实际电压仍需在板上测量。前两项说明，即使停止定时器发送，DIN 线上持续读高的现象仍然存在。继续调整脉宽或 GRB 顺序解决不了这个现象。&lt;/p&gt;
+&lt;h2 id=&#34;让固件遇到异常就退出发送&#34;&gt;让固件遇到异常就退出发送
+&lt;/h2&gt;&lt;p&gt;诊断版在启用定时器复用输出前，先把 PB8 配成输入下拉，等待电平稳定后检查输入。如果仍然为高，固件退回无上下拉的输入模式，在页面显示 &lt;code&gt;Check LED DIN&lt;/code&gt;。实板回读确认保护已触发，PB8 保持高阻，RGB 数据发送次数为 0。&lt;/p&gt;
+&lt;p&gt;这次排查中曾短时测试推挽写低。以后遇到同样现象，先用输入模式观察电平，必要时断电查线。若有外部器件在驱动这条线，长时间用推挽强拉可能造成输出争用。&lt;/p&gt;
+&lt;h2 id=&#34;下一轮怎样定位&#34;&gt;下一轮怎样定位
+&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;断电检查连线。&lt;/strong&gt; 按原理图找 PB8、灯珠 DIN、DOUT、5 V 和 GND 的测试点，核对封装方向，检查相邻焊盘是否误连。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;上电量实际电压。&lt;/strong&gt; 让 PB8 保持输入，在 MCU 引脚和灯珠 DIN 两端分别对地测量。有示波器的话，再看上电和复位期间电平如何变化。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;确认空闲电平正常后再测波形。&lt;/strong&gt; 在灯珠 DIN 端检查位周期、高低脉宽和帧间复位间隔，再发送低亮度的单色数据。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;目前确认的是 PB8 异常读高和固件保护生效。是否存在焊桥、灯珠方向错误或其他外部驱动，还需要用表验证，灯珠也尚未点亮。 &lt;a class=&#34;link&#34; href=&#34;https://www.puyasemi.com/download_path/%E6%95%B0%E6%8D%AE%E6%89%8B%E5%86%8C/MCU/PY32F403_Datasheet_V1.9.pdf&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;PY32F403 数据手册&lt;/a&gt;&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

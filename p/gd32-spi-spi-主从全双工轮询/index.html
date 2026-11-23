@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en-us" dir="ltr">
+<html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
 <meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="GD32 GD32F30x_Firmware_Library V3.0.3 SPI SPI 主从全双工轮询 示例教学">
 <title>GD32 SPI — SPI 主从全双工轮询</title>
@@ -56,7 +56,7 @@
                     
                     
                         
-                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                        <img src="/img/avatar_hu1200063259539398638.png" width="300"
                             height="290" class="site-logo" loading="lazy" alt="Avatar">
                     
                 
@@ -386,35 +386,35 @@
 <h3 id="2-杜邦线关键">2. 杜邦线（关键！）
 </h3><p>把板上的 SPI0 和 SPI2 用线<strong>交叉对接</strong>。SPI2 例程里做了引脚重映射（<code>GPIO_SPI2_REMAP</code>），所以 SPI2 用的是 PC 口。具体接法：</p>
 <div class="table-wrapper"><table>
-	<thead>
-			<tr>
-					<th>主机 SPI0</th>
-					<th>从机 SPI2（重映射后）</th>
-					<th>说明</th>
-			</tr>
-	</thead>
-	<tbody>
-			<tr>
-					<td>PA3</td>
-					<td>PA4</td>
-					<td>NSS（片选）：主机用 PA3 当软件片选，去选从机的 NSS(PA4)</td>
-			</tr>
-			<tr>
-					<td>PA5 (SCK)</td>
-					<td>PC10 (SCK)</td>
-					<td>时钟</td>
-			</tr>
-			<tr>
-					<td>PA6 (MISO)</td>
-					<td>PC11 (MOSI)</td>
-					<td>主机收 = 从机发</td>
-			</tr>
-			<tr>
-					<td>PA7 (MOSI)</td>
-					<td>PC12 (MISO)</td>
-					<td>主机发 = 从机收</td>
-			</tr>
-	</tbody>
+  <thead>
+      <tr>
+          <th>主机 SPI0</th>
+          <th>从机 SPI2（重映射后）</th>
+          <th>说明</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>PA3</td>
+          <td>PA4</td>
+          <td>NSS（片选）：主机用 PA3 当软件片选，去选从机的 NSS(PA4)</td>
+      </tr>
+      <tr>
+          <td>PA5 (SCK)</td>
+          <td>PC10 (SCK)</td>
+          <td>时钟</td>
+      </tr>
+      <tr>
+          <td>PA6 (MISO)</td>
+          <td>PC11 (MOSI)</td>
+          <td>主机收 = 从机发</td>
+      </tr>
+      <tr>
+          <td>PA7 (MOSI)</td>
+          <td>PC12 (MISO)</td>
+          <td>主机发 = 从机收</td>
+      </tr>
+  </tbody>
 </table></div>
 <blockquote>
 <p><strong>注意 MISO / MOSI 的接法</strong>：主机 MOSI(PA7) 接从机&quot;数据输入脚&quot;——在重映射后从机 SPI2 的数据输入脚是 PC12（例程把它配成了 <code>AF_PP</code> 输出）。主机的 MISO(PA6) 接从机的数据输出脚 PC11（配成 <code>IN_FLOATING</code> 输入）。一句话：<strong>把&quot;主发&quot;对&quot;从收&quot;，&ldquo;主收&quot;对&quot;从发&rdquo;</strong>。</p>
@@ -597,16 +597,16 @@
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;gd32f30x.h&#34;</span><span class="cp">
 </span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;gd32f307c_eval.h&#34;</span><span class="cp">
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cm">/* 是否开启 CRC 校验，本示例教学默认关闭 */</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define SPI_CRC_ENABLE             0
-</span></span></span><span class="line"><span class="cl"><span class="cm">/* 收发数组长度 */</span>
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span><span class="cm">/* 收发数组长度 */</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define ARRAYSIZE                  10
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cm">/* 用宏控制主机片选 NSS（PA3）：拉高=取消选中，拉低=选中从机 */</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define SET_SPI0_NSS_HIGH          gpio_bit_set(GPIOA, GPIO_PIN_3);
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define SET_SPI0_NSS_LOW           gpio_bit_reset(GPIOA, GPIO_PIN_3);
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cm">/* 待发送数据：主机 SPI0 发 0xA1~0xAA，从机 SPI2 发 0xB1~0xBA */</span>
 </span></span><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="n">spi0_send_array</span><span class="p">[</span><span class="n">ARRAYSIZE</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mh">0xA1</span><span class="p">,</span> <span class="mh">0xA2</span><span class="p">,</span> <span class="mh">0xA3</span><span class="p">,</span> <span class="mh">0xA4</span><span class="p">,</span> <span class="mh">0xA5</span><span class="p">,</span> <span class="mh">0xA6</span><span class="p">,</span> <span class="mh">0xA7</span><span class="p">,</span> <span class="mh">0xA8</span><span class="p">,</span> <span class="mh">0xA9</span><span class="p">,</span> <span class="mh">0xAA</span><span class="p">};</span>
 </span></span><span class="line"><span class="cl"><span class="kt">uint8_t</span> <span class="n">spi2_send_array</span><span class="p">[</span><span class="n">ARRAYSIZE</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mh">0xB1</span><span class="p">,</span> <span class="mh">0xB2</span><span class="p">,</span> <span class="mh">0xB3</span><span class="p">,</span> <span class="mh">0xB4</span><span class="p">,</span> <span class="mh">0xB5</span><span class="p">,</span> <span class="mh">0xB6</span><span class="p">,</span> <span class="mh">0xB7</span><span class="p">,</span> <span class="mh">0xB8</span><span class="p">,</span> <span class="mh">0xB9</span><span class="p">,</span> <span class="mh">0xBA</span><span class="p">};</span>
@@ -651,9 +651,9 @@
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">    <span class="cm">/* ---------- 关闭 CRC 时的主逻辑 ---------- */</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#if SPI_CRC_ENABLE
-</span></span></span><span class="line"><span class="cl">    <span class="cm">/* （此处为 CRC 分支，略） */</span>
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>    <span class="cm">/* （此处为 CRC 分支，略） */</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#else
-</span></span></span><span class="line"><span class="cl">    <span class="cm">/* 一字节一字节地收发：主机和从机同时各发各的、各收各的 */</span>
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>    <span class="cm">/* 一字节一字节地收发：主机和从机同时各发各的、各收各的 */</span>
 </span></span><span class="line"><span class="cl">    <span class="k">while</span><span class="p">(</span><span class="n">send_n</span> <span class="o">&lt;</span> <span class="n">ARRAYSIZE</span><span class="p">){</span>
 </span></span><span class="line"><span class="cl">        <span class="cm">/* 等从机发送缓冲空，塞入从机要发的数据 */</span>
 </span></span><span class="line"><span class="cl">        <span class="k">while</span><span class="p">(</span><span class="n">RESET</span> <span class="o">==</span> <span class="nf">spi_i2s_flag_get</span><span class="p">(</span><span class="n">SPI2</span><span class="p">,</span> <span class="n">SPI_FLAG_TBE</span><span class="p">));</span>
@@ -687,7 +687,7 @@
 </span></span><span class="line"><span class="cl">        <span class="nf">gd_eval_led_off</span><span class="p">(</span><span class="n">LED3</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#endif </span><span class="cm">/* enable CRC function */</span><span class="cp">
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl">    <span class="cm">/* 死循环，停在这里方便观察 LED */</span>
 </span></span><span class="line"><span class="cl">    <span class="k">while</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
@@ -806,7 +806,7 @@
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">spi_init_struct</span><span class="p">.</span><span class="n">clock_polarity_phase</span> <span class="o">=</span> <span class="n">SPI_CK_PL_LOW_PH_1EDGE</span><span class="p">;</span>  <span class="c1">// 模式 0
-</span></span></span><span class="line"><span class="cl"><span class="n">spi_init_struct</span><span class="p">.</span><span class="n">prescale</span>             <span class="o">=</span> <span class="n">SPI_PSC_256</span><span class="p">;</span>            <span class="c1">// 大幅分频
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">spi_init_struct</span><span class="p">.</span><span class="n">prescale</span>             <span class="o">=</span> <span class="n">SPI_PSC_256</span><span class="p">;</span>            <span class="c1">// 大幅分频
 </span></span></span></code></pre></td></tr></table>
 </div>
 </div><ul>
@@ -863,9 +863,9 @@
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="n">SET_SPI0_NSS_HIGH</span>                      <span class="c1">// 拉高 NSS，通信结束
-</span></span></span><span class="line"><span class="cl"><span class="k">if</span><span class="p">(</span><span class="nf">memory_compare</span><span class="p">(</span><span class="n">spi2_receive_array</span><span class="p">,</span> <span class="n">spi0_send_array</span><span class="p">,</span> <span class="n">ARRAYSIZE</span><span class="p">))</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">if</span><span class="p">(</span><span class="nf">memory_compare</span><span class="p">(</span><span class="n">spi2_receive_array</span><span class="p">,</span> <span class="n">spi0_send_array</span><span class="p">,</span> <span class="n">ARRAYSIZE</span><span class="p">))</span>
 </span></span><span class="line"><span class="cl">    <span class="nf">gd_eval_led_on</span><span class="p">(</span><span class="n">LED2</span><span class="p">);</span>              <span class="c1">// 从机收对 → LED2
-</span></span></span><span class="line"><span class="cl"><span class="k">if</span><span class="p">(</span><span class="nf">memory_compare</span><span class="p">(</span><span class="n">spi0_receive_array</span><span class="p">,</span> <span class="n">spi2_send_array</span><span class="p">,</span> <span class="n">ARRAYSIZE</span><span class="p">))</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">if</span><span class="p">(</span><span class="nf">memory_compare</span><span class="p">(</span><span class="n">spi0_receive_array</span><span class="p">,</span> <span class="n">spi2_send_array</span><span class="p">,</span> <span class="n">ARRAYSIZE</span><span class="p">))</span>
 </span></span><span class="line"><span class="cl">    <span class="nf">gd_eval_led_on</span><span class="p">(</span><span class="n">LED3</span><span class="p">);</span>              <span class="c1">// 主机收对 → LED3
 </span></span></span></code></pre></td></tr></table>
 </div>
@@ -934,7 +934,7 @@
         
             <a href="/tags/spi_master_slave_fullduplex_polling/">SPI_master_slave_fullduplex_polling</a>
         
-            <a href="/tags/spi/">Spi</a>
+            <a href="/tags/spi/">SPI</a>
         
             <a href="/tags/v3.0.3/">V3.0.3</a>
         

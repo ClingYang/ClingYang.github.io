@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en-us" dir="ltr">
+<html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
 <meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="野火 EBF STM32F103 Mini HAL 库：用 DMA1 把一段常量数组自动搬运到内存数组，演示\"不占用 CPU\"的数据传输本质。">
 <title>STM32 DMA — 直接存储区访问（存储器到存储器）</title>
@@ -56,7 +56,7 @@
                     
                     
                         
-                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                        <img src="/img/avatar_hu1200063259539398638.png" width="300"
                             height="290" class="site-logo" loading="lazy" alt="Avatar">
                     
                 
@@ -376,30 +376,30 @@
 <hr>
 <h2 id="二硬件准备">二、硬件准备
 </h2><div class="table-wrapper"><table>
-	<thead>
-			<tr>
-					<th style="text-align: left">项目</th>
-					<th style="text-align: left">说明</th>
-			</tr>
-	</thead>
-	<tbody>
-			<tr>
-					<td style="text-align: left">开发板</td>
-					<td style="text-align: left">野火 EBF STM32F103 Mini</td>
-			</tr>
-			<tr>
-					<td style="text-align: left">DMA 控制器</td>
-					<td style="text-align: left">DMA1（F103 仅 1 个 DMA 控制器，7 个通道）</td>
-			</tr>
-			<tr>
-					<td style="text-align: left">本例通道</td>
-					<td style="text-align: left">DMA1_Channel6（软件触发，M2M 模式专用）</td>
-			</tr>
-			<tr>
-					<td style="text-align: left">指示</td>
-					<td style="text-align: left">LED1 → PC2（失败）、LED2 → PC3（成功）</td>
-			</tr>
-	</tbody>
+  <thead>
+      <tr>
+          <th style="text-align: left">项目</th>
+          <th style="text-align: left">说明</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">开发板</td>
+          <td style="text-align: left">野火 EBF STM32F103 Mini</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">DMA 控制器</td>
+          <td style="text-align: left">DMA1（F103 仅 1 个 DMA 控制器，7 个通道）</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">本例通道</td>
+          <td style="text-align: left">DMA1_Channel6（软件触发，M2M 模式专用）</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">指示</td>
+          <td style="text-align: left">LED1 → PC2（失败）、LED2 → PC3（成功）</td>
+      </tr>
+  </tbody>
 </table></div>
 <blockquote>
 <p><strong>存储器到存储器（M2M）模式</strong>是 DMA 的特例：它不依赖外设硬件请求，而是<strong>软件触发</strong>一次就自动连续搬完，非常适合做 memcpy 加速。</p>
@@ -505,14 +505,14 @@
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;main.h&#34;</span><span class="cp">
 </span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;stm32f1xx.h&#34;</span><span class="cp">
 </span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;./led/bsp_led.h&#34;</span><span class="cp">
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cm">/* 存储器到存储器传输必须使用 DMA1 */</span>
 </span></span><span class="line"><span class="cl"><span class="n">DMA_HandleTypeDef</span> <span class="n">DMA_Handle</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="cp">#define DMA_STREAM          DMA1_Channel6
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define DMA_STREAM_CLOCK()  __HAL_RCC_DMA1_CLK_ENABLE();
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define BUFFER_SIZE         32
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cm">/* 源数据：常量数组（放在 Flash，DMA 把它读进 SRAM） */</span>
 </span></span><span class="line"><span class="cl"><span class="k">const</span> <span class="kt">uint32_t</span> <span class="n">aSRC_Const_Buffer</span><span class="p">[</span><span class="n">BUFFER_SIZE</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">  <span class="mh">0x01020304</span><span class="p">,</span><span class="mh">0x05060708</span><span class="p">,</span><span class="mh">0x090A0B0C</span><span class="p">,</span><span class="mh">0x0D0E0F10</span><span class="p">,</span>
@@ -537,7 +537,7 @@
 </span></span><span class="line"><span class="cl">  <span class="nf">LED_GPIO_Config</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">  <span class="nf">DMA_Config</span><span class="p">();</span>    <span class="c1">// 配置并启动 DMA 搬运
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
 </span></span><span class="line"><span class="cl">  <span class="cm">/* 轮询等待 DMA 传输完成标志（TCIF6） */</span>
 </span></span><span class="line"><span class="cl">  <span class="k">while</span><span class="p">(</span><span class="nf">__HAL_DMA_GET_FLAG</span><span class="p">(</span><span class="o">&amp;</span><span class="n">DMA_Handle</span><span class="p">,</span> <span class="n">DMA_FLAG_TC6</span><span class="p">)</span> <span class="o">==</span> <span class="n">RESET</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">  <span class="p">{</span>
@@ -547,9 +547,9 @@
 </span></span><span class="line"><span class="cl">  <span class="n">TransferStatus</span> <span class="o">=</span> <span class="nf">Buffercmp</span><span class="p">(</span><span class="n">aSRC_Const_Buffer</span><span class="p">,</span> <span class="n">aDST_Buffer</span><span class="p">,</span> <span class="n">BUFFER_SIZE</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">TransferStatus</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">    <span class="n">LED1_ON</span><span class="p">;</span>       <span class="c1">// 不一致 =&gt; 失败灯
-</span></span></span><span class="line"><span class="cl">  <span class="k">else</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">else</span>
 </span></span><span class="line"><span class="cl">    <span class="n">LED2_ON</span><span class="p">;</span>       <span class="c1">// 一致 =&gt; 成功灯
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
 </span></span><span class="line"><span class="cl">  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span><span class="line"><span class="cl">
@@ -560,14 +560,14 @@
 </span></span><span class="line"><span class="cl">  <span class="nf">DMA_STREAM_CLOCK</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">  <span class="n">DMA_Handle</span><span class="p">.</span><span class="n">Instance</span>                 <span class="o">=</span> <span class="n">DMA_STREAM</span><span class="p">;</span>                 <span class="c1">// DMA1_Channel6
-</span></span></span><span class="line"><span class="cl">  <span class="n">DMA_Handle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">Direction</span>          <span class="o">=</span> <span class="n">DMA_MEMORY_TO_MEMORY</span><span class="p">;</span>        <span class="c1">// 存储器到存储器
-</span></span></span><span class="line"><span class="cl">  <span class="n">DMA_Handle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">PeriphInc</span>          <span class="o">=</span> <span class="n">DMA_PINC_ENABLE</span><span class="p">;</span>             <span class="c1">// 外设(源)地址递增
-</span></span></span><span class="line"><span class="cl">  <span class="n">DMA_Handle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">MemInc</span>             <span class="o">=</span> <span class="n">DMA_MINC_ENABLE</span><span class="p">;</span>             <span class="c1">// 内存(目标)地址递增
-</span></span></span><span class="line"><span class="cl">  <span class="n">DMA_Handle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">PeriphDataAlignment</span><span class="o">=</span> <span class="n">DMA_PDATAALIGN_WORD</span><span class="p">;</span>         <span class="c1">// 源数据 32 位
-</span></span></span><span class="line"><span class="cl">  <span class="n">DMA_Handle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">MemDataAlignment</span>   <span class="o">=</span> <span class="n">DMA_MDATAALIGN_WORD</span><span class="p">;</span>         <span class="c1">// 目标数据 32 位
-</span></span></span><span class="line"><span class="cl">  <span class="n">DMA_Handle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">Mode</span>               <span class="o">=</span> <span class="n">DMA_NORMAL</span><span class="p">;</span>                 <span class="c1">// 普通模式（一次）
-</span></span></span><span class="line"><span class="cl">  <span class="n">DMA_Handle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">Priority</span>           <span class="o">=</span> <span class="n">DMA_PRIORITY_MEDIUM</span><span class="p">;</span>         <span class="c1">// 中等优先级
-</span></span></span><span class="line"><span class="cl">  <span class="nf">HAL_DMA_Init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">DMA_Handle</span><span class="p">);</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">DMA_Handle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">Direction</span>          <span class="o">=</span> <span class="n">DMA_MEMORY_TO_MEMORY</span><span class="p">;</span>        <span class="c1">// 存储器到存储器
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">DMA_Handle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">PeriphInc</span>          <span class="o">=</span> <span class="n">DMA_PINC_ENABLE</span><span class="p">;</span>             <span class="c1">// 外设(源)地址递增
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">DMA_Handle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">MemInc</span>             <span class="o">=</span> <span class="n">DMA_MINC_ENABLE</span><span class="p">;</span>             <span class="c1">// 内存(目标)地址递增
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">DMA_Handle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">PeriphDataAlignment</span><span class="o">=</span> <span class="n">DMA_PDATAALIGN_WORD</span><span class="p">;</span>         <span class="c1">// 源数据 32 位
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">DMA_Handle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">MemDataAlignment</span>   <span class="o">=</span> <span class="n">DMA_MDATAALIGN_WORD</span><span class="p">;</span>         <span class="c1">// 目标数据 32 位
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">DMA_Handle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">Mode</span>               <span class="o">=</span> <span class="n">DMA_NORMAL</span><span class="p">;</span>                 <span class="c1">// 普通模式（一次）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">DMA_Handle</span><span class="p">.</span><span class="n">Init</span><span class="p">.</span><span class="n">Priority</span>           <span class="o">=</span> <span class="n">DMA_PRIORITY_MEDIUM</span><span class="p">;</span>         <span class="c1">// 中等优先级
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nf">HAL_DMA_Init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">DMA_Handle</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">  <span class="cm">/* 启动传输：源地址 -&gt; 目标地址，共 BUFFER_SIZE 个数据项 */</span>
 </span></span><span class="line"><span class="cl">  <span class="n">DMA_status</span> <span class="o">=</span> <span class="nf">HAL_DMA_Start</span><span class="p">(</span><span class="o">&amp;</span><span class="n">DMA_Handle</span><span class="p">,</span>
@@ -577,7 +577,7 @@
 </span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">DMA_status</span> <span class="o">!=</span> <span class="n">HAL_OK</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">  <span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>   <span class="c1">// 启动失败，闪烁报警
-</span></span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="p">{</span>
 </span></span><span class="line"><span class="cl">      <span class="n">LED1_ON</span><span class="p">;</span> <span class="nf">Delay</span><span class="p">(</span><span class="mh">0xFFFFFF</span><span class="p">);</span> <span class="n">LED1_TOGGLE</span><span class="p">;</span> <span class="nf">Delay</span><span class="p">(</span><span class="mh">0xFFFFFF</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
 </span></span><span class="line"><span class="cl">  <span class="p">}</span>
@@ -589,10 +589,10 @@
 </span></span><span class="line"><span class="cl">  <span class="k">while</span><span class="p">(</span><span class="n">BufferLength</span><span class="o">--</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">  <span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="k">if</span><span class="p">(</span><span class="o">*</span><span class="n">pBuffer</span> <span class="o">!=</span> <span class="o">*</span><span class="n">pBuffer1</span><span class="p">)</span> <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>   <span class="c1">// 有差异立即返回 0
-</span></span></span><span class="line"><span class="cl">    <span class="n">pBuffer</span><span class="o">++</span><span class="p">;</span>   <span class="n">pBuffer1</span><span class="o">++</span><span class="p">;</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">pBuffer</span><span class="o">++</span><span class="p">;</span>   <span class="n">pBuffer1</span><span class="o">++</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">  <span class="p">}</span>
 </span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>   <span class="c1">// 全部相等返回 1
-</span></span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><hr>
@@ -601,35 +601,35 @@
 </h3><p>普通 <code>for</code> 循环拷贝数组，每个字节都要 CPU 取指、读源、写目标——CPU 全程被占。DMA 接管总线后，CPU 在 <code>HAL_DMA_Start</code> 之后就可以去干别的事（本例只是 <code>while</code> 等标志，实际项目里可以并行运算）。对<strong>大块数据 / 高速外设</strong>（ADC、SPI、USART、LCD）而言，DMA 是性能关键。</p>
 <h3 id="2-四个关键配置">2. 四个关键配置
 </h3><div class="table-wrapper"><table>
-	<thead>
-			<tr>
-					<th style="text-align: left">字段</th>
-					<th style="text-align: left">本例</th>
-					<th style="text-align: left">含义</th>
-			</tr>
-	</thead>
-	<tbody>
-			<tr>
-					<td style="text-align: left"><code>Direction</code></td>
-					<td style="text-align: left"><code>DMA_MEMORY_TO_MEMORY</code></td>
-					<td style="text-align: left">存储器→存储器（软件触发）</td>
-			</tr>
-			<tr>
-					<td style="text-align: left"><code>PeriphInc</code> / <code>MemInc</code></td>
-					<td style="text-align: left"><code>ENABLE</code></td>
-					<td style="text-align: left">源、目标地址都递增（否则会反复写同一格）</td>
-			</tr>
-			<tr>
-					<td style="text-align: left"><code>PeriphDataAlignment</code> / <code>MemDataAlignment</code></td>
-					<td style="text-align: left"><code>WORD</code>(32位)</td>
-					<td style="text-align: left">数据宽度要一致，避免错位</td>
-			</tr>
-			<tr>
-					<td style="text-align: left"><code>Mode</code></td>
-					<td style="text-align: left"><code>DMA_NORMAL</code></td>
-					<td style="text-align: left">普通模式：搬完一次就停（对比循环 <code>DMA_CIRCULAR</code>）</td>
-			</tr>
-	</tbody>
+  <thead>
+      <tr>
+          <th style="text-align: left">字段</th>
+          <th style="text-align: left">本例</th>
+          <th style="text-align: left">含义</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left"><code>Direction</code></td>
+          <td style="text-align: left"><code>DMA_MEMORY_TO_MEMORY</code></td>
+          <td style="text-align: left">存储器→存储器（软件触发）</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><code>PeriphInc</code> / <code>MemInc</code></td>
+          <td style="text-align: left"><code>ENABLE</code></td>
+          <td style="text-align: left">源、目标地址都递增（否则会反复写同一格）</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><code>PeriphDataAlignment</code> / <code>MemDataAlignment</code></td>
+          <td style="text-align: left"><code>WORD</code>(32位)</td>
+          <td style="text-align: left">数据宽度要一致，避免错位</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><code>Mode</code></td>
+          <td style="text-align: left"><code>DMA_NORMAL</code></td>
+          <td style="text-align: left">普通模式：搬完一次就停（对比循环 <code>DMA_CIRCULAR</code>）</td>
+      </tr>
+  </tbody>
 </table></div>
 <blockquote>
 <p>注意：这里&quot;Periph&quot;一方是源数组，在 M2M 模式下 HAL 把源/目标统称为外设/内存，只需保证两者都递增、宽度相同即可。</p>
@@ -696,7 +696,7 @@
         
             <a href="/tags/hal%E5%BA%93/">HAL库</a>
         
-            <a href="/tags/dma/">Dma</a>
+            <a href="/tags/dma/">DMA</a>
         
             <a href="/tags/%E5%AD%98%E5%82%A8%E5%99%A8%E5%88%B0%E5%AD%98%E5%82%A8%E5%99%A8/">存储器到存储器</a>
         

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en-us" dir="ltr">
+<html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
 <meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="PUYA PY32F0xx_Firmware V1.5.0 ADC 内部温度传感器读取示例教学">
 <title>PUYA ADC -- 内部温度传感器读取（HAL 库）</title>
@@ -56,7 +56,7 @@
                     
                     
                         
-                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                        <img src="/img/avatar_hu1200063259539398638.png" width="300"
                             height="290" class="site-logo" loading="lazy" alt="Avatar">
                     
                 
@@ -352,7 +352,7 @@
     <section class="article-content">
     
     
-    <h1 id="adc--内部温度传感器读取hal-库">ADC &ndash; 内部温度传感器读取（HAL 库）
+    <h1 id="adc----内部温度传感器读取hal-库">ADC &ndash; 内部温度传感器读取（HAL 库）
 </h1><blockquote>
 <p><strong>难度</strong>: ⭐⭐（需要了解 ADC 基本概念）
 <strong>固件库</strong>: PY32F0xx_Firmware V1.5.0
@@ -484,21 +484,21 @@
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;main.h&#34;</span><span class="cp">
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cm">/* 温度校准值（出厂写入 OTP，地址固定） */</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define HAL_ADC_TSCAL1  (*(uint32_t *)(0x1fff0f14))  </span><span class="cm">/* 30 度时的 ADC 校准值 */</span><span class="cp">
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define HAL_ADC_TSCAL2  (*(uint32_t *)(0x1fff0f18))  </span><span class="cm">/* 105 度时的校准值 */</span><span class="cp">
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define Vcc_Power       3.3l                          </span><span class="cm">/* 实际供电电压，按实际修改 */</span><span class="cp">
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cm">/* 校准值对应的电压（根据实际 VCC 换算） */</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define TScal1  (float)((HAL_ADC_TSCAL1) * 3.3 / Vcc_Power)
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define TScal2  (float)((HAL_ADC_TSCAL2) * 3.3 / Vcc_Power)
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cm">/* 温度计算公式参数 */</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define TStem1      30l   </span><span class="cm">/* 校准点 1 的温度：30 度 */</span><span class="cp">
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define TStem2_105  105   </span><span class="cm">/* 校准点 2 的温度：105 度（高温版） */</span><span class="cp">
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define Temp_k_105  ((float)(TStem2_105 - TStem1) / (float)(TScal2 - TScal1))
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="n">ADC_HandleTypeDef</span> <span class="n">AdcHandle</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl"><span class="kt">uint16_t</span> <span class="n">aADCxConvertedData</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl"><span class="n">__IO</span> <span class="kt">uint16_t</span> <span class="n">hADCxConvertedData_Temperature_DegreeCelsius</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
@@ -674,72 +674,72 @@
 <hr>
 <h2 id="小结">小结
 </h2><div class="table-wrapper"><table>
-	<thead>
-			<tr>
-					<th style="text-align: left">概念</th>
-					<th style="text-align: left">说明</th>
-			</tr>
-	</thead>
-	<tbody>
-			<tr>
-					<td style="text-align: left">内部温度传感器</td>
-					<td style="text-align: left">芯片自带，不需要外部元件</td>
-			</tr>
-			<tr>
-					<td style="text-align: left">OTP 校准值</td>
-					<td style="text-align: left">出厂写入，30 度和 105 度的 ADC 值</td>
-			</tr>
-			<tr>
-					<td style="text-align: left">线性插值</td>
-					<td style="text-align: left">用两个已知点推算任意点的温度</td>
-			</tr>
-			<tr>
-					<td style="text-align: left">ADC 校准</td>
-					<td style="text-align: left">必须做，消除工艺偏差</td>
-			</tr>
-			<tr>
-					<td style="text-align: left">采样时间</td>
-					<td style="text-align: left">内部传感器阻抗高，需要长采样时间</td>
-			</tr>
-	</tbody>
+  <thead>
+      <tr>
+          <th style="text-align: left">概念</th>
+          <th style="text-align: left">说明</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">内部温度传感器</td>
+          <td style="text-align: left">芯片自带，不需要外部元件</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">OTP 校准值</td>
+          <td style="text-align: left">出厂写入，30 度和 105 度的 ADC 值</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">线性插值</td>
+          <td style="text-align: left">用两个已知点推算任意点的温度</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">ADC 校准</td>
+          <td style="text-align: left">必须做，消除工艺偏差</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">采样时间</td>
+          <td style="text-align: left">内部传感器阻抗高，需要长采样时间</td>
+      </tr>
+  </tbody>
 </table></div>
 <hr>
 <h2 id="拓展应用">拓展应用
 </h2><div class="table-wrapper"><table>
-	<thead>
-			<tr>
-					<th style="text-align: left">项目</th>
-					<th style="text-align: left">原理</th>
-					<th style="text-align: left">难度</th>
-			</tr>
-	</thead>
-	<tbody>
-			<tr>
-					<td style="text-align: left"><strong>芯片过热保护</strong></td>
-					<td style="text-align: left">温度超阈值时降低频率或关断</td>
-					<td style="text-align: left">⭐⭐</td>
-			</tr>
-			<tr>
-					<td style="text-align: left"><strong>温度补偿</strong></td>
-					<td style="text-align: left">根据温度修正 ADC/RTC 等外设的偏差</td>
-					<td style="text-align: left">⭐⭐⭐</td>
-			</tr>
-			<tr>
-					<td style="text-align: left"><strong>简易温度计</strong></td>
-					<td style="text-align: left">串口显示 + LCD 显示</td>
-					<td style="text-align: left">⭐⭐</td>
-			</tr>
-			<tr>
-					<td style="text-align: left"><strong>温控风扇</strong></td>
-					<td style="text-align: left">温度高时 PWM 加速风扇</td>
-					<td style="text-align: left">⭐⭐⭐</td>
-			</tr>
-			<tr>
-					<td style="text-align: left"><strong>环境监测</strong></td>
-					<td style="text-align: left">内部温度 + 外部传感器对比</td>
-					<td style="text-align: left">⭐⭐</td>
-			</tr>
-	</tbody>
+  <thead>
+      <tr>
+          <th style="text-align: left">项目</th>
+          <th style="text-align: left">原理</th>
+          <th style="text-align: left">难度</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left"><strong>芯片过热保护</strong></td>
+          <td style="text-align: left">温度超阈值时降低频率或关断</td>
+          <td style="text-align: left">⭐⭐</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>温度补偿</strong></td>
+          <td style="text-align: left">根据温度修正 ADC/RTC 等外设的偏差</td>
+          <td style="text-align: left">⭐⭐⭐</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>简易温度计</strong></td>
+          <td style="text-align: left">串口显示 + LCD 显示</td>
+          <td style="text-align: left">⭐⭐</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>温控风扇</strong></td>
+          <td style="text-align: left">温度高时 PWM 加速风扇</td>
+          <td style="text-align: left">⭐⭐⭐</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong>环境监测</strong></td>
+          <td style="text-align: left">内部温度 + 外部传感器对比</td>
+          <td style="text-align: left">⭐⭐</td>
+      </tr>
+  </tbody>
 </table></div>
 
 </section>

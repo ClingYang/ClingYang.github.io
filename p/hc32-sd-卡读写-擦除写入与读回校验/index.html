@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en-us" dir="ltr">
+<html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
 <meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="HC32F460 SDIOC 实验：4 线 50MHz 高速模式初始化 SD 卡，擦除 4 个扇区并验证擦除结果，写入递增数据后读回用 memcmp 校验，LED 指示测试结果。">
 <title>HC32 SD 卡读写 — 擦除、写入与读回校验</title>
@@ -56,7 +56,7 @@
                     
                     
                         
-                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                        <img src="/img/avatar_hu1200063259539398638.png" width="300"
                             height="290" class="site-logo" loading="lazy" alt="Avatar">
                     
                 
@@ -569,17 +569,17 @@
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;sd_card.h&#34;              // SD 卡驱动库（内部已包含 hc32_ddl.h）</span><span class="cp">
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cm">/* ---------- SDIOC 引脚定义 ---------- */</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define SDIOC_CD_PORT    (PortH)  </span><span class="cm">/* 卡检测（本例未启用）*/</span><span class="cp">
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define SDIOC_CD_PIN     (Pin02)
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define SDIOC_CK_PORT    (PortB)  </span><span class="cm">/* 时钟 */</span><span class="cp">
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define SDIOC_CK_PIN     (Pin15)
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define SDIOC_CMD_PORT   (PortA)  </span><span class="cm">/* 命令线 */</span><span class="cp">
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define SDIOC_CMD_PIN    (Pin06)
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define SDIOC_D0_PORT    (PortB)  </span><span class="cm">/* 数据线 0 */</span><span class="cp">
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define SDIOC_D0_PIN     (Pin04)
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define SDIOC_D1_PORT    (PortA)  </span><span class="cm">/* 数据线 1 */</span><span class="cp">
@@ -588,14 +588,14 @@
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define SDIOC_D2_PIN     (Pin09)
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define SDIOC_D3_PORT    (PortB)  </span><span class="cm">/* 数据线 3 */</span><span class="cp">
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define SDIOC_D3_PIN     (Pin05)
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cm">/* 测试范围：从第 0 个扇区开始，共 4 个扇区 */</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define SD_SECTOR_START  (0u)
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define SD_SECTOR_COUNT  (4u)
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cm">/* 用 SDIOC 单元 1 */</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define SDIOC_UNIT       (M4_SDIOC1)
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="cm">/*==============================================================
 </span></span></span><span class="line"><span class="cl"><span class="cm"> * 把 7 根引脚全部复用为 SDIO 功能
 </span></span></span><span class="line"><span class="cl"><span class="cm"> *=============================================================*/</span>
@@ -606,7 +606,7 @@
 </span></span><span class="line"><span class="cl">    <span class="nf">PORT_SetFunc</span><span class="p">(</span><span class="n">SDIOC_D2_PORT</span><span class="p">,</span>  <span class="n">SDIOC_D2_PIN</span><span class="p">,</span>  <span class="n">Func_Sdio</span><span class="p">,</span> <span class="n">Disable</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">    <span class="nf">PORT_SetFunc</span><span class="p">(</span><span class="n">SDIOC_D3_PORT</span><span class="p">,</span>  <span class="n">SDIOC_D3_PIN</span><span class="p">,</span>  <span class="n">Func_Sdio</span><span class="p">,</span> <span class="n">Disable</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl"><span class="c1">//  PORT_SetFunc(SDIOC_CD_PORT,  SDIOC_CD_PIN,  Func_Sdio, Disable);  /* 卡检测未用 */
-</span></span></span><span class="line"><span class="cl">    <span class="nf">PORT_SetFunc</span><span class="p">(</span><span class="n">SDIOC_CK_PORT</span><span class="p">,</span>  <span class="n">SDIOC_CK_PIN</span><span class="p">,</span>  <span class="n">Func_Sdio</span><span class="p">,</span> <span class="n">Disable</span><span class="p">);</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">PORT_SetFunc</span><span class="p">(</span><span class="n">SDIOC_CK_PORT</span><span class="p">,</span>  <span class="n">SDIOC_CK_PIN</span><span class="p">,</span>  <span class="n">Func_Sdio</span><span class="p">,</span> <span class="n">Disable</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">    <span class="nf">PORT_SetFunc</span><span class="p">(</span><span class="n">SDIOC_CMD_PORT</span><span class="p">,</span> <span class="n">SDIOC_CMD_PIN</span><span class="p">,</span> <span class="n">Func_Sdio</span><span class="p">,</span> <span class="n">Disable</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">Ok</span><span class="p">;</span>
@@ -733,7 +733,7 @@
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">uint32_t</span> <span class="n">au32WriteBlocks</span><span class="p">[</span><span class="mi">512</span><span class="p">];</span>   <span class="c1">// 512 × 4 字节 = 2048 字节
-</span></span></span><span class="line"><span class="cl"><span class="cp">#define SD_SECTOR_COUNT   (4u)          </span><span class="c1">// 4 × 512 字节 = 2048 字节  ✓ 相等
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="cp">#define SD_SECTOR_COUNT   (4u)          </span><span class="c1">// 4 × 512 字节 = 2048 字节  ✓ 相等
 </span></span></span></code></pre></td></tr></table>
 </div>
 </div><p><strong>这是 SD 卡编程的第一要点</strong>。SD 卡按 512 字节扇区读写，你要读 4 个扇区，缓冲区就必须至少有 4×512 = 2048 字节。</p>
@@ -819,7 +819,7 @@
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0u</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nf">ARRAY_SZ</span><span class="p">(</span><span class="n">au32WriteBlocks</span><span class="p">);</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="n">au32WriteBlocks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>      <span class="c1">// 0, 1, 2, 3, 4, ...
-</span></span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>为什么不用随机数、不用全 0？因为<strong>递增序列是最好的调试数据</strong>：</p>
@@ -839,9 +839,9 @@
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">SDCARD_Erase</span><span class="p">(...,</span> <span class="mi">20000u</span><span class="p">);</span>       <span class="c1">// 擦除给 20000
-</span></span></span><span class="line"><span class="cl"><span class="nf">SDCARD_ReadBlocks</span><span class="p">(...,</span> <span class="mi">2000u</span><span class="p">);</span>   <span class="c1">// 读给 2000
-</span></span></span><span class="line"><span class="cl"><span class="nf">SDCARD_WriteBlocks</span><span class="p">(...,</span> <span class="mi">2000u</span><span class="p">);</span>  <span class="c1">// 写给 2000
-</span></span></span><span class="line"><span class="cl"><span class="nf">SDCARD_ReadBlocks</span><span class="p">(...,</span> <span class="mi">20000u</span><span class="p">);</span>  <span class="c1">// 这次读又给 20000
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nf">SDCARD_ReadBlocks</span><span class="p">(...,</span> <span class="mi">2000u</span><span class="p">);</span>   <span class="c1">// 读给 2000
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nf">SDCARD_WriteBlocks</span><span class="p">(...,</span> <span class="mi">2000u</span><span class="p">);</span>  <span class="c1">// 写给 2000
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nf">SDCARD_ReadBlocks</span><span class="p">(...,</span> <span class="mi">20000u</span><span class="p">);</span>  <span class="c1">// 这次读又给 20000
 </span></span></span></code></pre></td></tr></table>
 </div>
 </div><p>因为不同操作耗时差异很大：<strong>擦除 &raquo; 写 &gt; 读</strong>。擦除是 SD 卡最慢的操作，超时必须给得宽松，否则明明在正常工作却被判超时失败。</p>
@@ -855,7 +855,7 @@
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">ARRAY_SZ</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>          <span class="c1">// 求数组元素个数 = sizeof(arr)/sizeof(arr[0])
-</span></span></span><span class="line"><span class="cl"><span class="nf">MEM_ZERO_STRUCT</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>     <span class="c1">// 把 x 清零 = memset(&amp;x, 0, sizeof(x))
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nf">MEM_ZERO_STRUCT</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>     <span class="c1">// 把 x 清零 = memset(&amp;x, 0, sizeof(x))
 </span></span></span></code></pre></td></tr></table>
 </div>
 </div><p>用 <code>ARRAY_SZ</code> 而不是写死 <code>512</code>，是好习惯——以后改数组大小，循环次数自动跟着变，不会漏改。</p>

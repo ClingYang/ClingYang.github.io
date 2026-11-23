@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en-us" dir="ltr">
+<html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
 <meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="ESP32-S3 连 WiFi 提示 reason=15 4WAY_HANDSHAKE_TIMEOUT，密码明明是对的却连不上？本文记录从密码悬垂指针到架构重写的完整排查过程">
 <title>ESP32-S3 WiFi 连接踩坑：reason=15 不是密码错了</title>
@@ -56,7 +56,7 @@
                     
                     
                         
-                        <img src="/img/avatar_hu_7e3bb7db3881c69b.png" width="300"
+                        <img src="/img/avatar_hu1200063259539398638.png" width="300"
                             height="290" class="site-logo" loading="lazy" alt="Avatar">
                     
                 
@@ -287,7 +287,7 @@
     <header class="article-category">
         
             <a href="/categories/esp32/" >
-                ESP32
+                Esp32
             </a>
         
             <a href="/categories/%E7%AC%94%E8%AE%B0/" >
@@ -403,8 +403,8 @@
 </span></span><span class="line"><span class="cl">    <span class="p">.</span><span class="n">sta</span> <span class="o">=</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">        <span class="p">.</span><span class="n">threshold</span><span class="p">.</span><span class="n">authmode</span> <span class="o">=</span> <span class="n">WIFI_AUTH_WPA2_PSK</span><span class="p">,</span>
 </span></span><span class="line"><span class="cl">        <span class="p">.</span><span class="n">sae_pwe_h2e</span> <span class="o">=</span> <span class="n">WPA3_SAE_PWE_BOTH</span><span class="p">,</span>        <span class="c1">// ← 原来没有
-</span></span></span><span class="line"><span class="cl">        <span class="p">.</span><span class="n">sae_h2e_identifier</span> <span class="o">=</span> <span class="s">&#34;&#34;</span><span class="p">,</span>                  <span class="c1">// ← 原来没有
-</span></span></span><span class="line"><span class="cl">    <span class="p">},</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="p">.</span><span class="n">sae_h2e_identifier</span> <span class="o">=</span> <span class="s">&#34;&#34;</span><span class="p">,</span>                  <span class="c1">// ← 原来没有
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="p">},</span>
 </span></span><span class="line"><span class="cl"><span class="p">};</span>
 </span></span></code></pre></td></tr></table>
 </div>
@@ -422,7 +422,7 @@
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="nf">esp_wifi_disconnect</span><span class="p">();</span>              <span class="c1">// ← 参考例程里没有这行
-</span></span></span><span class="line"><span class="cl"><span class="nf">esp_wifi_set_config</span><span class="p">(</span><span class="n">WIFI_IF_STA</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">wifi_config</span><span class="p">);</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nf">esp_wifi_set_config</span><span class="p">(</span><span class="n">WIFI_IF_STA</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">wifi_config</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl"><span class="nf">esp_wifi_connect</span><span class="p">();</span>
 </span></span></code></pre></td></tr></table>
 </div>
@@ -462,15 +462,15 @@
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">wifi_connect_cb</span><span class="p">(</span><span class="kt">lv_event_t</span> <span class="o">*</span><span class="n">e</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">password</span> <span class="o">=</span> <span class="nf">lv_textarea_get_text</span><span class="p">(</span><span class="n">s_ta_pass</span><span class="p">);</span>  <span class="c1">// ① 获取密码指针
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
 </span></span><span class="line"><span class="cl">    <span class="nf">lv_obj_del</span><span class="p">(</span><span class="n">s_pwnd</span><span class="p">);</span>                                       <span class="c1">// ② 删除弹窗！
-</span></span></span><span class="line"><span class="cl">    <span class="c1">// s_ta_pass 是 s_pwnd 的子对象，删除弹窗后内部缓冲区被释放
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// s_ta_pass 是 s_pwnd 的子对象，删除弹窗后内部缓冲区被释放
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
 </span></span><span class="line"><span class="cl">    <span class="nf">lv_label_set_text_fmt</span><span class="p">(</span><span class="n">s_status_label</span><span class="p">,</span> <span class="s">&#34;正在连接 %s...&#34;</span><span class="p">,</span> <span class="n">s_selected_ssid</span><span class="p">);</span>  <span class="c1">// ③ 写状态标签
-</span></span></span><span class="line"><span class="cl">    <span class="c1">// 释放的内存可能被 LVGL 内存管理器重用了
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// 释放的内存可能被 LVGL 内存管理器重用了
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
 </span></span><span class="line"><span class="cl">    <span class="nf">xQueueSend</span><span class="p">(</span><span class="n">s_wifi_queue</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="p">...);</span>  <span class="c1">// ④ 发送的是悬空指针指向的垃圾数据！
-</span></span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>问题很清晰：</p>
@@ -518,15 +518,15 @@
 </span></span><span class="line"><span class="cl">    <span class="n">pass_copy</span><span class="p">[</span><span class="k">sizeof</span><span class="p">(</span><span class="n">pass_copy</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="sc">&#39;\0&#39;</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">    <span class="nf">ESP_LOGI</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span> <span class="s">&#34;UI: password=&#39;%s&#39;&#34;</span><span class="p">,</span> <span class="n">pass_copy</span><span class="p">);</span>  <span class="c1">// 确认密码正确
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
 </span></span><span class="line"><span class="cl">    <span class="nf">lv_obj_del</span><span class="p">(</span><span class="n">s_pwnd</span><span class="p">);</span>  <span class="c1">// 现在可以安全删除弹窗了
-</span></span></span><span class="line"><span class="cl">    <span class="n">s_pwnd</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">s_pwnd</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">    <span class="cm">/* 通过队列发送给后台任务 */</span>
 </span></span><span class="line"><span class="cl">    <span class="kt">wifi_account_t</span> <span class="n">account</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="nf">strncpy</span><span class="p">(</span><span class="n">account</span><span class="p">.</span><span class="n">ssid</span><span class="p">,</span> <span class="n">s_selected_ssid</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">account</span><span class="p">.</span><span class="n">ssid</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">    <span class="nf">strncpy</span><span class="p">(</span><span class="n">account</span><span class="p">.</span><span class="n">password</span><span class="p">,</span> <span class="n">pass_copy</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">account</span><span class="p">.</span><span class="n">password</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>  <span class="c1">// ✅ 使用安全副本
-</span></span></span><span class="line"><span class="cl">    <span class="nf">xQueueSend</span><span class="p">(</span><span class="n">s_wifi_queue</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">account</span><span class="p">,</span> <span class="n">portMAX_DELAY</span><span class="p">);</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="nf">xQueueSend</span><span class="p">(</span><span class="n">s_wifi_queue</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">account</span><span class="p">,</span> <span class="n">portMAX_DELAY</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
@@ -536,35 +536,35 @@
 </h2><p>前面的修复解决了密码传输问题，但连接仍然失败 <code>reason=15</code>。</p>
 <p>再仔细对比参考例程，发现<strong>核心差异不在某一行代码，而在架构</strong>：</p>
 <div class="table-wrapper"><table>
-	<thead>
-			<tr>
-					<th>项目</th>
-					<th>我们的项目</th>
-					<th>参考例程</th>
-			</tr>
-	</thead>
-	<tbody>
-			<tr>
-					<td>连接触发</td>
-					<td>UI 事件回调中直接 <code>esp_wifi_connect()</code></td>
-					<td>UI 只发队列，<strong>后台任务</strong>处理连接</td>
-			</tr>
-			<tr>
-					<td>同步方式</td>
-					<td>没有同步，直接返回</td>
-					<td><code>xEventGroupWaitBits</code> 等待结果</td>
-			</tr>
-			<tr>
-					<td>重试逻辑</td>
-					<td>没有</td>
-					<td>断开时自动重试 3 次</td>
-			</tr>
-			<tr>
-					<td>任务分离</td>
-					<td>UI 和 WiFi 混在一起</td>
-					<td>UI 线程 ↔ 队列 ↔ WiFi 线程</td>
-			</tr>
-	</tbody>
+  <thead>
+      <tr>
+          <th>项目</th>
+          <th>我们的项目</th>
+          <th>参考例程</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>连接触发</td>
+          <td>UI 事件回调中直接 <code>esp_wifi_connect()</code></td>
+          <td>UI 只发队列，<strong>后台任务</strong>处理连接</td>
+      </tr>
+      <tr>
+          <td>同步方式</td>
+          <td>没有同步，直接返回</td>
+          <td><code>xEventGroupWaitBits</code> 等待结果</td>
+      </tr>
+      <tr>
+          <td>重试逻辑</td>
+          <td>没有</td>
+          <td>断开时自动重试 3 次</td>
+      </tr>
+      <tr>
+          <td>任务分离</td>
+          <td>UI 和 WiFi 混在一起</td>
+          <td>UI 线程 ↔ 队列 ↔ WiFi 线程</td>
+      </tr>
+  </tbody>
 </table></div>
 <h3 id="为什么-ui-回调里不能直接连-wifi">为什么 UI 回调里不能直接连 WiFi？
 </h3><ol>
@@ -652,7 +652,7 @@
 </span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="n">EventGroupHandle_t</span> <span class="n">s_wifi_event_group</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define WIFI_CONNECTED_BIT  BIT0
 </span></span></span><span class="line"><span class="cl"><span class="cp">#define WIFI_FAIL_BIT       BIT1
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="kt">char</span> <span class="n">ssid</span><span class="p">[</span><span class="mi">32</span><span class="p">];</span>
 </span></span><span class="line"><span class="cl">    <span class="kt">char</span> <span class="n">password</span><span class="p">[</span><span class="mi">64</span><span class="p">];</span>
@@ -702,13 +702,13 @@
 </span></span><span class="line"><span class="cl">    <span class="n">pass_copy</span><span class="p">[</span><span class="k">sizeof</span><span class="p">(</span><span class="n">pass_copy</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="sc">&#39;\0&#39;</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">    <span class="nf">lv_obj_del</span><span class="p">(</span><span class="n">s_pwnd</span><span class="p">);</span>  <span class="c1">// 关闭弹窗
-</span></span></span><span class="line"><span class="cl">    <span class="n">s_pwnd</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">s_pwnd</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">    <span class="kt">wifi_account_t</span> <span class="n">account</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="nf">strncpy</span><span class="p">(</span><span class="n">account</span><span class="p">.</span><span class="n">ssid</span><span class="p">,</span> <span class="n">s_selected_ssid</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">account</span><span class="p">.</span><span class="n">ssid</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">    <span class="nf">strncpy</span><span class="p">(</span><span class="n">account</span><span class="p">.</span><span class="n">password</span><span class="p">,</span> <span class="n">pass_copy</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">account</span><span class="p">.</span><span class="n">password</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">    <span class="nf">xQueueSend</span><span class="p">(</span><span class="n">s_wifi_queue</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">account</span><span class="p">,</span> <span class="n">portMAX_DELAY</span><span class="p">);</span>  <span class="c1">// ✅ 发给后台任务
-</span></span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="cm">/* ---------- 初始化时创建任务 ---------- */</span>
 </span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">page_wifi_init</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
@@ -746,22 +746,22 @@
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">int</span> <span class="n">s_wifi_retry_num</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl"><span class="cp">#define WIFI_MAX_RETRY  3
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
 </span></span><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">wifi_event_handle</span><span class="p">(...)</span>
 </span></span><span class="line"><span class="cl"><span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="c1">// ...
-</span></span></span><span class="line"><span class="cl">    <span class="k">case</span> <span class="nl">WIFI_EVENT_STA_DISCONNECTED</span><span class="p">:</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">case</span> <span class="nl">WIFI_EVENT_STA_DISCONNECTED</span><span class="p">:</span>
 </span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">s_wifi_retry_num</span> <span class="o">&lt;</span> <span class="n">WIFI_MAX_RETRY</span><span class="p">)</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">            <span class="nf">esp_wifi_connect</span><span class="p">();</span>  <span class="c1">// 自动重试
-</span></span></span><span class="line"><span class="cl">            <span class="n">s_wifi_retry_num</span><span class="o">++</span><span class="p">;</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="n">s_wifi_retry_num</span><span class="o">++</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">            <span class="nf">page_wifi_on_failed</span><span class="p">();</span>  <span class="c1">// 通知 UI
-</span></span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="p">}</span>
 </span></span><span class="line"><span class="cl">        <span class="k">break</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="c1">// ...
-</span></span></span><span class="line"><span class="cl">    <span class="k">case</span> <span class="nl">IP_EVENT_STA_GOT_IP</span><span class="p">:</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">case</span> <span class="nl">IP_EVENT_STA_GOT_IP</span><span class="p">:</span>
 </span></span><span class="line"><span class="cl">        <span class="n">s_wifi_retry_num</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>  <span class="c1">// 重置重试计数
-</span></span></span><span class="line"><span class="cl">        <span class="nf">page_wifi_on_connected</span><span class="p">();</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="nf">page_wifi_on_connected</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl">        <span class="k">break</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
@@ -770,40 +770,40 @@
 <hr>
 <h2 id="所有修复点汇总">所有修复点汇总
 </h2><div class="table-wrapper"><table>
-	<thead>
-			<tr>
-					<th>#</th>
-					<th>问题</th>
-					<th>修复</th>
-			</tr>
-	</thead>
-	<tbody>
-			<tr>
-					<td>1</td>
-					<td><code>wifi_config_t</code> 缺 WPA3 字段</td>
-					<td>加 <code>.sae_pwe_h2e = WPA3_SAE_PWE_BOTH</code> 和 <code>.sae_h2e_identifier = &quot;&quot;</code></td>
-			</tr>
-			<tr>
-					<td>2</td>
-					<td>多余的 <code>esp_wifi_disconnect()</code></td>
-					<td><strong>删除</strong>这行</td>
-			</tr>
-			<tr>
-					<td>3</td>
-					<td><strong>悬垂指针</strong>：删弹窗后缓冲区失效</td>
-					<td><strong>先复制密码到局部变量，再删弹窗</strong></td>
-			</tr>
-			<tr>
-					<td>4</td>
-					<td>UI 回调直接操作 WiFi</td>
-					<td>改用<strong>队列 + 后台 FreeRTOS 任务</strong></td>
-			</tr>
-			<tr>
-					<td>5</td>
-					<td>缺少自动重试</td>
-					<td>事件处理中加 <code>WIFI_MAX_RETRY</code></td>
-			</tr>
-	</tbody>
+  <thead>
+      <tr>
+          <th>#</th>
+          <th>问题</th>
+          <th>修复</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>1</td>
+          <td><code>wifi_config_t</code> 缺 WPA3 字段</td>
+          <td>加 <code>.sae_pwe_h2e = WPA3_SAE_PWE_BOTH</code> 和 <code>.sae_h2e_identifier = &quot;&quot;</code></td>
+      </tr>
+      <tr>
+          <td>2</td>
+          <td>多余的 <code>esp_wifi_disconnect()</code></td>
+          <td><strong>删除</strong>这行</td>
+      </tr>
+      <tr>
+          <td>3</td>
+          <td><strong>悬垂指针</strong>：删弹窗后缓冲区失效</td>
+          <td><strong>先复制密码到局部变量，再删弹窗</strong></td>
+      </tr>
+      <tr>
+          <td>4</td>
+          <td>UI 回调直接操作 WiFi</td>
+          <td>改用<strong>队列 + 后台 FreeRTOS 任务</strong></td>
+      </tr>
+      <tr>
+          <td>5</td>
+          <td>缺少自动重试</td>
+          <td>事件处理中加 <code>WIFI_MAX_RETRY</code></td>
+      </tr>
+  </tbody>
 </table></div>
 <hr>
 <h2 id="关键教训">关键教训
@@ -822,11 +822,11 @@
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="c1">// ❌ 错误：先删对象，再用指针
-</span></span></span><span class="line"><span class="cl"><span class="nf">lv_obj_del</span><span class="p">(</span><span class="n">parent</span><span class="p">);</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nf">lv_obj_del</span><span class="p">(</span><span class="n">parent</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl"><span class="nf">xQueueSend</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">child_text</span><span class="p">);</span>   <span class="c1">// 指向已释放内存
-</span></span></span><span class="line"><span class="cl">
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
 </span></span><span class="line"><span class="cl"><span class="c1">// ✅ 正确：先复制数据，再删对象
-</span></span></span><span class="line"><span class="cl"><span class="kt">char</span> <span class="n">buf</span><span class="p">[</span><span class="mi">64</span><span class="p">];</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">char</span> <span class="n">buf</span><span class="p">[</span><span class="mi">64</span><span class="p">];</span>
 </span></span><span class="line"><span class="cl"><span class="nf">strncpy</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="n">child_text</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl"><span class="nf">lv_obj_del</span><span class="p">(</span><span class="n">parent</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl"><span class="nf">xQueueSend</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">buf</span><span class="p">);</span>          <span class="c1">// 安全
@@ -900,12 +900,38 @@
             
                 
 <article class="">
+    <a href="/p/esp32s3-wifi-tx-power-debug/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">ESP32-S3 Wi-Fi 连不上：把发射功率降到 2 dBm 后发生了什么</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
     <a href="/p/%E8%A3%B8%E6%9C%BA%E4%BD%BF%E7%94%A8-lvgl-%E5%AD%97%E5%BA%93%E5%AE%9E%E7%8E%B0-lcd-%E6%98%BE%E7%A4%BA%E6%96%B9%E6%A1%88/">
         
         
 
         <div class="article-details">
             <h2 class="article-title">裸机使用 LVGL 字库实现 LCD 显示方案</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/py32f403-ws2812b-din-stuck-high/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">PY32F403 驱动 WS2812B 不亮：PB8 下拉后仍然读高</h2>
         </div>
     </a>
 </article>
@@ -932,32 +958,6 @@
 
         <div class="article-details">
             <h2 class="article-title">INA226 软件 I2C 初始化踩坑：读取返回 0xFFFF</h2>
-        </div>
-    </a>
-</article>
-
-            
-                
-<article class="">
-    <a href="/p/microlink--segger-rtt-%E6%89%93%E5%8D%B0%E8%B8%A9%E5%9D%91no-find-_segger_rtt-addr/">
-        
-        
-
-        <div class="article-details">
-            <h2 class="article-title">MicroLink &#43; SEGGER RTT 打印踩坑：no find _SEGGER_RTT addr</h2>
-        </div>
-    </a>
-</article>
-
-            
-                
-<article class="">
-    <a href="/p/py32f002a-%E9%80%89%E9%A1%B9%E5%AD%97%E8%8A%82%E5%AE%9E%E6%88%98%E6%8A%8A-reset-%E5%BC%95%E8%84%9A%E5%8F%98%E6%88%90%E6%99%AE%E9%80%9A-gpio/">
-        
-        
-
-        <div class="article-details">
-            <h2 class="article-title">PY32F002A 选项字节实战：把 RESET 引脚变成普通 GPIO</h2>
         </div>
     </a>
 </article>
